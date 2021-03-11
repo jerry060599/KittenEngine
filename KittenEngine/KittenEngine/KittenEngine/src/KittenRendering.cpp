@@ -126,11 +126,15 @@ namespace Kitten {
 		if (!mat) mat = &defMaterial;
 
 		uploadUniformBuff(d_matCommon, mat, sizeof(UBOMat));
-		for (size_t i = 0; i < 8; i++) {
+		for (size_t i = 0; i < MAT_CUBEMAP - 1; i++) {
 			glActiveTexture((GLenum)(GL_TEXTURE0 + i));
-			glBindTexture(i == 7 ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D,
-				mat->texs[i] ? mat->texs[i]->glHandle : defTexture->glHandle);
+			glBindTexture(GL_TEXTURE_2D, mat->texs[i] ? mat->texs[i]->glHandle : defTexture->glHandle);
 		}
+		if (mat->texs[MAT_CUBEMAP]) {
+			glActiveTexture((GLenum)(GL_TEXTURE0 + MAT_CUBEMAP));
+			glBindTexture(GL_TEXTURE_CUBE_MAP, mat->texs[MAT_CUBEMAP]->glHandle);
+		}
+
 	}
 
 	void renderForward(Mesh* mesh, Shader* base, Shader* light) {
