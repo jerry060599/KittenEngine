@@ -60,6 +60,9 @@
     <ClCompile Include="KittenEngine\src\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KittenEngine\src\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\imgui\imconfig.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KittenEngine\includes\KittenEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

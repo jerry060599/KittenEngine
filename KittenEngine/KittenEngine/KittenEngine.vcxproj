@@ -169,6 +169,7 @@
     <ClCompile Include="KittenEngine\src\Mesh.cpp" />
     <ClCompile Include="KittenEngine\src\Shader.cpp" />
     <ClCompile Include="KittenEngine\src\Texture.cpp" />
+    <ClCompile Include="KittenEngine\src\Timer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +190,7 @@
     <ClInclude Include="KittenEngine\includes\modules\Mesh.h" />
     <ClInclude Include="KittenEngine\includes\modules\Shader.h" />
     <ClInclude Include="KittenEngine\includes\modules\Texture.h" />
+    <ClInclude Include="KittenEngine\includes\modules\Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
