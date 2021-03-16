@@ -11,7 +11,6 @@ namespace Kitten {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, channels, dataType, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -61,6 +60,7 @@ namespace Kitten {
 
 	void Texture::genMipmap() {
 		glBindTexture(GL_TEXTURE_2D, glHandle);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

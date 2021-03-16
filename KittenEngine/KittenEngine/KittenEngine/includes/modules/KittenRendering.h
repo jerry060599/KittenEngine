@@ -15,7 +15,7 @@ namespace Kitten {
 	const int MAT_TEX3 = 3;
 	const int MAT_TEX4 = 4;
 	const int MAT_TEX5 = 5;
-	const int MAT_TEX6 = 6;
+	const int MAT_SHADOW = 6;
 	const int MAT_CUBEMAP = 7;
 
 	typedef struct UBOCommon {
@@ -37,10 +37,19 @@ namespace Kitten {
 	enum class KittenLight { AMBIENT, POINT, SPOT, DIR };
 
 	typedef struct UBOLight {
-		vec4 col;
-		vec4 params;
-		vec3 pos;
-		int type;
+		vec4 col = vec4(1);
+		vec3 dir = vec3(0, -1, 0);
+		float radius = 0.05f;
+
+		float param;
+		int hasShadow = false;
+		float spread = 0.5f;
+		float focus = 0.3f;
+
+		vec3 pos = vec3(0);
+		int type = 0;
+
+		mat4 shadowProj;
 	} UBOLight;
 
 	extern Material defMaterial;
@@ -49,6 +58,8 @@ namespace Kitten {
 	extern mat4 viewMat;
 	extern mat4 modelMat;
 	extern vector<UBOLight> lights;
+	extern int shadowRes;
+	extern float shadowDist;
 
 	extern Texture* defTexture;
 	extern Mesh* defMesh;
@@ -56,4 +67,5 @@ namespace Kitten {
 	void initRender();
 	void startRender();
 	void renderForward(Mesh* mesh, Shader* base, Shader* light = nullptr);
+	void renderShadows(Mesh* mesh, Shader* base);
 };

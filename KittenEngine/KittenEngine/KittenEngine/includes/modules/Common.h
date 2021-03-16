@@ -80,3 +80,16 @@ inline mat3 abT(vec3 a, vec3 b) {
 		b.x * a.z, b.y * a.z, b.z * a.z
 	);
 }
+
+inline vec3 safeOrthonorm(vec3 v) {
+	if (abs(v.y) == 1) return normalize(cross(vec3(1, 0, 0), v));
+	return normalize(cross(vec3(0, 1, 0), v));
+}
+
+inline mat4 rotateView(vec3 dir) {
+	mat4 o(1);
+	o[2] = vec4(-normalize(dir), 0.f);
+	o[0] = vec4(safeOrthonorm(vec3(o[2])), 0.f);
+	o[1] = vec4(cross(vec3(o[2]), vec3(o[0])), 0.f);
+	return transpose(o);
+}

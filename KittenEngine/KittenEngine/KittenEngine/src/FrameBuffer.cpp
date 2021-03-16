@@ -10,16 +10,21 @@ namespace Kitten {
 
 		glGenTextures(1, &depthStencil);
 		glBindTexture(GL_TEXTURE_2D, depthStencil);
-		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
-			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL
-		);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencil, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthStencil, 0);
 
 		for (size_t i = 0; i < numGBuffers; i++) {
 			buffs[i] = new Texture(width, height);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GLenum(GL_COLOR_ATTACHMENT0 + i), GL_TEXTURE_2D, buffs[i]->glHandle, 0);
 		}
+		if (numGBuffers == 0)
+			glDrawBuffer(GL_NONE);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			printf("error: fbo creation failure!!\n");
@@ -56,11 +61,13 @@ namespace Kitten {
 	}
 
 	void FrameBuffer::bind() {
+		glGetFloatv(GL_VIEWPORT, (GLfloat*)&lastViewport);
 		glViewport(0, 0, width, height);
 		glBindFramebuffer(GL_FRAMEBUFFER, glHandle);
 	}
 
 	void FrameBuffer::unbind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(lastViewport.x, lastViewport.y, lastViewport.z, lastViewport.w);
 	}
 }

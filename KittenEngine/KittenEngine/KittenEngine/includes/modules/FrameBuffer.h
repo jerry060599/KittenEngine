@@ -9,6 +9,7 @@ namespace Kitten {
 		unsigned int glHandle = 0;
 		unsigned int depthStencil = 0;
 		Texture* buffs[8] = {};
+		vec4 lastViewport;
 
 		FrameBuffer();
 		FrameBuffer(int width, int height, int numGBuffers = 1);

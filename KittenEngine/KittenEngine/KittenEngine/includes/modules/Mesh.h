@@ -22,7 +22,7 @@ namespace Kitten {
 	public:
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
-		vector<unsigned int> tetraInds;
+		vector<unsigned int> groups;
 		mat4 defTransform = mat4(1);
 		Material* defMaterial;
 
@@ -42,4 +42,5 @@ namespace Kitten {
 	};
 
 	void loadMeshFrom(path path);
+	Mesh* loadMeshExact(path path);
 }

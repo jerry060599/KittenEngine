@@ -2,11 +2,15 @@
 #include "../includes/modules/Mesh.h"
 #include "../includes/modules/KittenAssets.h"
 #include "../includes/modules/KittenRendering.h"
+#include "../includes/modules/KittenPreprocessor.h"
 #include <glad/glad.h> 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
 
 namespace Kitten {
 	unsigned int meshImportFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
@@ -151,6 +155,7 @@ namespace Kitten {
 				mesh->defTransform = transform;
 				mat3 normMat = (mat3)normalTransform(transform);
 				int matIndex = -1;
+				mesh->groups.push_back(0);
 
 				for (size_t i = 0; i < node->mNumMeshes; i++) {
 					aiMesh* aim = scene->mMeshes[node->mMeshes[i]];
@@ -191,6 +196,7 @@ namespace Kitten {
 						for (unsigned int k = 0; k < face.mNumIndices; k++)
 							mesh->indices.push_back(face.mIndices[k] + startIndex);
 					}
+					mesh->groups.push_back(mesh->indices.size());
 				}
 
 				if (matIndex >= 0)
@@ -210,5 +216,47 @@ namespace Kitten {
 		}
 
 		delete[] mats;
+	}
+
+	Mesh* loadMeshExact(path path) {
+		Mesh* mesh = new Mesh;
+		std::ifstream input(path.string());
+
+		string text = loadText(path.string());
+		string line;
+
+		while (std::getline(input, line, '\n')) {
+			if (line[0] == 'v' && line[1] == ' ') {
+				std::istringstream iss(line.substr(1));
+				Vertex node{};
+				iss >> node.pos.x >> node.pos.y >> node.pos.z;
+				if (!iss) {
+					delete mesh;
+					return nullptr;
+				}
+				mesh->vertices.push_back(node);
+			}
+			else if (line[0] == 'f' && line[1] == ' ') {
+				if (!mesh->groups.size()) mesh->groups.push_back(0);
+
+				std::istringstream iss(line.substr(1));
+				int i;
+				while (iss >> i) {
+					if (i < 1)
+						mesh->indices.push_back(mesh->vertices.size() + i);
+					else
+						mesh->indices.push_back(i - 1);
+					iss.ignore(256, ' ');
+				}
+			}
+			else if (line[0] == 'o' && line[1] == ' ')
+				mesh->groups.push_back(mesh->indices.size());
+		}
+		mesh->groups.push_back(mesh->indices.size());
+
+		mesh->initGL();
+		mesh->upload();
+		mesh->calculateBounds();
+		return mesh;
 	}
 }
