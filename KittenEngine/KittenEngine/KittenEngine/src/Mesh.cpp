@@ -243,7 +243,7 @@ namespace Kitten {
 				int i;
 				while (iss >> i) {
 					if (i < 1)
-						mesh->indices.push_back(mesh->vertices.size() + i);
+						mesh->indices.push_back((unsigned int)mesh->vertices.size() + i);
 					else
 						mesh->indices.push_back(i - 1);
 					iss.ignore(256, ' ');

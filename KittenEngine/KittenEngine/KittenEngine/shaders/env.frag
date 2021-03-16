@@ -1,6 +1,6 @@
 #version 430 core
 
-#include "resources/shaders/kittenCommonFrag.glsl"
+#include "KittenEngine/shaders/kittenCommonFrag.glsl"
 
 in vec3 dir;
 out vec4 fragColor;

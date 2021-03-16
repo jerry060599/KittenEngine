@@ -68,6 +68,6 @@ namespace Kitten {
 
 	void FrameBuffer::unbind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(lastViewport.x, lastViewport.y, lastViewport.z, lastViewport.w);
+		glViewport((GLsizei)lastViewport.x, (GLsizei)lastViewport.y, (GLsizei)lastViewport.z, (GLsizei)lastViewport.w);
 	}
 }

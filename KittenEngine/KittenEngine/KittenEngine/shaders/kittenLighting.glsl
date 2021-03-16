@@ -60,6 +60,6 @@ vec3 getLightCol(vec3 worldPos){
 	case 2: // Spot
 		return c * distSqrInv * getLightSpread(worldPos) * getLightShadow(worldPos);
 	case 3: // Dir
-		return c;
+		return c * getLightShadow(worldPos);
 	}
 }

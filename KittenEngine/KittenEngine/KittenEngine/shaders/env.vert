@@ -1,6 +1,6 @@
 #version 430 core
 
-#include "resources/shaders/kittenCommonVert.glsl"
+#include "KittenEngine/shaders/kittenCommonVert.glsl"
 
 out vec3 dir;
 

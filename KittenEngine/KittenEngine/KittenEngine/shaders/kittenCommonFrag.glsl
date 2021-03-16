@@ -1,5 +1,5 @@
 
-#include "resources/shaders/kittenCommon.glsl"
+#include "KittenEngine/shaders/kittenCommon.glsl"
 
 layout(binding = 0) uniform sampler2D tex_d;
 layout(binding = 1) uniform sampler2D tex_s;

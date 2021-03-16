@@ -62,10 +62,16 @@ namespace Kitten {
 	extern float shadowDist;
 
 	extern Texture* defTexture;
+	extern Texture* defCubemap;
 	extern Mesh* defMesh;
+	extern Shader* defBaseShader;
+	extern Shader* defForwardShader;
+	extern Shader* defUnlitShader;
+	extern Shader* defEnvShader;
 
 	void initRender();
 	void startRender();
 	void renderForward(Mesh* mesh, Shader* base, Shader* light = nullptr);
-	void renderShadows(Mesh* mesh, Shader* base);
+	void renderShadows(Mesh* mesh, Shader* base = nullptr);
+	void renderEnv(Texture* cubemap);
 };

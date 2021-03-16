@@ -22,7 +22,7 @@ namespace Kitten {
 	public:
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
-		vector<unsigned int> groups;
+		vector<size_t> groups;
 		mat4 defTransform = mat4(1);
 		Material* defMaterial;
 
