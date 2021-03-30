@@ -1,7 +1,7 @@
 #version 430 core
 
-#include "KittenEngine/shaders/kittenCommonFrag.glsl"
-#include "KittenEngine/shaders/kittenLighting.glsl"
+#include "kittenCommonFrag.glsl"
+#include "kittenLighting.glsl"
 
 in vec2 uv;
 in vec3 norm;

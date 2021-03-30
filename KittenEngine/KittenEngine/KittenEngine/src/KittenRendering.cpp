@@ -1,5 +1,6 @@
 
 #include "../includes/modules/KittenRendering.h"
+#include "../includes/modules/KittenPreprocessor.h"
 
 using namespace glm;
 
@@ -65,6 +66,8 @@ namespace Kitten {
 		if (initialized) return;
 		initialized = true;
 
+		includePaths.push_back("KittenEngine\\shaders");
+
 		loadDirectory("KittenEngine\\shaders");
 		defBaseShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\blingBase.glsl"];
 		defForwardShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\blingForward.glsl"];
@@ -94,6 +97,11 @@ namespace Kitten {
 		glEnable(GL_BLEND);
 
 		glDepthFunc(GL_LEQUAL);
+
+		const float patchLvl[]{ 16, 16, 16, 16 };
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+		glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, patchLvl);
+		glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, patchLvl);
 
 		{// Gen white texture for binding null textures
 			unsigned int handle;
@@ -178,7 +186,15 @@ namespace Kitten {
 		clearShadowMaps();
 	}
 
-	void uploadMat(Material* mat) {
+	void startRenderMesh(mat4 transform) {
+		UBOModel uboModel;
+		uboModel.modelMat = modelMat * transform;
+		uboModel.modelMatInv = inverse(uboModel.modelMat);
+		uboModel.modelMat_n = normalTransform(uboModel.modelMat);
+		uploadUniformBuff(d_modelCommon, &uboModel, sizeof(UBOModel));
+	}
+
+	void startRenderMaterial(Material* mat) {
 		if (!mat) mat = &defMaterial;
 
 		uploadUniformBuff(d_matCommon, mat, sizeof(UBOMat));
@@ -190,35 +206,35 @@ namespace Kitten {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, mat->texs[MAT_CUBEMAP] ? mat->texs[MAT_CUBEMAP]->glHandle : defCubemap->glHandle);
 	}
 
-	void renderForward(Mesh* mesh, Shader* base, Shader* light) {
-		UBOModel uboModel;
-		uboModel.modelMat = modelMat * mesh->defTransform;
-		uboModel.modelMatInv = inverse(uboModel.modelMat);
-		uboModel.modelMat_n = normalTransform(uboModel.modelMat);
+	void render(Mesh* mesh, Shader* base) {
+		renderForward(mesh, base);
+	}
 
-		uploadUniformBuff(d_modelCommon, &uboModel, sizeof(UBOModel));
-		uploadMat(mesh->defMaterial);
+	void renderForward(Mesh* mesh, Shader* base, Shader* light) {
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glUseProgram(base->glHandle);
+		if (!base) base = defUnlitShader;
+		base->use();
 		glBindVertexArray(mesh->VAO);
-		glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
 
 		if (light) {
 			glBlendFunc(GL_ONE, GL_ONE);
 
-			glUseProgram(light->glHandle);
+			light->use();
 			for (size_t i = 0; i < lights.size(); i++) {
-				if ((lights[i].type == (int)KittenLight::SPOT
-					|| lights[i].type == (int)KittenLight::DIR)) {
+				if (lights[i].type == (int)KittenLight::SPOT
+					|| lights[i].type == (int)KittenLight::DIR) {
 					glActiveTexture((GLenum)(GL_TEXTURE0 + MAT_SHADOW));
 					glBindTexture(GL_TEXTURE_2D, shadowMaps[i]->depthStencil);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 				}
 				uploadUniformBuff(d_lightCommon, &lights[i], sizeof(UBOLight));
 
-				glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+				glDrawElements(light->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
 			}
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
@@ -228,13 +244,8 @@ namespace Kitten {
 	}
 
 	void renderShadows(Mesh* mesh, Shader* base) {
-		UBOModel uboModel;
-		uboModel.modelMat = modelMat * mesh->defTransform;
-		uboModel.modelMatInv = inverse(uboModel.modelMat);
-		uboModel.modelMat_n = normalTransform(uboModel.modelMat);
-
-		uploadUniformBuff(d_modelCommon, &uboModel, sizeof(UBOModel));
-		uploadMat(mesh->defMaterial);
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
 
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
@@ -242,7 +253,7 @@ namespace Kitten {
 		glDisable(GL_CULL_FACE);
 
 		if (base == nullptr) base = defUnlitShader;
-		glUseProgram(base->glHandle);
+		base->use();
 		glBindVertexArray(mesh->VAO);
 		for (size_t i = 0; i < lights.size(); i++)
 			if (lights[i].hasShadow
@@ -252,7 +263,7 @@ namespace Kitten {
 				uploadUBOCommonBuff();
 
 				shadowMaps[i]->bind();
-				glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+				glDrawElements(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
 				shadowMaps[i]->unbind();
 			}
 
@@ -267,7 +278,7 @@ namespace Kitten {
 	void renderEnv(Texture* cubemap) {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + MAT_CUBEMAP));
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->glHandle);
-		glUseProgram(defEnvShader->glHandle);
+		defEnvShader->use();
 		glBindVertexArray(defMesh->VAO);
 		glDrawElements(GL_TRIANGLES, (GLsizei)defMesh->indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);

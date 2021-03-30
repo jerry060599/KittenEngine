@@ -29,49 +29,50 @@ bool camSlide = false;
 
 string meshPath = "resources\\teapot\\teapot.obj";
 
-Kitten::Material quadMat = Kitten::defMaterial;
-Kitten::Mesh* mesh;
+namespace Kit = Kitten;
 
-Kitten::FrameBuffer* frameBuff = nullptr;
+Kit::Material quadMat = Kit::defMaterial;
+Kit::Mesh* mesh;
+
+Kit::FrameBuffer* frameBuff = nullptr;
 
 void renderScene() {
-	Kitten::lights[0].dir = -normalize(Kitten::lights[0].pos);
+	Kit::lights[0].dir = -normalize(Kit::lights[0].pos);
 
 	float aspect = (float)res.x / (float)res.y;
-	Kitten::projMat = glm::perspective(45.0f, aspect, 0.05f, 512.f);
-	Kitten::viewMat = glm::rotate(glm::mat4(1.0f), glm::radians(camEuler.y), { 1.0f, 0.0f, 0.0f });
-	Kitten::viewMat = glm::rotate(Kitten::viewMat, glm::radians(camEuler.x), { 0.0f, 1.0f, 0.0f });
-	Kitten::viewMat = glm::translate(mat4(1.f), { 0.0f, 0.0f, -camDist }) * Kitten::viewMat;
+	Kit::projMat = glm::perspective(45.0f, aspect, 0.05f, 512.f);
+	Kit::viewMat = glm::rotate(glm::mat4(1.0f), glm::radians(camEuler.y), { 1.0f, 0.0f, 0.0f });
+	Kit::viewMat = glm::rotate(Kit::viewMat, glm::radians(camEuler.x), { 0.0f, 1.0f, 0.0f });
+	Kit::viewMat = glm::translate(mat4(1.f), { 0.0f, 0.0f, -camDist }) * Kit::viewMat;
 
 	// Render everything
-	Kitten::startRender();
+	Kit::startRender();
 	glClearColor(0.3f, 0.3f, 0.35f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Kitten::renderShadows(mesh);
-	Kitten::renderForward(Kitten::defMesh, Kitten::defBaseShader, Kitten::defForwardShader);
-	Kitten::renderForward(mesh, Kitten::defBaseShader, Kitten::defForwardShader);
+	Kit::renderShadows(mesh);
+	Kit::renderForward(Kit::defMesh, Kit::defBaseShader, Kit::defForwardShader);
+	Kit::renderForward(mesh, Kit::defBaseShader, Kit::defForwardShader);
 }
 
 void renderGui() {
-	Kitten::Material* mat = mesh->defMaterial;
-
 	ImGui::Begin("Control Panel");
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	ImGui::DragFloat3("Light Position", (float*)&Kitten::lights[0].pos, 0.01f);
+	ImGui::DragFloat3("Light Position", (float*)&Kit::lights[0].pos, 0.01f);
 
 	ImGui::End();
 }
 
 void initScene() {
-	Kitten::loadAsset(meshPath);
-	mesh = (Kitten::Mesh*)Kitten::resources[meshPath];
+	Kit::loadAsset(meshPath);
+	Kit::loadDirectory("resources");
+	mesh = (Kit::Mesh*)Kit::resources[meshPath];
 
-	Kitten::defMesh->defMaterial = &quadMat;
-	Kitten::defMesh->defMaterial->props.col = vec4(0.4f, 0.4f, 0.5f, 1);
-	Kitten::defMesh->defMaterial->props.col1 = vec4(0.5f, 0.5f, 0.5f, 1);
-	Kitten::defMesh->defMaterial->props.params0.x = 6;
-	Kitten::defMesh->defTransform = glm::translate(glm::scale(glm::rotate(glm::mat4(1.0f), glm::radians(-90.f), { 1.0f, 0.0f, 0.0f }), { 2.f, 2.f, 1.f }), { -.5f, -.5f, 0.f });
+	Kit::defMesh->defMaterial = &quadMat;
+	Kit::defMesh->defMaterial->props.col = vec4(0.4f, 0.4f, 0.5f, 1);
+	Kit::defMesh->defMaterial->props.col1 = vec4(0.5f, 0.5f, 0.5f, 1);
+	Kit::defMesh->defMaterial->props.params0.x = 6;
+	Kit::defMesh->defTransform = glm::translate(glm::scale(glm::rotate(glm::mat4(1.0f), glm::radians(-90.f), { 1.0f, 0.0f, 0.0f }), { 2.f, 2.f, 1.f }), { -.5f, -.5f, 0.f });
 
 	float invScale = pow(mesh->bounds.volume(), -1.f / 3.f);
 	mesh->transform(glm::rotate(glm::scale(mat4(1), { invScale, invScale, invScale }), glm::radians(-90.f), { 1.0f, 0.0f, 0.0f }));
@@ -83,14 +84,14 @@ void initScene() {
 	mesh->defMaterial->props.col1 = vec4(0.5f, 0.5f, 0.5f, 1);
 	mesh->defMaterial->props.params0.x = 6;
 
-	Kitten::UBOLight light;
+	Kit::UBOLight light;
 	light.col = vec4(1, 1, 1, 4);
 	light.dir = vec3(sin(radians(30.f)), -cos(radians(30.f)), 0);
 	light.pos = -2.f * light.dir;
 	light.spread = 0.9f;
 	light.hasShadow = true;
-	light.type = (int)Kitten::KittenLight::SPOT;
-	Kitten::lights.push_back(light);
+	light.type = (int)Kit::KittenLight::SPOT;
+	Kit::lights.push_back(light);
 }
 
 void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
@@ -161,7 +162,7 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	if (ImGui::GetIO().WantCaptureMouse) return;
 	float* target;
 	target = &camDist;
-	*target = glm::max(0.5f, *target * powf(1.2f, (float)yoffset));
+	*target = glm::max(0.5f, *target * powf(1.2f, yoffset));
 }
 
 void initGL() {
@@ -205,7 +206,7 @@ void initGL() {
 
 int main(int argc, char** argv) {
 	initGL();
-	Kitten::initRender();
+	Kit::initRender();
 
 	if (argc > 1) meshPath = string(argv[1]);
 	initScene();

@@ -58,6 +58,7 @@ namespace Kitten {
 	extern mat4 viewMat;
 	extern mat4 modelMat;
 	extern vector<UBOLight> lights;
+	extern vector<string> includePaths;
 	extern int shadowRes;
 	extern float shadowDist;
 
@@ -71,6 +72,9 @@ namespace Kitten {
 
 	void initRender();
 	void startRender();
+	void startRenderMesh(mat4 transform);
+	void startRenderMaterial(Material* mat);
+	void render(Mesh* mesh, Shader* base = nullptr);
 	void renderForward(Mesh* mesh, Shader* base, Shader* light = nullptr);
 	void renderShadows(Mesh* mesh, Shader* base = nullptr);
 	void renderEnv(Texture* cubemap);

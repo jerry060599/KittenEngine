@@ -1,5 +1,6 @@
 #include "../includes/modules/KittenPreprocessor.h"
 
+#include <filesystem>
 #include <ratio>
 #include <iostream>
 #include <fstream>
@@ -8,6 +9,9 @@
 #include <regex>
 
 namespace Kitten {
+	vector<string> includePaths;
+	namespace fs = std::filesystem;
+
 	void printWithLineNumber(string str) {
 		int nLine = 0;
 		const char* format = "%-4d| ";
@@ -34,13 +38,31 @@ namespace Kitten {
 		return buff.str();
 	}
 
-	string loadTextWithIncludes(string path, set<string>& includedSet) {
+	string loadTextWithIncludes(const string root, string path, set<string>& includedSet) {
+		// Check the same folder.
+		fs::directory_entry file(fs::path(root) / fs::path(path));
+		// If not found, check the include paths.
+		for (auto incPath : includePaths) {
+			if (file.exists()) break;
+			fs::path p = fs::path(incPath) / fs::path(path);
+			file = fs::directory_entry(p);
+		}
+		// Default to working root otherwise.
+		if (!file.exists())
+			file = fs::directory_entry(path);
+		if (!file.exists()) {
+			printf("err: could not open file %s\n", path.c_str());
+			return "";
+		}
+
+		path = file.path().string();
+
 		if (includedSet.count(path))
 			return "";
 		includedSet.insert(path);
 
 		string src = loadText(path);
-		regex pattern("^#include +[<|\"][^\\n\">]+[>|\"] *$");
+		regex pattern("^ *#include +[<|\"][^\\n\">]+[>|\"] *\n?");
 
 		stringstream buff;
 		auto lastItr = src.begin();
@@ -60,13 +82,21 @@ namespace Kitten {
 
 			string p(s, e);
 			//cout << "including: " << p.c_str() << endl;
-			buff << loadTextWithIncludes(p, includedSet).c_str() << '\n';
+			const string subroot = fs::path(path).parent_path().string();
+			buff << loadTextWithIncludes(subroot, p, includedSet).c_str() << '\n';
 			++iter;
 		}
 
 		buff << string(lastItr, src.end()).c_str();
 
 		return buff.str();
+	}
+
+	string loadTextWithIncludes(string path) {
+		set<string> includedSet;
+		fs::path p(path);
+		const string root = p.parent_path().string();
+		return loadTextWithIncludes(root, path, includedSet);
 	}
 
 	void parseAssetTag(string& ori, string& name, Tags& tags) {

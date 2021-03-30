@@ -1,6 +1,6 @@
 #version 430 core
 
-#include "KittenEngine/shaders/kittenCommonVert.glsl"
+#include "kittenCommonVert.glsl"
 
 out vec3 norm;
 out vec3 wPos;

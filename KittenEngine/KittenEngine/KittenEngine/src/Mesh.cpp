@@ -87,7 +87,7 @@ namespace Kitten {
 		const aiScene* scene = import.ReadFile(path.string(), meshImportFlags);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			cout << "ERROR::ASSIMP::" << import.GetErrorString() << endl;
+			cout << "err: assimp error " << import.GetErrorString() << endl;
 			return;
 		}
 
@@ -101,7 +101,7 @@ namespace Kitten {
 			aiMaterial* aim = scene->mMaterials[i];
 			Material* mat = new Material;
 			string nName = path.string() + "\\materials\\" + aim->GetName().C_Str();
-			printf("loading sub-material: %s\n", nName.c_str());
+			printf("asset: loading sub-material %s\n", nName.c_str());
 			resources[nName] = mat;
 			mats[i] = mat;
 
@@ -147,10 +147,10 @@ namespace Kitten {
 				if (firstMesh) {
 					resources[path.string()] = mesh;
 					firstMesh = false;
-					printf("loading sub-mesh: %s (\\%s)\n", path.string().c_str(), node->mName.C_Str());
+					printf("asset: loading sub-mesh %s (\\%s)\n", path.string().c_str(), node->mName.C_Str());
 				}
 				else
-					printf("loading sub-mesh: %s\n", nName.c_str());
+					printf("asset: loading sub-mesh %s\n", nName.c_str());
 
 				mesh->defTransform = transform;
 				mat3 normMat = (mat3)normalTransform(transform);
@@ -164,7 +164,7 @@ namespace Kitten {
 						if (matIndex < 0)
 							matIndex = aim->mMaterialIndex;
 						else
-							printf("WARNING: Only one material supported per sub-mesh!\n");
+							printf("err: only one material supported per sub-mesh!\n");
 
 					for (size_t j = 0; j < aim->mNumVertices; j++) {
 						Vertex v;
