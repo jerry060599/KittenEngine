@@ -56,6 +56,54 @@ inline float pow4(float v) {
 	return v * v;
 }
 
+inline mat4 diag(vec4 d) {
+	return mat4(
+		d.x, 0, 0, 0,
+		0, d.y, 0, 0,
+		0, 0, d.z, 0,
+		0, 0, 0, d.w
+	);
+}
+
+inline mat3 diag(vec3 d) {
+	return mat3(
+		d.x, 0, 0,
+		0, d.y, 0,
+		0, 0, d.z
+	);
+}
+
+inline mat2 diag(vec2 d) {
+	return mat2(
+		d.x, 0,
+		0, d.y
+	);
+}
+
+inline vec4 diag(mat4 m) {
+	return vec4(m[0][0], m[1][1], m[2][2], m[3][3]);
+}
+
+inline vec3 diag(mat3 m) {
+	return vec3(m[0][0], m[1][1], m[2][2]);
+}
+
+inline vec2 diag(mat2 m) {
+	return vec2(m[0][0], m[1][1]);
+}
+
+inline float trace(mat4 m) {
+	return m[0][0] + m[1][1] + m[2][2] + m[3][3];
+}
+
+inline float trace(mat3 m) {
+	return m[0][0] + m[1][1] + m[2][2];
+}
+
+inline float trace(mat2 m) {
+	return m[0][0] + m[1][1];
+}
+
 inline vec3 reflect(vec3 v, vec3 norm) {
 	return v - 2 * dot(norm, v) * norm;
 }
