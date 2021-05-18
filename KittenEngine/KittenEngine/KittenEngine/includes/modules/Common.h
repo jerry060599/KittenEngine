@@ -121,6 +121,11 @@ inline mat4 normalTransform(mat4 mat) {
 	return outMat;
 }
 
+inline vec3 perturb(vec3 x, float h, int ind) {
+	x[ind] += h;
+	return x;
+}
+
 inline mat3 abT(vec3 a, vec3 b) {
 	return mat3(
 		b.x * a.x, b.y * a.x, b.z * a.x,
@@ -140,4 +145,12 @@ inline mat4 rotateView(vec3 dir) {
 	o[0] = vec4(safeOrthonorm(vec3(o[2])), 0.f);
 	o[1] = vec4(cross(vec3(o[2]), vec3(o[0])), 0.f);
 	return transpose(o);
+}
+
+inline int numBatches(int n, int batchSize) {
+	return (n - 1) / batchSize + 1;
+}
+
+inline int numBatches(size_t n, int batchSize) {
+	return numBatches((int)n, batchSize);
 }
