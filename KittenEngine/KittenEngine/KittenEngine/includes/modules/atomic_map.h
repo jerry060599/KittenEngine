@@ -38,13 +38,13 @@ private:
 	inline static const double MAX_LOAD_FACTOR = 0.5;
 	inline static const size_t XOR_MASK = 0x3b6c307e19239b62;
 
+public:
 	size_t internalHash(TKey key) const {
 		size_t hash = std::hash<TKey>()(key);
 		hash ^= XOR_MASK;
 		return hash ? hash : 1;
 	}
 
-public:
 	typedef void* handle;
 
 	TVal read(handle handle) const {
@@ -91,8 +91,8 @@ public:
 		ent.lock.store(2); // release lock
 	}
 
-	handle getHandleWithMap(TKey& key, std::function<bool(TVal&, bool)> mapping) {
-		size_t hash = internalHash(key);
+	handle getHandleWithMap(TKey& key, std::function<bool(TVal&, bool)> mapping, size_t hash = 0) {
+		if (!hash) hash = internalHash(key);
 
 		size_t idx = hash % tableSize;
 		while (true) {
@@ -131,8 +131,8 @@ public:
 		return nullptr;
 	}
 
-	handle getHandle(TKey& key) const {
-		size_t hash = internalHash(key);
+	handle getHandle(TKey& key, size_t hash = 0) const {
+		if (!hash) hash = internalHash(key);
 
 		size_t idx = hash % tableSize;
 		while (true) {
@@ -172,9 +172,10 @@ public:
 	/// </summary>
 	/// <param name="key">key</param>
 	/// <param name="mapping">a function that takes a value reference and whether it is an existing value. should return true if ref is modified.</param>
+	/// <param name="hash">optional hash where the hash can be reused</param>
 	/// <returns>whether the value existed/was added to this table</returns>
-	bool map(TKey& key, std::function<bool(TVal&, bool)> mapping) {
-		return getHandleWithMap(key, mapping);
+	bool map(TKey& key, std::function<bool(TVal&, bool)> mapping, size_t hash = 0) {
+		return getHandleWithMap(key, mapping, hash);
 	}
 
 	/// <summary>
@@ -182,9 +183,10 @@ public:
 	/// </summary>
 	/// <param name="key">key</param>
 	/// <param name="val">value</param>
+	/// <param name="hash">optional hash where the hash can be reused</param>
 	/// <returns>whether the value existed/was added to this table</returns>
-	bool insert(TKey& key, TVal& val) {
-		return getHandleWithMap(key, [&val](TVal& v, bool init)->bool { v = val; return true; });
+	bool insert(TKey& key, TVal& val, size_t hash = 0) {
+		return getHandleWithMap(key, [&val](TVal& v, bool init)->bool { v = val; return true; }, hash);
 	}
 
 	/// <summary>
@@ -192,9 +194,10 @@ public:
 	/// </summary>
 	/// <param name="key">key</param>
 	/// <param name="val">value reference to be stored in</param>
+	/// <param name="hash">optional hash where the hash can be reused</param>
 	/// <returns>whether the entry was found</returns>
-	bool get(TKey& key, TVal& val) const {
-		handle handle = getHandle(key);
+	bool get(TKey& key, TVal& val, size_t hash = 0) const {
+		handle handle = getHandle(key, hash);
 		if (handle) {
 			val = read(handle);
 			return true;
