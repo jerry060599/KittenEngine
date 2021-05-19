@@ -12,6 +12,8 @@
 template<typename TKey, typename TVal>
 class atomic_map {
 private:
+	enum class cell_state { FREE = 0, WRITE, READ, ABORTED };
+
 	struct entry {
 		std::atomic<size_t> hash;
 		size_t idx;
@@ -30,7 +32,7 @@ private:
 		for (int64_t i = 0; i < (int64_t)tableSize; i++) {
 			table[i].hash = 0;
 			table[i].rev = 0;
-			table[i].lock = 0; // 0 = unallocated, 1 = writing, 2 = free.
+			table[i].lock = (int)cell_state::FREE; // 0 = unallocated, 1 = writing, 2 = good data, 3 = aborted due to capcity limits.
 			table[i].idx = 0;
 		}
 	}
@@ -55,7 +57,7 @@ public:
 			auto prevRev = ent.rev.load();
 			val = list[ent.idx].second;
 
-			if (ent.lock.load() != 2) { // Make sure some write didnt start.
+			if (ent.lock.load() != (int)cell_state::READ) { // Make sure some write didnt start.
 				std::this_thread::yield();
 				continue;
 			}
@@ -67,28 +69,26 @@ public:
 	void write(handle handle, TVal& val) {
 		auto& ent = *(entry*)handle;
 		// Get write lock
-		int lock = 2;
-		std::atomic<int> h;
+		int lock = (int)cell_state::READ;
 
 		// Get write lock
-		while (!ent.lock.compare_exchange_strong(lock, 1)) lock = 2;
+		while (!ent.lock.compare_exchange_strong(lock, (int)cell_state::WRITE)) lock = (int)cell_state::READ;
 		list[ent.idx].second = val;
 		ent.rev.fetch_add(1); // Invalidate all concurrent reads
-		ent.lock.store(2); // release lock
+		ent.lock.store((int)cell_state::READ); // release lock
 	}
 
 	void map(handle handle, std::function<bool(TVal&, bool)> mapping) {
 		auto& ent = *(entry*)handle;
 		// Get write lock
-		int lock = 2;
-		std::atomic<int> h;
+		int lock = (int)cell_state::READ;
 
 		// Get write lock
-		while (!ent.lock.compare_exchange_strong(lock, 1)) lock = 2;
+		while (!ent.lock.compare_exchange_strong(lock, (int)cell_state::WRITE)) lock = (int)cell_state::READ;
 
 		if (mapping(list[ent.idx].second, true)) ent.rev.fetch_add(1); // Invalidate all concurrent reads
 
-		ent.lock.store(2); // release lock
+		ent.lock.store((int)cell_state::READ); // release lock
 	}
 
 	handle getHandleWithMap(TKey& key, std::function<bool(TVal&, bool)> mapping, size_t hash = 0) {
@@ -102,8 +102,10 @@ public:
 			if (res) { // We sucsessfully allocated a new entry
 				// Write data
 				size_t listIndex = c.fetch_add(1);
-				if (listIndex >= maxSize) {
+				if (listIndex >= maxSize) { // Abort the write
 					c.fetch_sub(1);
+					ent.hash.store(0);
+					ent.lock.store((int)cell_state::ABORTED);
 					return nullptr;
 				}
 
@@ -113,12 +115,14 @@ public:
 
 				// Write table
 				ent.idx = listIndex;
-				ent.lock.store(2);
+				ent.lock.store((int)cell_state::READ);
 				return &table[idx];
 			}
 			else if (old == hash) {  // We hit a possible existing entry
-				while (!ent.lock.load()); // Spinlock until this entry is consistent (lock == 0 means that its still allocating)
+				int lVal;
+				while (!(lVal = ent.lock.load())); // Spinlock until this entry is consistent (lock == 0 means that its still allocating)
 
+				if (lVal == (int)cell_state::ABORTED) return nullptr;
 				if (list[ent.idx].first == key) { // Make sure both the hash and key match
 					handle handle = &table[idx];
 					map(handle, mapping);
@@ -140,8 +144,10 @@ public:
 			size_t cell = ent.hash.load();
 			if (cell == 0) return nullptr;
 			if (cell == hash) {  // We hit a possible existing entry
-				while (!ent.lock.load()); // Spinlock until this entry is consistent (lock == 0 means that its still allocating)
+				int lVal;
+				while (!(lVal = ent.lock.load())); // Spinlock until this entry is consistent (lock == 0 means that its still allocating)
 
+				if (lVal == (int)cell_state::ABORTED) return nullptr;
 				if (list[ent.idx].first == key)  // Make sure both the hash and key match
 					return &table[idx];
 			}
