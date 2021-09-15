@@ -23,12 +23,13 @@ namespace Kitten {
 
 	Texture* defTexture;
 	Texture* defCubemap;
-	Mesh* defMesh;
+	Mesh* defMesh, * defMeshPoly;
 
 	Shader* defBaseShader;
 	Shader* defForwardShader;
 	Shader* defUnlitShader;
 	Shader* defEnvShader;
+	Shader* defBlitShader;
 
 	bool initialized = false;
 	vector<FrameBuffer*> shadowMaps;
@@ -62,6 +63,15 @@ namespace Kitten {
 		}
 	}
 
+	void checkErr(const char* tag) {
+		unsigned int error = glGetError();
+		if (error != GL_NO_ERROR)
+			if (tag)
+				printf("GL error %d at %s\n", error, tag);
+			else
+				printf("GL error %d\n", error);
+	}
+
 	void initRender() {
 		if (initialized) return;
 		initialized = true;
@@ -69,10 +79,11 @@ namespace Kitten {
 		includePaths.push_back("KittenEngine\\shaders");
 
 		loadDirectory("KittenEngine\\shaders");
-		defBaseShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\blingBase.glsl"];
-		defForwardShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\blingForward.glsl"];
-		defUnlitShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\unlit.glsl"];
-		defEnvShader = (Kitten::Shader*)Kitten::resources["KittenEngine\\shaders\\env.glsl"];
+		defBaseShader = get<Kitten::Shader>("KittenEngine\\shaders\\blingBase.glsl");
+		defForwardShader = get<Kitten::Shader>("KittenEngine\\shaders\\blingForward.glsl");
+		defUnlitShader = get<Kitten::Shader>("KittenEngine\\shaders\\unlit.glsl");
+		defEnvShader = get<Kitten::Shader>("KittenEngine\\shaders\\env.glsl");
+		defBlitShader = get<Kitten::Shader>("KittenEngine\\shaders\\blit.glsl");
 
 		glGenBuffers(1, &d_uboCommon);
 		glBindBuffer(GL_UNIFORM_BUFFER, d_uboCommon);
@@ -109,7 +120,7 @@ namespace Kitten {
 			glBindTexture(GL_TEXTURE_2D, handle);
 
 			unsigned int data = ~0;
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -118,34 +129,24 @@ namespace Kitten {
 			img->glHandle = handle;
 			img->width = 1;
 			img->height = 1;
-			img->channels = 4;
+			img->deviceFormat = GL_RGBA8;
+			img->hostFormat = GL_RGBA;
+			img->hostDataType = GL_UNSIGNED_BYTE;
 			img->ratio = 1;
 			img->borders = ivec4(0);
-			img->rawData = new unsigned char[1];
+			img->rawData = new unsigned char[4];
 			img->rawData[0] = ~0;
+			img->rawData[1] = ~0;
+			img->rawData[2] = ~0;
+			img->rawData[3] = ~0;
 			resources["white.tex"] = img;
 			defTexture = img;
 		}
 
-		{// Gen standard quad for FBO bliting
-			defMesh = new Mesh;
-			defMesh->vertices.push_back({ vec3(0, 0, 0), vec3(0, 0, 1), vec2(0, 0) });
-			defMesh->vertices.push_back({ vec3(1, 0, 0), vec3(0, 0, 1), vec2(1, 0) });
-			defMesh->vertices.push_back({ vec3(1, 1, 0), vec3(0, 0, 1), vec2(1, 1) });
-			defMesh->vertices.push_back({ vec3(0, 1, 0), vec3(0, 0, 1), vec2(0, 1) });
-			defMesh->indices.push_back(3);
-			defMesh->indices.push_back(0);
-			defMesh->indices.push_back(1);
-			defMesh->indices.push_back(3);
-			defMesh->indices.push_back(1);
-			defMesh->indices.push_back(2);
-
-			defMesh->defMaterial = &defMaterial;
-
-			defMesh->initGL();
-			defMesh->upload();
-			defMesh->calculateBounds();
-		}
+		// Gen standard quad for FBO bliting
+		defMesh = genQuadMesh(1, 1);
+		defMeshPoly = genQuadMesh(1, 1);
+		defMeshPoly->polygonize();
 
 		defCubemap = new Texture(defTexture, defTexture, defTexture, defTexture, defTexture, defTexture);
 	}
@@ -184,6 +185,8 @@ namespace Kitten {
 
 		allocShadowMaps();
 		clearShadowMaps();
+
+		modelMat = mat4(1);
 	}
 
 	void startRenderMesh(mat4 transform) {
@@ -208,6 +211,18 @@ namespace Kitten {
 
 	void render(Mesh* mesh, Shader* base) {
 		renderForward(mesh, base);
+	}
+
+	void renderInstanced(Mesh* mesh, int count, Shader* base) {
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
+		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (!base) base = defUnlitShader;
+		base->use();
+		glBindVertexArray(mesh->VAO);
+		glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
 	}
 
 	void renderForward(Mesh* mesh, Shader* base, Shader* light) {

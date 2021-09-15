@@ -4,6 +4,7 @@ const float episilon = 0.000001f;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
+#include <functional>
 #include "Timer.h"
 
 using namespace glm;
@@ -43,6 +44,14 @@ inline float length2(vec2 v) {
 	return dot(v, v);
 }
 
+inline double pow2(double v) {
+	return v * v;
+}
+
+inline int pow2(int v) {
+	return v * v;
+}
+
 inline float pow2(float v) {
 	return v * v;
 }
@@ -78,6 +87,30 @@ inline mat2 diag(vec2 d) {
 		d.x, 0,
 		0, d.y
 	);
+}
+
+inline float min(vec2 v) {
+	return glm::min(v.x, v.y);
+}
+
+inline float min(vec3 v) {
+	return glm::min(v.x, glm::min(v.y, v.z));
+}
+
+inline float min(vec4 v) {
+	return glm::min(glm::min(v.x, v.y), glm::min(v.z, v.w));
+}
+
+inline float max(vec2 v) {
+	return glm::max(v.x, v.y);
+}
+
+inline float max(vec3 v) {
+	return glm::max(v.x, glm::max(v.y, v.z));
+}
+
+inline float max(vec4 v) {
+	return glm::max(glm::max(v.x, v.y), glm::max(v.z, v.w));
 }
 
 inline vec4 diag(mat4 m) {
@@ -153,4 +186,17 @@ inline int numBatches(int n, int batchSize) {
 
 inline int numBatches(size_t n, int batchSize) {
 	return numBatches((int)n, batchSize);
+}
+
+inline vec2 lineInt(vec2 a0, vec2 a1, vec2 b0, vec2 b1) {
+	vec2 d0 = a0 - a1;
+	vec2 d1 = b1 - b0;
+
+	vec2 diff = a0 - b0;
+	float c = cross(d0, d1);
+	return (vec2(d1.y, -d0.y) * (a0.x - b0.x) + vec2(-d1.x, d0.x) * (a0.y - b0.y)) / (c + 0.00001f * float(c == 0));
+}
+
+inline bool lineHasInt(vec2 s) {
+	return s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1;
 }

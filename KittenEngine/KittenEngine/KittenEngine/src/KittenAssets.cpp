@@ -100,6 +100,7 @@ namespace Kitten {
 		parsedName = path.parent_path().string().append("\\").append(parsedName);
 
 		int width, height, nrChannels;
+		stbi_set_flip_vertically_on_load(1);
 		unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &nrChannels, 4);
 		if (data) {
 			unsigned int handle;
@@ -121,14 +122,15 @@ namespace Kitten {
 			Texture* img = new Texture;
 			img->glHandle = handle;
 			img->width = width;
-			img->channels = GL_RGBA;
-			img->dataType = GL_UNSIGNED_BYTE;
+			img->deviceFormat = GL_RGBA;
+			img->hostFormat = GL_RGBA;
+			img->hostDataType = GL_UNSIGNED_BYTE;
 			img->height = height;
 			img->ratio = float(width) / height;
 			img->borders = tags["border"];
 			img->rawData = data;
 
-			glTexImage2D(GL_TEXTURE_2D, 0, img->channels, width, height, 0, img->channels, img->dataType, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 			resources[parsedName] = img;

@@ -32,7 +32,7 @@ namespace Kitten {
 		for (size_t i = 0; i < times.size(); i++) {
 			double time = times[i];
 			if (tags[i] == nullptr)
-				printf("Tag%03zd timed @ %.2f sec", i, time);
+				printf("Tag_%03zd timed @ %.2f sec", i, time);
 			else
 				printf("%s timed @ %.2f sec", tags[i], time);
 

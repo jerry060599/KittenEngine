@@ -11,6 +11,7 @@
 #include "Bound.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "ComputeBuffer.h"
 #include "FrameBuffer.h"
 
 #include <assimp/Importer.hpp>
@@ -43,5 +44,13 @@ namespace Kitten {
 	void loadShader(path path);
 	void loadTexture(path path);
 	void loadMesh(path path);
+
+	template<typename T>
+	inline T* get(const char* name) {
+		auto itr = resources.find(name);
+		if (itr == resources.end())
+			throw runtime_error("Resource not found!");
+		return (T*)itr->second;
+	}
 };
 

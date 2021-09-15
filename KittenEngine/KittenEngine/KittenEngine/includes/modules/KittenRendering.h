@@ -64,17 +64,20 @@ namespace Kitten {
 
 	extern Texture* defTexture;
 	extern Texture* defCubemap;
-	extern Mesh* defMesh;
+	extern Mesh* defMesh, *defMeshPoly;
 	extern Shader* defBaseShader;
 	extern Shader* defForwardShader;
 	extern Shader* defUnlitShader;
 	extern Shader* defEnvShader;
+	extern Shader* defBlitShader;
 
+	void checkErr(const char* tag = nullptr);
 	void initRender();
 	void startRender();
 	void startRenderMesh(mat4 transform);
 	void startRenderMaterial(Material* mat);
 	void render(Mesh* mesh, Shader* base = nullptr);
+	void renderInstanced(Mesh* mesh, int count, Shader* base = nullptr);
 	void renderForward(Mesh* mesh, Shader* base, Shader* light = nullptr);
 	void renderShadows(Mesh* mesh, Shader* base = nullptr);
 	void renderEnv(Texture* cubemap);

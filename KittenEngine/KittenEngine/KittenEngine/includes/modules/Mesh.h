@@ -34,6 +34,7 @@ namespace Kitten {
 
 		~Mesh();
 
+		void polygonize();
 		void transform(mat4);
 		void draw();
 		void initGL();
@@ -41,6 +42,7 @@ namespace Kitten {
 		void calculateBounds();
 	};
 
+	Mesh* genQuadMesh(int rows = 1, int cols = 1);
 	void loadMeshFrom(path path);
 	Mesh* loadMeshExact(path path);
 }

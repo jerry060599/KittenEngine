@@ -37,6 +37,17 @@ namespace Kitten {
 		glGenBuffers(1, &EBO);
 	}
 
+	void Mesh::polygonize() {
+		auto v = vertices;
+		vertices.clear();
+		for (size_t i = 0; i < indices.size(); i++) {
+			vertices.push_back(v[indices[i]]);
+			indices[i] = vertices.size() - 1;
+		}
+
+		upload();
+	}
+
 	void Mesh::transform(mat4 mat) {
 		mat3 mat_n = normalTransform(mat);
 
@@ -218,11 +229,40 @@ namespace Kitten {
 		delete[] mats;
 	}
 
+	Mesh* genQuadMesh(int rows, int cols) {
+		Mesh* mesh = new Mesh;
+
+		mesh->vertices.reserve((rows + 1) * (cols + 1));
+		for (int r = 0; r <= rows; r++)
+			for (int c = 0; c <= cols; c++) {
+				vec2 p = vec2(c / (float)cols, r / (float)rows);
+				mesh->vertices.push_back({ vec3(p.x, p.y, 0), vec3(0, 0, 1), p });
+			}
+
+		mesh->indices.reserve(6 * rows * cols);
+		for (int r = 0; r < rows; r++)
+			for (int c = 0; c < cols; c++) {
+				const int idx = r * (cols + 1) + c;
+				mesh->indices.push_back(idx);
+				mesh->indices.push_back(idx + 1);
+				mesh->indices.push_back(idx + cols + 1);
+				mesh->indices.push_back(idx + 1);
+				mesh->indices.push_back(idx + cols + 2);
+				mesh->indices.push_back(idx + cols + 1);
+			}
+
+		mesh->defMaterial = nullptr;
+		mesh->defTransform = mat4(1);
+		mesh->initGL();
+		mesh->upload();
+		mesh->calculateBounds();
+		return mesh;
+	}
+
 	Mesh* loadMeshExact(path path) {
 		Mesh* mesh = new Mesh;
 		std::ifstream input(path.string());
 
-		string text = loadText(path.string());
 		string line;
 
 		while (std::getline(input, line, '\n')) {
@@ -254,6 +294,8 @@ namespace Kitten {
 		}
 		mesh->groups.push_back(mesh->indices.size());
 
+		mesh->defMaterial = nullptr;
+		mesh->defTransform = mat4(1);
 		mesh->initGL();
 		mesh->upload();
 		mesh->calculateBounds();
