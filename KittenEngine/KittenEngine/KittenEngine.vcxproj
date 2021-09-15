@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />
     <ClCompile Include="KittenEngine\src\KittenPreprocessor.cpp" />
@@ -175,8 +176,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KittenEngine\includes\KittenEngine.h" />
+    <ClInclude Include="KittenEngine\includes\modules\Algo.h" />
+    <ClInclude Include="KittenEngine\includes\modules\atomic_map.h" />
     <ClInclude Include="KittenEngine\includes\modules\Bound.h" />
     <ClInclude Include="KittenEngine\includes\modules\Common.h" />
+    <ClInclude Include="KittenEngine\includes\modules\ComputeBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\FrameBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenAssets.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenPreprocessor.h" />
