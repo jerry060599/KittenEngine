@@ -83,12 +83,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)includes;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libs;$(ProjectDir)libs\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)includes;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)libs;$(ProjectDir)libs\GLFW;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,7 +139,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -159,17 +159,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="includes\imgui\imgui.cpp" />
-    <ClCompile Include="includes\imgui\imgui_demo.cpp" />
-    <ClCompile Include="includes\imgui\imgui_draw.cpp" />
-    <ClCompile Include="includes\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="includes\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="includes\imgui\imgui_widgets.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />
     <ClCompile Include="KittenEngine\src\KittenPreprocessor.cpp" />
@@ -181,13 +174,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="includes\imgui\imconfig.h" />
-    <ClInclude Include="includes\imgui\imgui.h" />
-    <ClInclude Include="includes\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="includes\imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="includes\imgui\imgui_internal.h" />
-    <ClInclude Include="includes\imgui\imstb_rectpack.h" />
-    <ClInclude Include="includes\imgui\imstb_textedit.h" />
     <ClInclude Include="KittenEngine\includes\KittenEngine.h" />
     <ClInclude Include="KittenEngine\includes\modules\Bound.h" />
     <ClInclude Include="KittenEngine\includes\modules\Common.h" />
