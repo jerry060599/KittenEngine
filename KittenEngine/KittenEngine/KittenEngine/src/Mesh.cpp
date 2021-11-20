@@ -58,6 +58,10 @@ namespace Kitten {
 	}
 
 	void Mesh::upload() {
+#ifdef _DEBUG
+		assert(initialized);
+#endif
+
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 

@@ -31,3 +31,8 @@ vec3 reflect(vec3 v, vec3 norm) {
 	return v - 2 * dot(norm, v) * norm;
 }
 
+vec3 hue2rgb(float h) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(h + K.xyz) * 6.0 - K.www);
+    return clamp(p - K.xxx, 0.0, 1.0);
+}

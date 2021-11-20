@@ -200,3 +200,8 @@ inline vec2 lineInt(vec2 a0, vec2 a1, vec2 b0, vec2 b1) {
 inline bool lineHasInt(vec2 s) {
 	return s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1;
 }
+
+template <typename T>
+T& slice(float* x, size_t index) {
+	return ((T*)x)[index];
+}
