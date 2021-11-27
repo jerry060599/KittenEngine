@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <unordered_set>
 
 namespace Kitten {
 	unsigned int meshImportFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
@@ -58,10 +59,6 @@ namespace Kitten {
 	}
 
 	void Mesh::upload() {
-#ifdef _DEBUG
-		assert(initialized);
-#endif
-
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -304,5 +301,88 @@ namespace Kitten {
 		mesh->upload();
 		mesh->calculateBounds();
 		return mesh;
+	}
+
+	TetMesh* loadTetMeshExact(path path) {
+		TetMesh* mesh = new TetMesh;
+		std::ifstream input(path.string());
+
+		string line;
+
+		while (std::getline(input, line, '\n')) {
+			if (line[0] == 'v' && line[1] == ' ') {
+				std::istringstream iss(line.substr(1));
+				Vertex node{};
+				iss >> node.pos.x >> node.pos.y >> node.pos.z;
+				if (!iss) {
+					delete mesh;
+					return nullptr;
+				}
+				mesh->vertices.push_back(node);
+			}
+			else if (line[0] == 'f' && line[1] == ' ') {
+				if (!mesh->groups.size()) mesh->groups.push_back(0);
+
+				std::istringstream iss(line.substr(1));
+				int i;
+				while (iss >> i) {
+					if (i < 1)
+						mesh->tetIndices.push_back((unsigned int)mesh->vertices.size() + i);
+					else
+						mesh->tetIndices.push_back(i - 1);
+					iss.ignore(256, ' ');
+				}
+			}
+		}
+
+		using tri = tuple<int, int, int>;
+
+		unordered_set<tri> faceSet;
+
+		auto sortTri = [](tri t) {
+			if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
+			if (get<1>(t) > get<2>(t)) {
+				swap(get<1>(t), get<2>(t));
+				if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
+			}
+			return t;
+		};
+
+		for (size_t i = 0; i < mesh->tetIndices.size(); i += 4) {
+			tri tris[4]{
+				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 1], mesh->tetIndices[i + 2])),
+				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 1], mesh->tetIndices[i + 3])),
+				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 2], mesh->tetIndices[i + 3])),
+				sortTri(make_tuple(mesh->tetIndices[i + 1], mesh->tetIndices[i + 2], mesh->tetIndices[i + 3]))
+			};
+
+			// Relies on the assumption that interior faces have exactly two neighboring tets.
+			for (size_t k = 0; k < 4; k++) {
+				auto itr = faceSet.find(tris[k]);
+				if (itr != faceSet.end())  // Is a face
+					faceSet.erase(itr);
+				else
+					faceSet.insert(tris[k]);
+			}
+		}
+
+		for (auto t : faceSet) {
+			mesh->indices.push_back(get<0>(t));
+			mesh->indices.push_back(get<1>(t));
+			mesh->indices.push_back(get<2>(t));
+		}
+
+		mesh->groups.push_back(mesh->indices.size());
+
+		mesh->defMaterial = nullptr;
+		mesh->defTransform = mat4(1);
+		mesh->initGL();
+		mesh->upload();
+		mesh->calculateBounds();
+		return mesh;
+	}
+
+	size_t TetMesh::numTet() {
+		return tetIndices.size() / 4;
 	}
 }

@@ -106,7 +106,7 @@ namespace Kitten {
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		glDepthFunc(GL_LEQUAL);
 
 		const float patchLvl[]{ 16, 16, 16, 16 };
@@ -186,12 +186,6 @@ namespace Kitten {
 		allocShadowMaps();
 		clearShadowMaps();
 
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDepthFunc(GL_LEQUAL);
-
 		modelMat = mat4(1);
 	}
 
@@ -224,6 +218,7 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);
@@ -235,6 +230,7 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);

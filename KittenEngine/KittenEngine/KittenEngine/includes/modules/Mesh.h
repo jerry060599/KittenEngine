@@ -42,7 +42,14 @@ namespace Kitten {
 		void calculateBounds();
 	};
 
+	class TetMesh : public Mesh {
+	public:
+		vector<unsigned int> tetIndices;
+		size_t numTet();
+	};
+
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
 	void loadMeshFrom(path path);
 	Mesh* loadMeshExact(path path);
+	TetMesh* loadTetMeshExact(path path);
 }

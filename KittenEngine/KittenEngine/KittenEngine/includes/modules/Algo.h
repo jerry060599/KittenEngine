@@ -207,11 +207,7 @@ inline Eigen::VectorXf lbfgsMin(int numVars, std::function<float(Eigen::VectorXf
 		float v = f(x);
 		while (f(x + a * z) > v + a * t)
 			a *= 0.5f;
-		/*
-		for (size_t i = 0; i < 20; i++) {
-			printf("%f %f %f\n", x[i], a * z[i], gv[i]);
-		}
-		printf("\n");*/
+
 		// Update guess
 		x += a * z;
 		float newFv = f(x);

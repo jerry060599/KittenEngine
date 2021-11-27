@@ -6,6 +6,7 @@ const float episilon = 0.000001f;
 #include <string>
 #include <functional>
 #include "Timer.h"
+#include <tuple>
 
 using namespace glm;
 using namespace std;
@@ -204,4 +205,110 @@ inline bool lineHasInt(vec2 s) {
 template <typename T>
 T& slice(float* x, size_t index) {
 	return ((T*)x)[index];
+}
+
+namespace std {
+	namespace {
+
+		// Code from boost
+		// Reciprocal of the golden ratio helps spread entropy
+		//     and handles duplicates.
+		// See Mike Seymour in magic-numbers-in-boosthash-combine:
+		//     http://stackoverflow.com/questions/4948780
+
+		template <class T>
+		inline void hash_combine(std::size_t& seed, T const& v) {
+			seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+
+		// Recursive template code derived from Matthieu M.
+		template <class Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
+		struct HashValueImpl {
+			static void apply(size_t& seed, Tuple const& tuple) {
+				HashValueImpl<Tuple, Index - 1>::apply(seed, tuple);
+				hash_combine(seed, std::get<Index>(tuple));
+			}
+		};
+
+		template <class Tuple>
+		struct HashValueImpl<Tuple, 0> {
+			static void apply(size_t& seed, Tuple const& tuple) {
+				hash_combine(seed, std::get<0>(tuple));
+			}
+		};
+	}
+
+	template <typename ... TT>
+	struct hash<std::tuple<TT...>> {
+		size_t
+			operator()(std::tuple<TT...> const& tt) const {
+			size_t seed = 0;
+			HashValueImpl<std::tuple<TT...> >::apply(seed, tt);
+			return seed;
+		}
+	};
+}
+
+template <int s>
+void print(mat<s, s, f32, defaultp> m, const char* format = "%.4f") {
+	for (int i = 0; i < s; i++) {
+		printf(i == 0 ? "{{" : " {");
+
+		for (int j = 0; j < s; j++) {
+			printf(format, m[j][i]);
+			if (j != s - 1) printf(", ");
+		}
+
+		printf(i == s - 1 ? "}}\n" : "}\n");
+	}
+}
+
+template <int s>
+void print(vec<s, float, defaultp> v, const char* format = "%.4f") {
+	printf("{");
+	for (int i = 0; i < s; i++) {
+		printf(format, v[i]);
+		if (i != s - 1) printf(", ");
+	}
+	printf("}\n");
+}
+
+/// <summary>
+/// Performs the element-wise multiplcation of a .* b
+/// </summary>
+/// <param name="a">a matrix</param>
+/// <param name="b">b matrix</param>
+/// <returns>a .* b</returns>
+template <int s>
+mat<s, s, f32, defaultp> elemMul(mat<s, s, f32, defaultp> a, mat<s, s, f32, defaultp> b) {
+	for (int i = 0; i < s; i++)
+		a[i] *= b[i];
+	return a;
+}
+
+/// <summary>
+/// Performs the element-wise multiplcation of a .* b
+/// </summary>
+/// <param name="a">a vector</param>
+/// <param name="b">b vector</param>
+/// <returns>a .* b</returns>
+template <int s>
+vec<s, float, defaultp> elemMul(vec<s, float, defaultp> a, vec<s, float, defaultp> b) {
+	return a * b;
+}
+
+template <int s>
+float compSum(vec<s, float, defaultp> v) {
+	float sum = v[0];
+	for (int i = 1; i < s; i++)
+		sum += v[i];
+	return sum;
+}
+
+template <int s>
+float compSum(mat<s, s, f32, defaultp> a) {
+	vec<s, float, defaultp> sum = a[0];
+	for (int i = 1; i < s; i++)
+		sum += a[i];
+	return compSum(sum);
 }
