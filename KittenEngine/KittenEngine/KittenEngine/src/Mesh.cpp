@@ -43,7 +43,7 @@ namespace Kitten {
 		vertices.clear();
 		for (size_t i = 0; i < indices.size(); i++) {
 			vertices.push_back(v[indices[i]]);
-			indices[i] = vertices.size() - 1;
+			indices[i] = (int)vertices.size() - 1;
 		}
 
 		upload();
@@ -90,6 +90,59 @@ namespace Kitten {
 		bounds = { vertices[0].pos, vertices[0].pos };
 		for (size_t i = 0; i < vertices.size(); i++)
 			bounds = bounds.absorb(vertices[i].pos);
+	}
+
+	void Mesh::writeOBJ(string p) {
+		FILE* file;
+		fopen_s(&file, p.c_str(), "w");
+		if (file) {
+			fprintf(file, "# WaveFront *.obj file\n\n");
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				vec3 v = vertices[i].pos;
+				fprintf(file, "v %.16f %.16f %.16f\n", v.x, v.y, v.z);
+			}
+
+			fprintf(file, "# %zd vertices\n\no mesh\n", vertices.size());
+			for (size_t i = 0; i < indices.size() / 3; i++) {
+				ivec3 v = ivec3(
+					indices[3 * i + 0],
+					indices[3 * i + 1],
+					indices[3 * i + 2]
+				) + 1;
+				fprintf(file, "f %d %d %d\n", v.x, v.y, v.z);
+			}
+			fprintf(file, "# %zd triangles\n\n", indices.size() / 3);
+
+			fclose(file);
+		}
+	}
+
+
+	void Mesh::writePOLY(string p) {
+		FILE* file;
+		fopen_s(&file, p.c_str(), "w");
+		if (file) {
+			fprintf(file, "%zd 3 0 0\n", vertices.size());
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				vec3 v = vertices[i].pos;
+				fprintf(file, "%zd %.16f %.16f %.16f\n", i + 1, v.x, v.y, v.z);
+			}
+			fprintf(file, "%zd 0\n", indices.size() / 3);
+
+			for (size_t i = 0; i < indices.size() / 3; i++) {
+				ivec3 v = ivec3(
+					indices[3 * i + 0],
+					indices[3 * i + 1],
+					indices[3 * i + 2]
+				) + 1;
+				fprintf(file, "1\n3 %d %d %d\n", v.x, v.y, v.z);
+			}
+			fprintf(file, "0\n0\n");
+
+			fclose(file);
+		}
 	}
 
 	void loadMeshFrom(std::filesystem::path path) {
@@ -379,6 +432,106 @@ namespace Kitten {
 		mesh->initGL();
 		mesh->upload();
 		mesh->calculateBounds();
+		return mesh;
+	}
+
+	TetMesh* loadTetMeshExact(path node, path face, path ele) {
+		TetMesh* mesh = new TetMesh;
+
+		{
+			std::ifstream input(node.string());
+			int nV = 0, dim, marker, attributes;
+
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> dim >> marker >> attributes;
+			}
+
+			// printf("%d %d %d %d\n", nV, dim, marker, attributes);
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				Vertex node{};
+				int v;
+				iss >> v >> node.pos.x >> node.pos.y >> node.pos.z;
+				mesh->vertices.push_back(node);
+				// printf("v %f %f %f\n", node.pos.x, node.pos.y, node.pos.z);
+			}
+
+			input.close();
+		}
+
+		{
+			std::ifstream input(face.string());
+
+			string line;
+			int nV = 0, marker;
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> marker;
+			}
+
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				ivec3 tri;
+				int v, m;
+				iss >> v >> tri.x >> tri.y >> tri.z >> m;
+				mesh->indices.push_back(tri.x - 1);
+				mesh->indices.push_back(tri.y - 1);
+				mesh->indices.push_back(tri.z - 1);
+				// printf("f %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1);
+			}
+
+			input.close();
+		}
+
+		{
+			std::ifstream input(ele.string());
+
+			string line;
+			int nV = 0, nN, attribute;
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> nN >> attribute;
+			}
+
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				ivec4 tri;
+				int v;
+				iss >> v >> tri.x >> tri.y >> tri.z >> tri.w;
+				mesh->tetIndices.push_back(tri.x - 1);
+				mesh->tetIndices.push_back(tri.y - 1);
+				mesh->tetIndices.push_back(tri.z - 1);
+				mesh->tetIndices.push_back(tri.w - 1);
+				// printf("e %d %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1, tri.w - 1);
+			}
+
+			input.close();
+		}
+
+		mesh->groups.push_back(mesh->indices.size());
+
+		mesh->defMaterial = nullptr;
+		mesh->defTransform = mat4(1);
+		mesh->initGL();
+		mesh->upload();
+		mesh->calculateBounds();
+
 		return mesh;
 	}
 

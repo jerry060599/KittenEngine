@@ -40,6 +40,8 @@ namespace Kitten {
 		void initGL();
 		void upload();
 		void calculateBounds();
+		void writeOBJ(string p);
+		void writePOLY(string p);
 	};
 
 	class TetMesh : public Mesh {
@@ -52,4 +54,5 @@ namespace Kitten {
 	void loadMeshFrom(path path);
 	Mesh* loadMeshExact(path path);
 	TetMesh* loadTetMeshExact(path path);
+	TetMesh* loadTetMeshExact(path node, path face, path ele);
 }
