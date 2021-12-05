@@ -52,7 +52,7 @@ namespace Kitten {
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
 	void loadMeshFrom(path path);
+	void loadTetgenFrom(path path);
 	Mesh* loadMeshExact(path path);
 	TetMesh* loadTetMeshExact(path path);
-	TetMesh* loadTetMeshExact(path node, path face, path ele);
 }

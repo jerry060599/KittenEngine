@@ -70,6 +70,8 @@ namespace Kitten {
 			loadShader(path);
 		else if (ext == ".obj" || ext == ".fbx")
 			loadMesh(path);
+		else if (ext == ".node" || ext == ".face" || ext == ".ele")
+			loadTetgenMesh(path);
 		else if (ext == ".glsl" || ext == ".include" || ext == ".mtl") {
 		}
 		else if (ext == ".csv" || ext == ".txt" || ext == ".cfg" || ext == ".json") {
@@ -86,6 +88,11 @@ namespace Kitten {
 	void loadMesh(path path) {
 		cout << "asset: loading model " << path.string().c_str() << endl;
 		loadMeshFrom(path);
+	}
+
+	void loadTetgenMesh(path path) {
+		// cout << "asset: loading tetgen " << path.string().c_str() << endl;
+		loadTetgenFrom(path);
 	}
 
 	void loadTexture(path path) {

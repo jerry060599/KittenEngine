@@ -44,6 +44,7 @@ namespace Kitten {
 	void loadShader(path path);
 	void loadTexture(path path);
 	void loadMesh(path path);
+	void loadTetgenMesh(path path);
 
 	template<typename T>
 	inline T* get(const char* name) {

@@ -283,6 +283,118 @@ namespace Kitten {
 		delete[] mats;
 	}
 
+	void loadTetgenFrom(path path) {
+		string name = path.string().substr(0, path.string().size() - path.extension().string().size()) + ".tetgen";
+		printf("asset: loading tetgen-mesh %s (.tetgen)\n", path.string().c_str());
+
+		auto itr = resources.find(name);
+		TetMesh* mesh;
+		if (itr != resources.end())
+			mesh = (TetMesh*)itr->second;
+		else {
+			mesh = new TetMesh;
+			mesh->defMaterial = nullptr;
+			mesh->defTransform = mat4(1);
+			resources[name] = mesh;
+		}
+		resources[path.string()] = mesh;
+
+		string ext = path.extension().string();
+		if (ext == ".node") {
+			std::ifstream input(path.string());
+			int nV = 0, dim, marker, attributes;
+
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> dim >> marker >> attributes;
+			}
+
+			// printf("%d %d %d %d\n", nV, dim, marker, attributes);
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				Vertex node{};
+				int v;
+				iss >> v >> node.pos.x >> node.pos.y >> node.pos.z;
+				mesh->vertices.push_back(node);
+				// printf("v %f %f %f\n", node.pos.x, node.pos.y, node.pos.z);
+			}
+
+			input.close();
+			mesh->initGL();
+			mesh->upload();
+			mesh->calculateBounds();
+		}
+		else if (ext == ".face") {
+			std::ifstream input(path.string());
+
+			string line;
+			int nV = 0, marker;
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> marker;
+			}
+
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				ivec3 tri;
+				int v, m;
+				iss >> v >> tri.x >> tri.y >> tri.z >> m;
+				mesh->indices.push_back(tri.x - 1);
+				mesh->indices.push_back(tri.y - 1);
+				mesh->indices.push_back(tri.z - 1);
+				// printf("f %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1);
+			}
+
+			input.close();
+
+			mesh->groups.push_back(mesh->indices.size());
+
+			mesh->initGL();
+			mesh->upload();
+		}
+		else if (ext == ".ele") {
+			std::ifstream input(path.string());
+
+			string line;
+			int nV = 0, nN, attribute;
+			{
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+				iss >> nV >> nN >> attribute;
+			}
+
+			for (size_t i = 0; i < nV; i++) {
+				string line;
+				std::getline(input, line, '\n');
+				std::istringstream iss(line);
+
+				ivec4 tri;
+				int v;
+				iss >> v >> tri.x >> tri.y >> tri.z >> tri.w;
+				mesh->tetIndices.push_back(tri.x - 1);
+				mesh->tetIndices.push_back(tri.y - 1);
+				mesh->tetIndices.push_back(tri.z - 1);
+				mesh->tetIndices.push_back(tri.w - 1);
+				// printf("e %d %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1, tri.w - 1);
+			}
+
+			input.close();
+			mesh->initGL();
+			mesh->upload();
+		}
+	}
+
 	Mesh* genQuadMesh(int rows, int cols) {
 		Mesh* mesh = new Mesh;
 
@@ -432,106 +544,6 @@ namespace Kitten {
 		mesh->initGL();
 		mesh->upload();
 		mesh->calculateBounds();
-		return mesh;
-	}
-
-	TetMesh* loadTetMeshExact(path node, path face, path ele) {
-		TetMesh* mesh = new TetMesh;
-
-		{
-			std::ifstream input(node.string());
-			int nV = 0, dim, marker, attributes;
-
-			{
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-				iss >> nV >> dim >> marker >> attributes;
-			}
-
-			// printf("%d %d %d %d\n", nV, dim, marker, attributes);
-			for (size_t i = 0; i < nV; i++) {
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-
-				Vertex node{};
-				int v;
-				iss >> v >> node.pos.x >> node.pos.y >> node.pos.z;
-				mesh->vertices.push_back(node);
-				// printf("v %f %f %f\n", node.pos.x, node.pos.y, node.pos.z);
-			}
-
-			input.close();
-		}
-
-		{
-			std::ifstream input(face.string());
-
-			string line;
-			int nV = 0, marker;
-			{
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-				iss >> nV >> marker;
-			}
-
-			for (size_t i = 0; i < nV; i++) {
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-
-				ivec3 tri;
-				int v, m;
-				iss >> v >> tri.x >> tri.y >> tri.z >> m;
-				mesh->indices.push_back(tri.x - 1);
-				mesh->indices.push_back(tri.y - 1);
-				mesh->indices.push_back(tri.z - 1);
-				// printf("f %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1);
-			}
-
-			input.close();
-		}
-
-		{
-			std::ifstream input(ele.string());
-
-			string line;
-			int nV = 0, nN, attribute;
-			{
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-				iss >> nV >> nN >> attribute;
-			}
-
-			for (size_t i = 0; i < nV; i++) {
-				string line;
-				std::getline(input, line, '\n');
-				std::istringstream iss(line);
-
-				ivec4 tri;
-				int v;
-				iss >> v >> tri.x >> tri.y >> tri.z >> tri.w;
-				mesh->tetIndices.push_back(tri.x - 1);
-				mesh->tetIndices.push_back(tri.y - 1);
-				mesh->tetIndices.push_back(tri.z - 1);
-				mesh->tetIndices.push_back(tri.w - 1);
-				// printf("e %d %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1, tri.w - 1);
-			}
-
-			input.close();
-		}
-
-		mesh->groups.push_back(mesh->indices.size());
-
-		mesh->defMaterial = nullptr;
-		mesh->defTransform = mat4(1);
-		mesh->initGL();
-		mesh->upload();
-		mesh->calculateBounds();
-
 		return mesh;
 	}
 
