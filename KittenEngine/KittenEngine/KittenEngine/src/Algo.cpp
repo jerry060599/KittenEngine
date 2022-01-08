@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-Eigen::VectorXf lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
+Eigen::VectorXf Kitten::lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
 	std::function<Eigen::VectorXf(Eigen::VectorXf)> g,
 	Eigen::VectorXf& guess, const float tol, const int m) {
 	using namespace Eigen;
@@ -84,7 +84,7 @@ Eigen::VectorXf lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
 	return x;
 }
 
-Eigen::VectorXd cg(
+Eigen::VectorXd Kitten::cg(
 	Eigen::SparseMatrix<double>& A,
 	Eigen::VectorXd& b,
 	const double tol,
@@ -128,7 +128,7 @@ Eigen::VectorXd cg(
 	return x;
 }
 
-Eigen::VectorXd bccg(
+Eigen::VectorXd Kitten::bccg(
 	Eigen::SparseMatrix<double>& A,
 	Eigen::VectorXd& b,
 	Eigen::VectorXd& lower,
@@ -218,7 +218,7 @@ Eigen::VectorXd bccg(
 	return x;
 }
 
-VectorXd ebccg(
+VectorXd Kitten::ebccg(
 	SparseMatrix<double>& A,
 	VectorXd& b,
 	VectorXd& lower,
