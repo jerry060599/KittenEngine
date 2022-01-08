@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <Eigen/Eigen>
+#include <Eigen/Sparse>
 
 #include "Common.h"
 
@@ -140,84 +141,64 @@ inline double goldenIntMinSearch(std::function<double(double)> f, double a, doub
 /// <param name="tol"></param>
 /// <param name="m"></param>
 /// <returns></returns>
-inline Eigen::VectorXf lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
+Eigen::VectorXf lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
 	std::function<Eigen::VectorXf(Eigen::VectorXf)> g,
-	Eigen::VectorXf& guess, const float tol = 1e-6, const int m = 6) {
-	using namespace Eigen;
+	Eigen::VectorXf& guess, const float tol = 1e-6, const int m = 6);
 
-	MatrixXf s(numVars, m);
-	MatrixXf y(numVars, m);
-	VectorXf rho(m);
-	VectorXf a(m);
+/// <summary>
+/// Solves arg min(0.5 x^T A x - b^T x)
+/// </summary>
+/// <param name="A">the matrix in Ax = b</param>
+/// <param name="b">the vector in Ax = b</param>
+/// <param name="tol">tolerance</param>
+/// <param name="itrLim">iteration limit. -1 for infinity</param>
+/// <returns></returns>
+Eigen::VectorXd cg(
+	Eigen::SparseMatrix<double>& A,
+	Eigen::VectorXd& b,
+	const double tol = 1e-13,
+	const int itrLim = -1
+);
 
-	int buffSize = 0;
-	int buffInd = 0;
+/// <summary>
+/// Solves arg min(0.5 x^T A x - b^T x) s.t. lower <= x
+/// An implementation of the Bound Constrained Conjugate Gradients method
+/// "The Bound-Constrained Conjugate Gradient Method for Non-negative Matrices"
+/// https://link.springer.com/article/10.1007/s10957-013-0499-x
+/// </summary>
+/// <param name="A">the matrix in Ax = b</param>
+/// <param name="b">the vector in Ax = b</param>
+/// <param name="lower">the lower bound for x</param>
+/// <param name="tol">tolerance</param>
+/// <param name="itrLim">iteration limit. -1 for infinity</param>
+/// <returns></returns>
+Eigen::VectorXd bccg(
+	Eigen::SparseMatrix<double>& A,
+	Eigen::VectorXd& b,
+	Eigen::VectorXd& lower,
+	const double tol = 1e-13,
+	const int itrLim = -1
+);
 
-	VectorXf lastX = guess;
-	VectorXf lastGv = g(guess);
-	VectorXf x = guess - 0.001f * lastGv;
-	float fv = f(x);
-	VectorXf gv;
-	VectorXf z;
-	int itr = 0;
-	while (true) {
-		itr++;
-
-		const int ind = buffInd % m;
-
-		// Find descent direction with lbfgs
-
-		gv = g(x);
-		float k = (gv - lastGv).dot(x - lastX);
-		if (k <= 0) {
-			x -= 0.001f * gv;
-			if (gv.norm() < tol) break;
-			continue;
-		}
-
-		s.col(ind) = x - lastX;
-		y.col(ind) = gv - lastGv;
-		rho[ind] = 1 / k;
-
-		lastX = x;
-		lastGv = gv;
-		z = gv;
-		buffSize = std::min(m, buffSize + 1);
-
-		for (int i = 0; i < buffSize; i++) {
-			const int oi = (buffInd + m - i) % m;
-			a[oi] = rho[oi] * z.dot(s.col(oi));
-			z -= a[oi] * y.col(oi);
-		}
-
-		float Y = y.col(ind).dot(y.col(ind));
-		if (Y != 0) {
-			Y = s.col(ind).dot(y.col(ind)) / Y;
-			z *= Y;
-		}
-		for (int i = 0; i < buffSize; i++) {
-			const int oi = (buffInd + m + i - buffSize + 1) % m;
-			z += s.col(oi) * (a[oi] - rho[oi] * y.col(oi).dot(z));
-		}
-
-		z *= -1;
-		// Perform backtracking line search
-		float t = 0.5f * gv.dot(z);
-		float a = 1.f;
-		float v = f(x);
-		while (f(x + a * z) > v + a * t)
-			a *= 0.5f;
-
-		// Update guess
-		x += a * z;
-		float newFv = f(x);
-		float diff = newFv - fv;
-		fv = newFv;
-
-		buffInd++;
-
-		if (gv.norm() < tol && abs(diff) < tol) break;
-	}
-	// printf("ITR: %d\n", itr);
-	return x;
-}
+/// <summary>
+/// Solves arg min(0.5 x^T A x - b^T x) s.t. lower <= x <= upper
+/// An implementation of the enhanced Bound Constrained Conjugate Gradients method
+/// "The Bound-Constrained Conjugate Gradient Method for Non-negative Matrices"
+/// https://link.springer.com/article/10.1007/s10957-013-0499-x
+/// </summary>
+/// <param name="A">the matrix in Ax = b</param>
+/// <param name="b">the vector in Ax = b</param>
+/// <param name="lower">the lower bound for x</param>
+/// <param name="upper">the upper bound for x</param>
+/// <param name="tol">tolerance</param>
+/// <param name="itrLim">iteration limit</param>
+/// <returns></returns>
+Eigen::VectorXd ebccg(
+	Eigen::SparseMatrix<double>& A,
+	Eigen::VectorXd& b,
+	Eigen::VectorXd& lower,
+	Eigen::VectorXd& upper,
+	const double tol = 1e-13,
+	const int itrLim = -1,
+	const int k = 4
+);

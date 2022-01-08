@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KittenEngine\src\Algo.cpp" />
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />

@@ -45,6 +45,9 @@
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KittenEngine\src\Algo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KittenEngine\includes\modules\Bound.h">
