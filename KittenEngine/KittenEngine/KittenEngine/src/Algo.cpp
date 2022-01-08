@@ -85,7 +85,7 @@ Eigen::VectorXf Kitten::lbfgsMin(int numVars, std::function<float(Eigen::VectorX
 }
 
 Eigen::VectorXd Kitten::cg(
-	Eigen::SparseMatrix<double>& A,
+	Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
 	Eigen::VectorXd& b,
 	const double tol,
 	const int itrLim) {
@@ -129,7 +129,7 @@ Eigen::VectorXd Kitten::cg(
 }
 
 Eigen::VectorXd Kitten::bccg(
-	Eigen::SparseMatrix<double>& A,
+	Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
 	Eigen::VectorXd& b,
 	Eigen::VectorXd& lower,
 	const double tol,

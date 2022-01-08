@@ -156,7 +156,7 @@ namespace Kitten {
 	/// <param name="itrLim">iteration limit. -1 for infinity</param>
 	/// <returns></returns>
 	Eigen::VectorXd cg(
-		Eigen::SparseMatrix<double>& A,
+		Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
 		Eigen::VectorXd& b,
 		const double tol = 1e-13,
 		const int itrLim = -1
@@ -175,7 +175,7 @@ namespace Kitten {
 	/// <param name="itrLim">iteration limit. -1 for infinity</param>
 	/// <returns></returns>
 	Eigen::VectorXd bccg(
-		Eigen::SparseMatrix<double>& A,
+		Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
 		Eigen::VectorXd& b,
 		Eigen::VectorXd& lower,
 		const double tol = 1e-13,
