@@ -550,4 +550,61 @@ namespace Kitten {
 	size_t TetMesh::numTet() {
 		return tetIndices.size() / 4;
 	}
+
+	void TetMesh::writeMSH(string p) {
+		FILE* file;
+		fopen_s(&file, p.c_str(), "w");
+		if (file) {
+			fprintf(file, "$MeshFormat\n4.1 0 8\n$EndMeshFormat\n");
+			fprintf(file, "$Nodes\n1 %zd 1 %zd\n3 0 0 %zd\n", vertices.size(), vertices.size(), vertices.size());
+			for (size_t i = 1; i <= vertices.size(); i++)
+				fprintf(file, "%zd\n", i);
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				vec3 v = vertices[i].pos;
+				fprintf(file, "%.16f %.16f %.16f\n", v.x, v.y, v.z);
+			}
+
+			fprintf(file, "$EndNodes\n$Elements\n1 %zd 1 %zd\n3 0 4 %zd\n", numTet(), numTet(), numTet());
+			for (size_t i = 0; i < numTet(); i++) {
+				fprintf(file, "%zd %d %d %d %d\n", i + 1,
+					tetIndices[4 * i + 0] + 1,
+					tetIndices[4 * i + 1] + 1,
+					tetIndices[4 * i + 2] + 1,
+					tetIndices[4 * i + 3] + 1
+				);
+			}
+
+			fprintf(file, "$EndElements\n$Surface\n%zd\n", indices.size() / 3);
+
+			for (size_t i = 0; i < indices.size() / 3; i++) {
+				ivec3 v = ivec3(
+					indices[3 * i + 0],
+					indices[3 * i + 1],
+					indices[3 * i + 2]
+				) + 1;
+				fprintf(file, "%d %d %d\n", v.x, v.y, v.z);
+			}
+			fprintf(file, "$EndSurface\n");
+
+			fclose(file);
+		}
+	}
+
+	void TetMesh::flipInverted() {
+		for (size_t i = 0; i < tetIndices.size(); i += 4) {
+			auto& i0 = tetIndices[i + 0];
+			auto& i1 = tetIndices[i + 1];
+			auto& i2 = tetIndices[i + 2];
+			auto& i3 = tetIndices[i + 3];
+
+			float v = determinant(mat3(
+				vertices[i1].pos - vertices[i0].pos,
+				vertices[i2].pos - vertices[i0].pos,
+				vertices[i3].pos - vertices[i0].pos
+			));
+
+			if (v < 0) std::swap(i2, i3);
+		}
+	}
 }

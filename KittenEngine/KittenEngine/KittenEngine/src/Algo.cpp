@@ -107,8 +107,8 @@ Eigen::VectorXd Kitten::cg(
 
 	double rDotD[2] = { r.dot(d), 0 };
 	const double relTol = tol * tol * rDotD[0];
-
-	for (size_t itr = 1; itr <= itrLim && rDotD[0] > relTol; itr++) {
+	size_t itr = 1;
+	for (; itr <= itrLim && rDotD[0] > relTol; itr++) {
 		q = A * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
@@ -124,6 +124,7 @@ Eigen::VectorXd Kitten::cg(
 		double beta = rDotD[0] / rDotD[1];
 		d = s + beta * d;
 	}
+	// printf("%zd\n", itr);
 
 	return x;
 }
@@ -155,7 +156,6 @@ Eigen::VectorXd Kitten::bccg(
 		boundSet[i] = x[i] <= lower[i] && r_tilde[i] < 0;
 
 	// Initialize the rest of CG
-
 	VectorXd d = invDiag.array() * r_tilde.array();
 	VectorXd r(x.size());
 #pragma omp parallel for schedule(static, 1024)
@@ -168,9 +168,11 @@ Eigen::VectorXd Kitten::bccg(
 	double rDotD[2] = { r.dot(d), 0 };
 	const double relTol = tol * tol * rDotD[0];
 	bool projected = false;
+	bool haveUnreleased = false;
+	bool boundsChanged = false;
 	int itrSinceRes = 0;
-
-	for (size_t itr = 1; itr <= itrLim && rDotD[0] > relTol; itr++, itrSinceRes++) {
+	size_t itr = 1;
+	for (; itr <= itrLim && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
 		q = A * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
@@ -183,24 +185,33 @@ Eigen::VectorXd Kitten::bccg(
 			r_tilde -= alpha * q;
 
 		// Update bounded set and projected
-		projected = false;
-		bool boundsChanged = false;
+		boundsChanged = projected = haveUnreleased = false;
 #pragma omp parallel for schedule(static, 1024)
 		for (int i = 0; i < x.size(); i++) {
 			bool bounded = x[i] <= lower[i] && r_tilde[i] < 0;
-			if (boundSet[i] != bounded) {
-				boundSet[i] = bounded;
+
+			if (itr % 64 == 1) {
+				// Use the full bound update method
+				if (boundSet[i] != bounded) {
+					boundSet[i] = bounded;
+					boundsChanged = true;
+				}
+			}
+			else if (bounded && !boundSet[i]) {
+				// We only want to bound things and not release too often to prevent slow convergence due to oscillations
+				boundSet[i] = true;
 				boundsChanged = true;
 			}
+			else if (boundSet[i] != bounded)
+				haveUnreleased = true; // We dont want to exit before all the unreleased stuff is released
 
 			if (x[i] < lower[i]) {
 				x[i] = lower[i];
 				projected = true;
 			}
 
-			r[i] = bounded ? 0 : r_tilde[i];
+			r[i] = boundSet[i] ? 0 : r_tilde[i];
 		}
-
 		rDotD[1] = rDotD[0];
 
 		if (boundsChanged) {
@@ -213,7 +224,7 @@ Eigen::VectorXd Kitten::bccg(
 			d = s + (rDotD[0] / rDotD[1]) * d;
 		}
 	}
-
+	// printf("%zd\n", itr);
 	delete[] boundSet;
 	return x;
 }

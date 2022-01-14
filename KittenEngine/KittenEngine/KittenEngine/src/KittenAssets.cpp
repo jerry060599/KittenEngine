@@ -68,7 +68,7 @@ namespace Kitten {
 			loadTexture(path);
 		else if (ext == ".vert" || ext == ".frag" || ext == ".comp" || ext == ".geom" || ext == ".tesc" || ext == ".tese")
 			loadShader(path);
-		else if (ext == ".obj" || ext == ".fbx")
+		else if (ext == ".obj" || ext == ".fbx" || ext == ".ply")
 			loadMesh(path);
 		else if (ext == ".node" || ext == ".face" || ext == ".ele")
 			loadTetgenMesh(path);

@@ -48,6 +48,8 @@ namespace Kitten {
 	public:
 		vector<unsigned int> tetIndices;
 		size_t numTet();
+		void writeMSH(string p);
+		void flipInverted();
 	};
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
