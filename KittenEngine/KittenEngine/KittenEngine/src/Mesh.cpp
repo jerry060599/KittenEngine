@@ -500,44 +500,7 @@ namespace Kitten {
 			}
 		}
 
-		using tri = tuple<int, int, int>;
-
-		unordered_set<tri> faceSet;
-
-		auto sortTri = [](tri t) {
-			if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
-			if (get<1>(t) > get<2>(t)) {
-				swap(get<1>(t), get<2>(t));
-				if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
-			}
-			return t;
-		};
-
-		for (size_t i = 0; i < mesh->tetIndices.size(); i += 4) {
-			tri tris[4]{
-				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 1], mesh->tetIndices[i + 2])),
-				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 1], mesh->tetIndices[i + 3])),
-				sortTri(make_tuple(mesh->tetIndices[i + 0], mesh->tetIndices[i + 2], mesh->tetIndices[i + 3])),
-				sortTri(make_tuple(mesh->tetIndices[i + 1], mesh->tetIndices[i + 2], mesh->tetIndices[i + 3]))
-			};
-
-			// Relies on the assumption that interior faces have exactly two neighboring tets.
-			for (size_t k = 0; k < 4; k++) {
-				auto itr = faceSet.find(tris[k]);
-				if (itr != faceSet.end())  // Is a face
-					faceSet.erase(itr);
-				else
-					faceSet.insert(tris[k]);
-			}
-		}
-
-		for (auto t : faceSet) {
-			mesh->indices.push_back(get<0>(t));
-			mesh->indices.push_back(get<1>(t));
-			mesh->indices.push_back(get<2>(t));
-		}
-
-		mesh->groups.push_back(mesh->indices.size());
+		mesh->regenSurface();
 
 		mesh->defMaterial = nullptr;
 		mesh->defTransform = mat4(1);
@@ -606,5 +569,46 @@ namespace Kitten {
 
 			if (v < 0) std::swap(i2, i3);
 		}
+	}
+
+	void TetMesh::regenSurface() {
+		using tri = tuple<int, int, int>;
+		unordered_set<tri> faceSet;
+
+		auto sortTri = [](tri t) {
+			if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
+			if (get<1>(t) > get<2>(t)) {
+				swap(get<1>(t), get<2>(t));
+				if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
+			}
+			return t;
+		};
+
+		for (size_t i = 0; i < tetIndices.size(); i += 4) {
+			tri tris[4]{
+				sortTri(make_tuple(tetIndices[i + 0], tetIndices[i + 1], tetIndices[i + 2])),
+				sortTri(make_tuple(tetIndices[i + 0], tetIndices[i + 1], tetIndices[i + 3])),
+				sortTri(make_tuple(tetIndices[i + 0], tetIndices[i + 2], tetIndices[i + 3])),
+				sortTri(make_tuple(tetIndices[i + 1], tetIndices[i + 2], tetIndices[i + 3]))
+			};
+
+			// Relies on the assumption that interior faces have exactly two neighboring tets.
+			for (size_t k = 0; k < 4; k++) {
+				auto itr = faceSet.find(tris[k]);
+				if (itr != faceSet.end())  // Is a face
+					faceSet.erase(itr);
+				else
+					faceSet.insert(tris[k]);
+			}
+		}
+
+		for (auto t : faceSet) {
+			indices.push_back(get<0>(t));
+			indices.push_back(get<1>(t));
+			indices.push_back(get<2>(t));
+		}
+
+		groups.clear();
+		groups.push_back(indices.size());
 	}
 }

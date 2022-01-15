@@ -50,6 +50,7 @@ namespace Kitten {
 		size_t numTet();
 		void writeMSH(string p);
 		void flipInverted();
+		void regenSurface();
 	};
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
