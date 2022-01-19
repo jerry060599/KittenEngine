@@ -311,8 +311,8 @@ void print(vec<s, float, defaultp> v, const char* format = "%.4f") {
 /// <param name="a">a matrix</param>
 /// <param name="b">b matrix</param>
 /// <returns>a .* b</returns>
-template <int s>
-mat<s, s, f32, defaultp> elemMul(mat<s, s, f32, defaultp> a, mat<s, s, f32, defaultp> b) {
+template <int s, typename T>
+mat<s, s, T, defaultp> elemMul(mat<s, s, T, defaultp> a, mat<s, s, T, defaultp> b) {
 	for (int i = 0; i < s; i++)
 		a[i] *= b[i];
 	return a;
@@ -324,22 +324,22 @@ mat<s, s, f32, defaultp> elemMul(mat<s, s, f32, defaultp> a, mat<s, s, f32, defa
 /// <param name="a">a vector</param>
 /// <param name="b">b vector</param>
 /// <returns>a .* b</returns>
-template <int s>
-vec<s, float, defaultp> elemMul(vec<s, float, defaultp> a, vec<s, float, defaultp> b) {
+template <int s, typename T>
+vec<s, T, defaultp> elemMul(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
 	return a * b;
 }
 
-template <int s>
-float compSum(vec<s, float, defaultp> v) {
-	float sum = v[0];
+template <int s, typename T>
+T compSum(vec<s, T, defaultp> v) {
+	T sum = v[0];
 	for (int i = 1; i < s; i++)
 		sum += v[i];
 	return sum;
 }
 
-template <int s>
-float compSum(mat<s, s, f32, defaultp> a) {
-	vec<s, float, defaultp> sum = a[0];
+template <int s, typename T>
+float compSum(mat<s, s, T, defaultp> a) {
+	vec<s, T, defaultp> sum = a[0];
 	for (int i = 1; i < s; i++)
 		sum += a[i];
 	return compSum(sum);

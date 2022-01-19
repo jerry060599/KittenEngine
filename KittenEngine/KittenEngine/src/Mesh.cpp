@@ -602,6 +602,7 @@ namespace Kitten {
 			}
 		}
 
+		indices.clear();
 		for (auto t : faceSet) {
 			indices.push_back(get<0>(t));
 			indices.push_back(get<1>(t));

@@ -105,6 +105,7 @@ Eigen::VectorXd Kitten::cg(
 	VectorXd q(x.size());
 	VectorXd s(x.size());
 
+	const int UPDATE_ITR = std::max(100, (int)sqrt(A.cols()));
 	double rDotD[2] = { r.dot(d), 0 };
 	const double relTol = tol * tol * rDotD[0];
 	size_t itr = 1;
@@ -113,7 +114,7 @@ Eigen::VectorXd Kitten::cg(
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
 
-		if (itr % 100 == 0)
+		if (itr % UPDATE_ITR == 0)
 			r = b - A * x;
 		else
 			r -= alpha * q;
@@ -171,13 +172,15 @@ Eigen::VectorXd Kitten::bccg(
 	bool haveUnreleased = false;
 	bool boundsChanged = false;
 	int itrSinceRes = 0;
+	const int UPDATE_ITR = std::max(100, (int)sqrt(A.cols()));
+
 	size_t itr = 1;
 	for (; itr <= itrLim && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
 		q = A * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
 
-		if (projected || itrSinceRes >= 100) {
+		if (projected || itrSinceRes >= UPDATE_ITR) {
 			r_tilde = b - A * x;
 			itrSinceRes = 0;
 		}
