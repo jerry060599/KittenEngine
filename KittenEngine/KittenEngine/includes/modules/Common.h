@@ -279,6 +279,15 @@ namespace std {
 			return seed;
 		}
 	};
+
+	template <typename T1, class T2>
+	struct hash<std::pair<T1, T2>> {
+		std::size_t operator() (const std::pair<T1, T2>& pair) const {
+			size_t s = std::hash<T1>()(pair.first);
+			size_t h = std::hash<T2>()(pair.second);
+			return s ^ (h + 0x9e3779b9 + (s << 6) + (s >> 2));
+		}
+	};
 }
 
 template <int s>
