@@ -20,18 +20,26 @@ namespace Kitten {
 	/// <param name="tol">The error tolerance</param>
 	/// <returns>The value of the integral down to the given tolerance</returns>
 	template<typename T, int minLevel, int maxLevel>
-	double adpInt(std::function<T(double)> f, const double a, const double b, double tol = 0.001) {
-		tol = sqrt(tol / (b - a));
+	T adpInt(std::function<T(double)> f, const double a, const double b, const double tol = 0.001) {
+		// 0 - real, 1 - Eigen, 2 - glm.
+		constexpr int type = (std::is_same<T, float>::value || std::is_same<T, double>::value) ? 0 :
+			((std::is_same <T, Eigen::VectorXf>::value || std::is_same <T, Eigen::VectorXd>::value) ? 1 : 2);
+
+		const double sqrTolPerLen = pow2(tol / (b - a));
 		const double minIntSize = 1 / double(1 << minLevel);
 
-		double samples[maxLevel];
-		double sampleL = f(a);
+		T samples[maxLevel];
+		T sampleL = f(a);
 		samples[minLevel] = f(mix(a, b, minIntSize));
 
 		double ends[maxLevel];
 		ends[minLevel - 1] = ends[minLevel] = minIntSize;
 
-		T v = 0;
+		T v;
+		if constexpr (type == 0) v = 0;
+		else if constexpr (type == 1) v = T::Zero(samples[minLevel].size());
+		else v = T(0);
+
 		int level = minLevel;
 		int k = 0;
 
@@ -40,14 +48,19 @@ namespace Kitten {
 			const double at = bt - 1 / double(1 << level);
 
 			// Sample midpoint
-			const double sampleM = f(mix(a, b, 0.5 * (at + bt)));
-			const double vh = 0.5 * (sampleL + samples[level]);
-			const double vhh = 0.25 * (sampleL + 2 * sampleM + samples[level]);
-			const double err = (vhh - vh) / 3;
+			const T sampleM = f(mix(a, b, 0.5 * (at + bt)));
+			const T vh = 0.5 * (sampleL + samples[level]);
+			const T vhh = 0.25 * (sampleL + 2. * sampleM + samples[level]);
+			const T err = (vhh - vh) * (1. / 3.);
 
 			//printf("(%f %f %d) e:%f (%f %f)\n", at, bt, level, err, sampleL, samples[level]);
 
-			if (abs(err) > tol && level + 1 < maxLevel) {
+			double errNormSqr;
+			if constexpr (type == 0) errNormSqr = err * err;
+			else if constexpr (type == 1) errNormSqr = err.squaredNorm();
+			else errNormSqr = dot(err, err);
+
+			if (errNormSqr > sqrTolPerLen && level + 1 < maxLevel) {
 				// Local error has exceeded tolerance
 				level++;
 				samples[level] = sampleM;
@@ -85,10 +98,44 @@ namespace Kitten {
 	/// <param name="tol">The error tolerance</param>
 	/// <returns>The value of the integral down to the given tolerance</returns>
 	template<typename T>
-	double adpInt(std::function<T(double)> f, const double a, const double b, double tol = 0.001) {
+	T adpInt(std::function<T(double)> f, const double a, const double b, double tol = 0.001) {
 		// We allow anywhere from 2^3=8 intervals to 2^13=8192 intervals.
 		// It'll adaptively decide based on the error tolerance
 		return adpInt<T, 3, 13>(f, a, b, tol);
+	}
+
+	template<typename T>
+	T autoDiff(std::function<double(T)> f, T x, const double h = 0.001) {
+		if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value)
+			return (T)((f(x - 2 * h) - 8 * f(x - h) + 8 * f(x + h) - f(x + 2 * h)) / (12 * h));
+		else {
+			T nx = x;
+			T g;
+			int s;
+			if constexpr (std::is_same <T, Eigen::VectorXf>::value || std::is_same <T, Eigen::VectorXd>::value) {
+				s = x.size();
+				g = T::Zero(s);
+			}
+			else {
+				s = x.length();
+				g = T(0);
+			}
+			for (int i = 0; i < s; i++) {
+				auto v = nx[i];
+
+				nx[i] = v - 2 * h;
+				g[i] += f(nx);
+				nx[i] = v - h;
+				g[i] -= 8 * f(nx);
+				nx[i] = v + h;
+				g[i] += 8 * f(nx);
+				nx[i] = v + 2 * h;
+				g[i] -= f(nx);
+
+				nx[i] = v;
+			}
+			return g * (1 / (12 * h));
+		}
 	}
 
 	/// <summary>
@@ -178,6 +225,31 @@ namespace Kitten {
 		Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
 		Eigen::VectorXd& b,
 		Eigen::VectorXd& lower,
+		const double tol = 1e-13,
+		const int itrLim = -1
+	);
+
+
+	/// <summary>
+	/// Solves arg min(0.5 x^T A x - b^T x + 0.5 alpha(x - s)^T(x - s)) s.t. lower <= x
+	/// An implementation of the Bound Constrained Conjugate Gradients method
+	/// "The Bound-Constrained Conjugate Gradient Method for Non-negative Matrices"
+	/// https://link.springer.com/article/10.1007/s10957-013-0499-x
+	/// </summary>
+	/// <param name="A">the matrix in Ax = b</param>
+	/// <param name="b">the vector in Ax = b</param>
+	/// <param name="lower">the lower bound for x</param>
+	/// <param name="s">s</param>
+	/// <param name="alpha">alpha</param>
+	/// <param name="tol">tolerance</param>
+	/// <param name="itrLim">iteration limit. -1 for infinity</param>
+	/// <returns></returns>
+	Eigen::VectorXd rbccg(
+		Eigen::SparseMatrix<double, Eigen::RowMajor>& A,
+		Eigen::VectorXd& b,
+		Eigen::VectorXd& lower,
+		Eigen::VectorXd& s,
+		const double alpha,
 		const double tol = 1e-13,
 		const int itrLim = -1
 	);

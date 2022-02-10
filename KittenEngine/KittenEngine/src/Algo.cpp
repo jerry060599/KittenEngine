@@ -232,6 +232,111 @@ Eigen::VectorXd Kitten::bccg(
 	return x;
 }
 
+Eigen::VectorXd Kitten::rbccg(Eigen::SparseMatrix<double, 
+	Eigen::RowMajor>& A,
+	Eigen::VectorXd& b,
+	Eigen::VectorXd& lower, 
+	Eigen::VectorXd& shift,
+	const double regAlpha, 
+	const double tol, 
+	const int itrLim) {
+	using namespace Eigen;
+	// Initialize preconditioner
+	VectorXd invDiag(A.rows());
+	VectorXd x(invDiag.size());
+	VectorXd sb = regAlpha * shift + b;
+
+#pragma omp parallel for schedule(static, 512)
+	for (int i = 0; i < x.size(); i++) {
+		double v = A.coeff(i, i) + regAlpha;
+		invDiag[i] = abs(v) < 1e-10 ? 1 : 1 / v;
+		x[i] = std::max(0., lower[i]);
+	}
+
+	VectorXd r_tilde = sb - A * x - regAlpha * x;
+
+	// Initialize bounded set
+	bool* boundSet = new bool[x.size()];
+#pragma omp parallel for schedule(static, 1024)
+	for (int i = 0; i < x.size(); i++)
+		boundSet[i] = x[i] <= lower[i] && r_tilde[i] < 0;
+
+	// Initialize the rest of CG
+	VectorXd d = invDiag.array() * r_tilde.array();
+	VectorXd r(x.size());
+#pragma omp parallel for schedule(static, 1024)
+	for (int i = 0; i < r.size(); i++)
+		r[i] = boundSet[i] ? 0 : r_tilde[i];
+
+	VectorXd q(x.size());
+	VectorXd s(x.size());
+
+	double rDotD[2] = { r.dot(d), 0 };
+	const double relTol = tol * tol * rDotD[0];
+	bool projected = false;
+	bool haveUnreleased = false;
+	bool boundsChanged = false;
+	int itrSinceRes = 0;
+	const int UPDATE_ITR = std::max(100, (int)sqrt(A.cols()));
+	
+	size_t itr = 1;
+	for (; itr <= itrLim && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
+		q = A * d + regAlpha * d;
+		double alpha = rDotD[0] / d.dot(q);
+		x += alpha * d;
+
+		if (projected || itrSinceRes >= UPDATE_ITR) {
+			r_tilde = sb - A * x - regAlpha * x;
+			itrSinceRes = 0;
+		}
+		else
+			r_tilde -= alpha * q;
+
+		// Update bounded set and projected
+		boundsChanged = projected = haveUnreleased = false;
+#pragma omp parallel for schedule(static, 1024)
+		for (int i = 0; i < x.size(); i++) {
+			bool bounded = x[i] <= lower[i] && r_tilde[i] < 0;
+
+			if (itr % 64 == 1) {
+				// Use the full bound update method
+				if (boundSet[i] != bounded) {
+					boundSet[i] = bounded;
+					boundsChanged = true;
+				}
+			}
+			else if (bounded && !boundSet[i]) {
+				// We only want to bound things and not release too often to prevent slow convergence due to oscillations
+				boundSet[i] = true;
+				boundsChanged = true;
+			}
+			else if (boundSet[i] != bounded)
+				haveUnreleased = true; // We dont want to exit before all the unreleased stuff is released
+
+			if (x[i] < lower[i]) {
+				x[i] = lower[i];
+				projected = true;
+			}
+
+			r[i] = boundSet[i] ? 0 : r_tilde[i];
+		}
+		rDotD[1] = rDotD[0];
+
+		if (boundsChanged) {
+			d = invDiag.array() * r.array();
+			rDotD[0] = r.dot(d);
+		}
+		else {
+			s = invDiag.array() * r.array();
+			rDotD[0] = r.dot(s);
+			d = s + (rDotD[0] / rDotD[1]) * d;
+		}
+	}
+	// printf("%zd\n", itr);
+	delete[] boundSet;
+	return x;
+}
+
 VectorXd Kitten::ebccg(
 	SparseMatrix<double>& A,
 	VectorXd& b,

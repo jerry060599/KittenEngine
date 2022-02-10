@@ -213,6 +213,18 @@ namespace Kitten {
 		renderForward(mesh, base);
 	}
 
+	void renderLine(Mesh* mesh, Shader* base) {
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
+		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (!base) base = defUnlitShader;
+		base->use();
+		glBindVertexArray(mesh->VAO);
+		glDrawElements(GL_LINES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+	}
+
 	void renderInstanced(Mesh* mesh, int count, Shader* base) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
