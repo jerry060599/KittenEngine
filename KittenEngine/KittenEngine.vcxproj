@@ -163,6 +163,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="KittenEngine\opt\asa047.cpp" />
+    <ClCompile Include="KittenEngine\opt\compass_search.cpp" />
+    <ClCompile Include="KittenEngine\opt\lbfgs.c" />
+    <ClCompile Include="KittenEngine\opt\math.cpp" />
+    <ClCompile Include="KittenEngine\opt\praxis.cpp" />
+    <ClCompile Include="KittenEngine\opt\toms178.cpp" />
     <ClCompile Include="KittenEngine\src\Algo.cpp" />
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
@@ -190,6 +196,15 @@
     <ClInclude Include="KittenEngine\includes\modules\Shader.h" />
     <ClInclude Include="KittenEngine\includes\modules\Texture.h" />
     <ClInclude Include="KittenEngine\includes\modules\Timer.h" />
+    <ClInclude Include="KittenEngine\opt\arithmetic_ansi.h" />
+    <ClInclude Include="KittenEngine\opt\arithmetic_sse_double.h" />
+    <ClInclude Include="KittenEngine\opt\arithmetic_sse_float.h" />
+    <ClInclude Include="KittenEngine\opt\asa047.hpp" />
+    <ClInclude Include="KittenEngine\opt\compass_search.hpp" />
+    <ClInclude Include="KittenEngine\opt\lbfgs.h" />
+    <ClInclude Include="KittenEngine\opt\math.h" />
+    <ClInclude Include="KittenEngine\opt\praxis.hpp" />
+    <ClInclude Include="KittenEngine\opt\toms178.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
