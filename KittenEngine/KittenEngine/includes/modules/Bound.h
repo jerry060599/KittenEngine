@@ -101,4 +101,6 @@ namespace Kitten {
 			return min + (max - min) * coord;
 		}
 	};
+
+	typedef Bound<1> Range;
 }
