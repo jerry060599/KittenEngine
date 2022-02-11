@@ -26,7 +26,7 @@ namespace Kitten {
 		mat4 defTransform = mat4(1);
 		Material* defMaterial;
 
-		Bound bounds;
+		Bound<> bounds;
 
 		unsigned int VAO, VBO, EBO;
 
