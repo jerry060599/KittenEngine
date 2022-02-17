@@ -3,104 +3,104 @@
 using namespace glm;
 
 namespace Kitten {
-	template<int dim = 3>
+	template<int dim = 3, typename Real = float>
 	struct Bound {
-		vec<dim, float, defaultp> min;
-		vec<dim, float, defaultp> max;
+		vec<dim, Real, defaultp> min;
+		vec<dim, Real, defaultp> max;
 
-		inline vec<dim, float, defaultp> center() {
+		inline vec<dim, Real, defaultp> center() {
 			return (min + max) * 0.5f;
 		}
 
-		inline Bound<dim> absorb(Bound<dim>& b) {
-			return Bound<dim>{ glm::min(min, b.min), glm::max(max, b.max) };
+		inline Bound<dim, Real> absorb(Bound<dim, Real>& b) {
+			return Bound<dim, Real>{ glm::min(min, b.min), glm::max(max, b.max) };
 		}
 
-		inline Bound absorb(vec<dim, float, defaultp> b) {
-			return Bound<dim>{ glm::min(min, b), glm::max(max, b) };
+		inline Bound<dim, Real> absorb(vec<dim, Real, defaultp> b) {
+			return Bound<dim, Real>{ glm::min(min, b), glm::max(max, b) };
 		}
 
-		inline bool contains(vec<dim, float, defaultp> point) {
+		inline bool contains(vec<dim, Real, defaultp> point) {
 			return all(lessThanEqual(min, point)) && all(greaterThanEqual(max, point));
 		}
 
-		inline bool contains(Bound<dim>& b) {
+		inline bool contains(Bound<dim, Real>& b) {
 			return all(lessThanEqual(min, b.min)) && all(greaterThanEqual(max, b.max));
 		}
 
-		inline bool intersects(Bound<dim>& b) {
+		inline bool intersects(Bound<dim, Real>& b) {
 			return !(any(lessThanEqual(max, b.min)) || any(greaterThanEqual(min, b.max)));
 		}
 
-		inline Bound<dim> pad(float padding) {
-			return Bound<dim>{ min - vec<dim, float, defaultp>(padding), max + vec<dim, float, defaultp>(padding) };
+		inline Bound<dim, Real> pad(Real padding) {
+			return Bound<dim, Real>{ min - vec<dim, Real, defaultp>(padding), max + vec<dim, Real, defaultp>(padding) };
 		}
 
-		inline float volume() {
-			vec<dim, float, defaultp> diff = max - min;
-			float v = diff.x;
+		inline Real volume() {
+			vec<dim, Real, defaultp> diff = max - min;
+			Real v = diff.x;
 			for (int i = 1; i < dim; i++) v *= diff[i];
 			return v;
 		}
 
-		inline vec<dim, float, defaultp> normCoord(vec<dim, float, defaultp> pos) {
+		inline vec<dim, Real, defaultp> normCoord(vec<dim, Real, defaultp> pos) {
 			return (pos - min) / (max - min);
 		}
 
-		inline vec<dim, float, defaultp> interp(vec<dim, float, defaultp> coord) {
-			vec<dim, float, defaultp> pos;
-			vec<dim, float, defaultp> diff = max - min;
+		inline vec<dim, Real, defaultp> interp(vec<dim, Real, defaultp> coord) {
+			vec<dim, Real, defaultp> pos;
+			vec<dim, Real, defaultp> diff = max - min;
 			for (int i = 0; i < dim; i++)
 				pos[i] = min[i] + diff[i] * coord[i];
 			return pos;
 		}
 	};
 
-	template<>
-	struct Bound<1> {
-		float min;
-		float max;
+	template<typename Real>
+	struct Bound<1, Real> {
+		Real min;
+		Real max;
 
-		inline float center() {
+		inline Real center() {
 			return (min + max) * 0.5f;
 		}
 
-		inline Bound<1> absorb(Bound<1>& b) {
-			return Bound<1>{ glm::min(min, b.min), glm::max(max, b.max) };
+		inline Bound<1, Real> absorb(Bound<1, Real>& b) {
+			return Bound<1, Real>{ glm::min(min, b.min), glm::max(max, b.max) };
 		}
 
-		inline Bound<1> absorb(float b) {
-			return Bound<1>{ glm::min(min, b), glm::max(max, b) };
+		inline Bound<1, Real> absorb(Real b) {
+			return Bound<1, Real>{ glm::min(min, b), glm::max(max, b) };
 		}
 
-		inline bool contains(float point) {
+		inline bool contains(Real point) {
 			return min <= point && point <= max;
 		}
 
-		inline bool contains(Bound<1>& b) {
+		inline bool contains(Bound<1, Real>& b) {
 			return min <= b.min && b.max <= max;
 		}
 
-		inline bool intersects(Bound<1>& b) {
+		inline bool intersects(Bound<1, Real>& b) {
 			return max > b.min && min < b.max;
 		}
 
-		inline Bound<1> pad(float padding) {
-			return Bound<1>{ min - padding, max + padding };
+		inline Bound<1, Real> pad(Real padding) {
+			return Bound<1, Real>{ min - padding, max + padding };
 		}
 
-		inline float volume() {
+		inline Real volume() {
 			return max - min;
 		}
 
-		inline float normCoord(float pos) {
+		inline Real normCoord(Real pos) {
 			return (pos - min) / (max - min);
 		}
 
-		inline float interp(float coord) {
+		inline Real interp(Real coord) {
 			return min + (max - min) * coord;
 		}
 	};
 
-	typedef Bound<1> Range;
+	typedef Bound<1, float> Range;
 }

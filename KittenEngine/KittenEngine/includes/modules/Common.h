@@ -235,7 +235,7 @@ inline bool lineHasInt(vec2 s) {
 }
 
 template <typename T>
-T& slice(float* x, size_t index) {
+T& slice(void* x, size_t index) {
 	return ((T*)x)[index];
 }
 
