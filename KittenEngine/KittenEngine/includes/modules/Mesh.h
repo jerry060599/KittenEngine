@@ -34,6 +34,7 @@ namespace Kitten {
 
 		~Mesh();
 
+		void setFromLine(vector<vec3>& points);
 		void polygonize();
 		void transform(mat4);
 		void draw();

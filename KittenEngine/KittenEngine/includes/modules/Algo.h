@@ -9,7 +9,6 @@
 #include "Common.h"
 
 namespace Kitten {
-
 	/// <summary>
 	/// A constant-memory trapezoidal adaptive romberg integrator. 
 	/// Jerry Hsu 2021
@@ -35,10 +34,12 @@ namespace Kitten {
 		double ends[maxLevel];
 		ends[minLevel - 1] = ends[minLevel] = minIntSize;
 
-		T v;
-		if constexpr (type == 0) v = 0;
-		else if constexpr (type == 1) v = T::Zero(samples[minLevel].size());
-		else v = T(0);
+		T v[maxLevel];
+		if constexpr (type == 0) v[minLevel] = 0;
+		else if constexpr (type == 1) v[minLevel] = T::Zero(samples[minLevel].size());
+		else v[minLevel] = T(0);
+		for (int i = minLevel + 1; i < maxLevel; i++)
+			v[i] = v[minLevel];
 
 		int level = minLevel;
 		int k = 0;
@@ -68,7 +69,7 @@ namespace Kitten {
 			}
 			else {
 				// Local error is good. We tack it on
-				v += (vhh + err) / double(1 << level);
+				v[level] += vhh + err;
 
 				while (ends[level - 1] == ends[level] && level > minLevel)
 					level--;
@@ -85,7 +86,11 @@ namespace Kitten {
 			}
 		}
 
-		return (b - a) * v;
+		v[maxLevel - 1] /= double(1 << (maxLevel - 1));
+		for (int i = maxLevel - 2; i >= minLevel; i--)
+			v[maxLevel - 1] += v[i] / double(1 << i);
+
+		return (b - a) * v[maxLevel - 1];
 	}
 
 	/// <summary>
@@ -105,7 +110,7 @@ namespace Kitten {
 	}
 
 	template<typename T>
-	T autoDiff(std::function<double(T)> f, T x, const double h = 0.001) {
+	T nDiff(std::function<double(T)> f, T x, const double h = 0.001) {
 		if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value)
 			return (T)((f(x - 2 * h) - 8 * f(x - h) + 8 * f(x + h) - f(x + 2 * h)) / (12 * h));
 		else {

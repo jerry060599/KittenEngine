@@ -38,6 +38,24 @@ namespace Kitten {
 		glGenBuffers(1, &EBO);
 	}
 
+	void Mesh::setFromLine(vector<vec3>& points) {
+		if (points.size() < 2) {
+			vertices.clear();
+			indices.clear();
+			return;
+		}
+
+		vertices.resize(points.size());
+		for (size_t i = 0; i < points.size(); i++)
+			vertices[i] = { points[i] };
+
+		indices.resize(2 * points.size() - 2);
+		for (size_t i = 0; i < points.size() - 1; i++) {
+			indices[2 * i] = i;
+			indices[2 * i + 1] = i + 1;
+		}
+	}
+
 	void Mesh::polygonize() {
 		auto v = vertices;
 		vertices.clear();

@@ -109,7 +109,7 @@ Eigen::VectorXd Kitten::cg(
 	double rDotD[2] = { r.dot(d), 0 };
 	const double relTol = tol * tol * rDotD[0];
 	size_t itr = 1;
-	for (; itr <= itrLim && rDotD[0] > relTol; itr++) {
+	for (; (itrLim < 0 || itr <= itrLim) && rDotD[0] > relTol; itr++) {
 		q = A * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
@@ -175,7 +175,7 @@ Eigen::VectorXd Kitten::bccg(
 	const int UPDATE_ITR = std::max(100, (int)sqrt(A.cols()));
 
 	size_t itr = 1;
-	for (; itr <= itrLim && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
+	for (; (itrLim < 0 || itr <= itrLim) && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
 		q = A * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
@@ -232,13 +232,13 @@ Eigen::VectorXd Kitten::bccg(
 	return x;
 }
 
-Eigen::VectorXd Kitten::rbccg(Eigen::SparseMatrix<double, 
+Eigen::VectorXd Kitten::rbccg(Eigen::SparseMatrix<double,
 	Eigen::RowMajor>& A,
 	Eigen::VectorXd& b,
-	Eigen::VectorXd& lower, 
+	Eigen::VectorXd& lower,
 	Eigen::VectorXd& shift,
-	const double regAlpha, 
-	const double tol, 
+	const double regAlpha,
+	const double tol,
 	const int itrLim) {
 	using namespace Eigen;
 	// Initialize preconditioner
@@ -278,9 +278,9 @@ Eigen::VectorXd Kitten::rbccg(Eigen::SparseMatrix<double,
 	bool boundsChanged = false;
 	int itrSinceRes = 0;
 	const int UPDATE_ITR = std::max(100, (int)sqrt(A.cols()));
-	
+
 	size_t itr = 1;
-	for (; itr <= itrLim && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
+	for (; (itrLim < 0 || itr <= itrLim) && (rDotD[0] > relTol || boundsChanged || haveUnreleased); itr++, itrSinceRes++) {
 		q = A * d + regAlpha * d;
 		double alpha = rDotD[0] / d.dot(q);
 		x += alpha * d;
