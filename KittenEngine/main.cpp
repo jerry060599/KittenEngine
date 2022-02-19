@@ -17,7 +17,6 @@
 using namespace glm;
 using namespace std;
 
-GLFWwindow* window = nullptr;
 ivec2 res(800, 600);
 
 vec2 camEuler = vec2(30.0, 30.0);
@@ -162,72 +161,26 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	if (ImGui::GetIO().WantCaptureMouse) return;
 	float* target;
 	target = &camDist;
-	*target = glm::max(0.5f, *target * powf(1.2f, yoffset));
-}
-
-void initGL() {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	window = glfwCreateWindow(res.x, res.y, "CS6610 P1", nullptr, nullptr);
-	if (!window) {
-		std::cerr << "Cannot create window";
-		std::exit(1);
-	}
-	glfwMakeContextCurrent(window);
-
-	glfwSetMouseButtonCallback(window, mouseButtonCallback);
-	glfwSetCursorPosCallback(window, cursorPosCallback);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	glfwSetKeyCallback(window, keyCallback);
-	glfwSetScrollCallback(window, scrollCallback);
-
-	assert(window);
-	if (gladLoadGLLoader((GLADloadproc)(glfwGetProcAddress)) == 0) {
-		std::cerr << "Failed to intialize OpenGL loader" << std::endl;
-		std::exit(1);
-	}
-	assert(glGetError() == GL_NO_ERROR);
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	const char* glsl_version = "#version 130";
-	ImGui_ImplOpenGL3_Init(glsl_version);
-
-	ImGui::SetNextWindowSize(ImVec2(res.x, res.y));
+	*target = glm::max(0.5f, *target * powf(1.2f, (float)yoffset));
 }
 
 int main(int argc, char** argv) {
-	initGL();
+	Kit::initWindow(res);
 	Kit::initRender();
+
+	glfwSetMouseButtonCallback(Kit::window, mouseButtonCallback);
+	glfwSetCursorPosCallback(Kit::window, cursorPosCallback);
+	glfwSetFramebufferSizeCallback(Kit::window, framebufferSizeCallback);
+	glfwSetKeyCallback(Kit::window, keyCallback);
+	glfwSetScrollCallback(Kit::window, scrollCallback);
 
 	if (argc > 1) meshPath = string(argv[1]);
 	initScene();
 
-	while (!glfwWindowShouldClose(window)) {
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
+	while (!glfwWindowShouldClose(Kit::window)) {
+		Kit::startFrame();
 		renderScene();
-
-		glfwPollEvents();
 		renderGui();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		unsigned int error = glGetError();
-		if (error != GL_NO_ERROR)
-			printf("GL error: %d\n", error);
-
-		glfwSwapBuffers(window);
+		Kit::endFrame();
 	}
 }

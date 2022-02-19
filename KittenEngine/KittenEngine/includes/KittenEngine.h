@@ -6,3 +6,5 @@
 
 #include "modules/KittenAssets.h"
 #include "modules/KittenRendering.h"
+
+#include "modules/KittenInit.h"

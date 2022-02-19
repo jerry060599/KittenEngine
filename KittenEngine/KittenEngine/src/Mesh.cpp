@@ -51,8 +51,8 @@ namespace Kitten {
 
 		indices.resize(2 * points.size() - 2);
 		for (size_t i = 0; i < points.size() - 1; i++) {
-			indices[2 * i] = i;
-			indices[2 * i + 1] = i + 1;
+			indices[2 * i] = (unsigned int)i;
+			indices[2 * i + 1] = (unsigned int)i + 1;
 		}
 	}
 

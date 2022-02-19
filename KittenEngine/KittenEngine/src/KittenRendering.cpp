@@ -1,6 +1,14 @@
+#include "../includes/modules/KittenInit.h"
 
 #include "../includes/modules/KittenRendering.h"
 #include "../includes/modules/KittenPreprocessor.h"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 using namespace glm;
 
@@ -19,7 +27,7 @@ namespace Kitten {
 	unsigned int d_matCommon = 0;
 	unsigned int d_lightCommon = 0;
 	int shadowRes = 2048;
-	float shadowDist = 15.f;
+	float shadowDist = 50.f;
 
 	Texture* defTexture;
 	Texture* defCubemap;
@@ -187,6 +195,25 @@ namespace Kitten {
 		clearShadowMaps();
 
 		modelMat = mat4(1);
+	}
+
+	void startFrame() {
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void endFrame() {
+		glfwPollEvents();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		unsigned int error = glGetError();
+		if (error != GL_NO_ERROR)
+			printf("GL error: %d\n", error);
+
+		glfwSwapBuffers(window);
 	}
 
 	void startRenderMesh(mat4 transform) {

@@ -66,6 +66,12 @@
     <ClCompile Include="KittenEngine\opt\toms178.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KittenEngine\src\KittenInit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="KittenEngine\src\MeshMoments.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KittenEngine\includes\modules\Bound.h">
@@ -135,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KittenEngine\opt\toms178.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\KittenInit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

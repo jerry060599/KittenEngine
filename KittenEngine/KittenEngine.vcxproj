@@ -173,9 +173,11 @@
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />
+    <ClCompile Include="KittenEngine\src\KittenInit.cpp" />
     <ClCompile Include="KittenEngine\src\KittenPreprocessor.cpp" />
     <ClCompile Include="KittenEngine\src\KittenRendering.cpp" />
     <ClCompile Include="KittenEngine\src\Mesh.cpp" />
+    <ClCompile Include="KittenEngine\src\MeshMoments.cpp" />
     <ClCompile Include="KittenEngine\src\Shader.cpp" />
     <ClCompile Include="KittenEngine\src\Texture.cpp" />
     <ClCompile Include="KittenEngine\src\Timer.cpp" />
@@ -190,6 +192,7 @@
     <ClInclude Include="KittenEngine\includes\modules\ComputeBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\FrameBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenAssets.h" />
+    <ClInclude Include="KittenEngine\includes\modules\KittenInit.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenPreprocessor.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenRendering.h" />
     <ClInclude Include="KittenEngine\includes\modules\Mesh.h" />

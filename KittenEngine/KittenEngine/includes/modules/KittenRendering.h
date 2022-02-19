@@ -74,6 +74,8 @@ namespace Kitten {
 	void checkErr(const char* tag = nullptr);
 	void initRender();
 	void startRender();
+	void startFrame();
+	void endFrame();
 	void startRenderMesh(mat4 transform);
 	void startRenderMaterial(Material* mat);
 	void render(Mesh* mesh, Shader* base = nullptr);

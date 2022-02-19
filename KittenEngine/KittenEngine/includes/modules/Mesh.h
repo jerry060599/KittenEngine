@@ -12,7 +12,7 @@ using namespace std::filesystem;
 using namespace glm;
 
 namespace Kitten {
-	typedef struct Vertex {
+	typedef struct {
 		vec3 pos;
 		vec3 norm;
 		vec2 uv;
@@ -43,6 +43,16 @@ namespace Kitten {
 		void calculateBounds();
 		void writeOBJ(string p);
 		void writePOLY(string p);
+
+		// The zeroth moment of the mesh. Only works if triangle index ordering is correct.
+		float zerothMoment();
+		// The first moment of the mesh. Only works if triangle index ordering is correct.
+		vec3 firstMoment();
+		// The second moment of the mesh. Only works if triangle index ordering is correct.
+		mat3 secondMoment();
+
+		// The center of mass of the mesh. Only works if triangle index ordering is correct.
+		vec3 centerOfMass();
 	};
 
 	class TetMesh : public Mesh {
