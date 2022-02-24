@@ -33,8 +33,6 @@ namespace Kit = Kitten;
 Kit::Material quadMat = Kit::defMaterial;
 Kit::Mesh* mesh;
 
-Kit::FrameBuffer* frameBuff = nullptr;
-
 void renderScene() {
 	Kit::lights[0].dir = -normalize(Kit::lights[0].pos);
 
@@ -147,7 +145,6 @@ void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
 	res.x = width;
 	res.y = height;
 	glViewport(0, 0, width, height);
-	if (frameBuff) frameBuff->resize(res.x, res.y);
 }
 
 void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
