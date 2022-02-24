@@ -55,7 +55,7 @@ namespace Kitten {
 			mat4 proj(1);
 			if (lights[i].type == (int)KittenLight::DIR)
 				proj = glm::ortho(-shadowDist, shadowDist, -shadowDist, shadowDist, -shadowDist, shadowDist)
-				* rotateView(lights[i].dir) * glm::translate(mat4(1), -vec3(viewMat[3]));
+				* rotateView(lights[i].dir) * glm::translate(mat4(1), -lights[i].pos);
 			else if (lights[i].type == (int)KittenLight::SPOT)
 				proj = glm::perspective(2 * (180 / glm::pi<float>()) * glm::acos(lights[i].spread), 1.f, lights[i].radius, shadowDist)
 				* rotateView(lights[i].dir) * glm::translate(mat4(1), -lights[i].pos);
@@ -288,6 +288,39 @@ namespace Kitten {
 				uploadUniformBuff(d_lightCommon, &lights[i], sizeof(UBOLight));
 
 				glDrawElements(light->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+			}
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
+
+	void renderInstancedForward(Mesh* mesh, int count, Shader* base, Shader* light) {
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
+		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (!base) base = defUnlitShader;
+		base->use();
+		glBindVertexArray(mesh->VAO);
+		glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
+
+		if (light) {
+			glBlendFunc(GL_ONE, GL_ONE);
+
+			light->use();
+			for (size_t i = 0; i < lights.size(); i++) {
+				if (lights[i].type == (int)KittenLight::SPOT
+					|| lights[i].type == (int)KittenLight::DIR) {
+					glActiveTexture((GLenum)(GL_TEXTURE0 + MAT_SHADOW));
+					glBindTexture(GL_TEXTURE_2D, shadowMaps[i]->depthStencil);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+				}
+				uploadUniformBuff(d_lightCommon, &lights[i], sizeof(UBOLight));
+
+				glDrawElementsInstanced(light->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
 			}
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
