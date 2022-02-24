@@ -2,7 +2,7 @@
 const float pi = 3.14159265359;
 const float e = 2.71828182846;
 
-float cross(vec2 a, vec2 b) {
+float cross2d(vec2 a, vec2 b) {
 	return a.x * b.y - a.y * b.x;
 }
 
