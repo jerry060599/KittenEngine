@@ -328,6 +328,38 @@ namespace Kitten {
 		glUseProgram(0);
 	}
 
+	void renderInstancedShadows(Mesh* mesh, int count, Shader* base) {
+		startRenderMesh(mesh->defTransform);
+		startRenderMaterial(mesh->defMaterial);
+
+		mat4 oldView = viewMat;
+		mat4 oldProj = projMat;
+		viewMat = mat4(1);
+		glDisable(GL_CULL_FACE);
+
+		if (base == nullptr) base = defUnlitShader;
+		base->use();
+		glBindVertexArray(mesh->VAO);
+		for (size_t i = 0; i < lights.size(); i++)
+			if (lights[i].hasShadow
+				&& (lights[i].type == (int)KittenLight::SPOT
+					|| lights[i].type == (int)KittenLight::DIR)) {
+				projMat = lights[i].shadowProj;
+				uploadUBOCommonBuff();
+
+				shadowMaps[i]->bind();
+				glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
+				shadowMaps[i]->unbind();
+			}
+
+		viewMat = oldView;
+		projMat = oldProj;
+		uploadUBOCommonBuff();
+		glEnable(GL_CULL_FACE);
+		glBindVertexArray(0);
+		glUseProgram(0);
+	}
+
 	void renderEnv(Texture* cubemap) {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + MAT_CUBEMAP));
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->glHandle);

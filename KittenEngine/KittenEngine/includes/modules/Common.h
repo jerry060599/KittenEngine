@@ -198,13 +198,13 @@ inline mat3 orthoBasisY(vec3 yNorm) {
 		const float a = 1.0f / (1.0f + yNorm.z);
 		const float b = -yNorm.x * yNorm.y * a;
 		basis[0] = vec3(1.0f - yNorm.x * yNorm.x * a, b, -yNorm.x);
-		basis[2] = vec3(b, 1.0f - yNorm.y * yNorm.y * a, -yNorm.y);
+		basis[2] = -vec3(b, 1.0f - yNorm.y * yNorm.y * a, -yNorm.y);
 	}
 	else {
 		const float a = 1.0f / (1.0f + yNorm.y);
 		const float b = -yNorm.x * yNorm.z * a;
 		basis[0] = vec3(b, -yNorm.z, 1.0f - yNorm.z * yNorm.z * a);
-		basis[2] = vec3(1.0f - yNorm.x * yNorm.x * a, -yNorm.x, b);
+		basis[2] = -vec3(1.0f - yNorm.x * yNorm.x * a, -yNorm.x, b);
 	}
 	return basis;
 }

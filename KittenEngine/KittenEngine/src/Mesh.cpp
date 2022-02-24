@@ -444,6 +444,43 @@ namespace Kitten {
 		return mesh;
 	}
 
+	Mesh* genCylMesh(int radialSegments, bool cap) {
+		Mesh* mesh = new Mesh;
+
+		mesh->vertices.resize(2 * radialSegments);
+		mesh->indices.resize(6 * radialSegments + 6 * cap * (radialSegments - 2));
+		for (size_t i = 0; i < radialSegments; i++) {
+			float angle = (2 * pi<float>() * i) / radialSegments;
+			vec3 n = vec3(cos(angle), 0, sin(angle));
+			mesh->vertices[2 * i + 0] = { n };
+			mesh->vertices[2 * i + 1] = { n + vec3(0, 1, 0) };
+
+			mesh->indices[6 * i + 0] = 2 * i;
+			mesh->indices[6 * i + 1] = 2 * i + 1;
+			mesh->indices[6 * i + 2] = wrap(2 * i + 3, mesh->vertices.size());
+			mesh->indices[6 * i + 3] = wrap(2 * i + 2, mesh->vertices.size());
+			mesh->indices[6 * i + 4] = 2 * i;
+			mesh->indices[6 * i + 5] = wrap(2 * i + 3, mesh->vertices.size());
+
+			if (cap && i > 1) {
+				mesh->indices[6 * (i + radialSegments) - 12] = 0;
+				mesh->indices[6 * (i + radialSegments) - 11] = wrap(2 * i - 2, mesh->vertices.size());
+				mesh->indices[6 * (i + radialSegments) - 10] = 2 * i;
+				mesh->indices[6 * (i + radialSegments) - 9] = wrap(2 * i - 1, mesh->vertices.size());
+				mesh->indices[6 * (i + radialSegments) - 8] = 1;
+				mesh->indices[6 * (i + radialSegments) - 7] = 2 * i + 1;
+			}
+		}
+
+		mesh->defMaterial = nullptr;
+		mesh->defTransform = mat4(1);
+		mesh->initGL();
+		mesh->upload();
+		mesh->calculateBounds();
+
+		return mesh;
+	}
+
 	Mesh* loadMeshExact(path path) {
 		Mesh* mesh = new Mesh;
 		std::ifstream input(path.string());
