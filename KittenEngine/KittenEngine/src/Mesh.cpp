@@ -464,9 +464,9 @@ namespace Kitten {
 
 			if (cap && i > 1) {
 				mesh->indices[6 * (i + radialSegments) - 12] = 0;
-				mesh->indices[6 * (i + radialSegments) - 11] = wrap(2 * i - 2, mesh->vertices.size());
+				mesh->indices[6 * (i + radialSegments) - 11] = 2 * i - 2;
 				mesh->indices[6 * (i + radialSegments) - 10] = 2 * i;
-				mesh->indices[6 * (i + radialSegments) - 9] = wrap(2 * i - 1, mesh->vertices.size());
+				mesh->indices[6 * (i + radialSegments) - 9] = 2 * i - 1;
 				mesh->indices[6 * (i + radialSegments) - 8] = 1;
 				mesh->indices[6 * (i + radialSegments) - 7] = 2 * i + 1;
 			}
