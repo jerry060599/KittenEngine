@@ -234,6 +234,15 @@ inline bool lineHasInt(vec2 s) {
 	return s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1;
 }
 
+inline int wrap(int i, int period) {
+	return (i + period) % period;
+}
+
+// Returns the distance between a and b modulo len
+inline int cyclicDist(int a, int b, int len) {
+	return ((b - a) + len / 2 + len) % len - len / 2;
+}
+
 template <typename T>
 T& slice(void* x, size_t index) {
 	return ((T*)x)[index];
