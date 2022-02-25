@@ -195,6 +195,7 @@ namespace Kitten {
 		clearShadowMaps();
 
 		modelMat = mat4(1);
+		checkErr("render_start");
 	}
 
 	void startFrame() {
@@ -202,16 +203,13 @@ namespace Kitten {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		glfwPollEvents();
+		checkErr("frame_start");
 	}
 
 	void endFrame() {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		unsigned int error = glGetError();
-		if (error != GL_NO_ERROR)
-			printf("GL error: %d\n", error);
-
+		checkErr("frame_end");
 		glfwSwapBuffers(window);
 	}
 
