@@ -63,6 +63,7 @@ namespace Kitten {
 		void writeMSH(string p);
 		void flipInverted();
 		void regenSurface();
+		void writeTetsOBJ(string p);
 	};
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
@@ -70,5 +71,5 @@ namespace Kitten {
 	void loadMeshFrom(path path);
 	void loadTetgenFrom(path path);
 	Mesh* loadMeshExact(path path);
-	TetMesh* loadTetMeshExact(path path);
+	TetMesh* loadTetMeshOBJ(path path);
 }

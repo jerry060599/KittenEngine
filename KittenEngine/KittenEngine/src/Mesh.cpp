@@ -524,7 +524,7 @@ namespace Kitten {
 		return mesh;
 	}
 
-	TetMesh* loadTetMeshExact(path path) {
+	TetMesh* loadTetMeshOBJ(path path) {
 		TetMesh* mesh = new TetMesh;
 		std::ifstream input(path.string());
 
@@ -667,5 +667,32 @@ namespace Kitten {
 
 		groups.clear();
 		groups.push_back(indices.size());
+	}
+
+	void TetMesh::writeTetsOBJ(string p) {
+		FILE* file;
+		fopen_s(&file, p.c_str(), "w");
+		if (file) {
+			fprintf(file, "# WaveFront *.obj file\n\n");
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				vec3 v = vertices[i].pos;
+				fprintf(file, "v %.16f %.16f %.16f\n", v.x, v.y, v.z);
+			}
+
+			fprintf(file, "# %zd vertices\n\no mesh\n", vertices.size());
+			for (size_t i = 0; i < numTet(); i++) {
+				ivec4 v = ivec4(
+					tetIndices[4 * i + 0],
+					tetIndices[4 * i + 1],
+					tetIndices[4 * i + 2],
+					tetIndices[4 * i + 3]
+				) + 1;
+				fprintf(file, "f %d %d %d %d\n", v.x, v.y, v.z, v.w);
+			}
+			fprintf(file, "# %zd tets\n\n", numTet());
+
+			fclose(file);
+		}
 	}
 }
