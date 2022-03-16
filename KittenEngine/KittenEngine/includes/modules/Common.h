@@ -1,5 +1,6 @@
 #pragma once
-const float episilon = 0.000001f;
+// Jerry Hsu, 2021
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

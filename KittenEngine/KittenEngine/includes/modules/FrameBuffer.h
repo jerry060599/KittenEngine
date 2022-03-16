@@ -1,4 +1,6 @@
 #pragma once
+// Jerry Hsu, 2021
+
 #include <glm/glm.hpp>
 #include "Texture.h"
 

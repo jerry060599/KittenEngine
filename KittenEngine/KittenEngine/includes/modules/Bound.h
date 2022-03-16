@@ -1,4 +1,6 @@
 #pragma once
+// Jerry Hsu, 2021
+
 #include "Common.h"
 using namespace glm;
 

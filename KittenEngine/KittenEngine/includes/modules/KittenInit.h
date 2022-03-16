@@ -1,4 +1,5 @@
 #pragma once
+// Jerry Hsu, 2021
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

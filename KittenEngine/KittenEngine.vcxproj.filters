@@ -146,5 +146,8 @@
     <ClInclude Include="KittenEngine\includes\modules\KittenInit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\SpatialHashmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
