@@ -40,13 +40,13 @@ namespace Kitten {
 			return hash + (!hash);
 		}
 
+	public:
 		void clear() {
 #pragma omp parallel for schedule(static, 4096)
 			for (long long i = 0; i < (long long)maxSize; i++)
 				keys[i].hash = 0;
 		}
 
-	public:
 		SpatialHashmap(const size_t maxCol, const float maxDiameter) :
 			maxSize(2llu << (int)ceil(log2((double)maxCol))), cellSize(maxDiameter), invCellSize(1.f / maxDiameter) {
 			keys = new key[maxSize];
