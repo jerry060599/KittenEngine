@@ -68,20 +68,20 @@ namespace Kitten {
 
 		bool contains(uint64_t key) {
 			key = scramble(key);
-			uint32_t cell = key % tableSize;
-			uint32_t stride = 1;
+			uint64_t cell = key % tableSize;
+			uint64_t stride = 1;
 
-			uint32_t expected = 0;
+			uint64_t expected = 0;
 
 			while (true) {
 				size_t v = table[cell].key;
 				if (v == key)
 					return true;
-				else if (v == 0xFFFFFFFF)
+				else if (v == 0xFFFFFFFFllu)
 					return false;
 
 				cell = (cell + (stride++)) % tableSize;
-				expected = 0;
+				expected = 0xFFFFFFFFllu;
 			}
 		}
 
