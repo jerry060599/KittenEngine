@@ -334,7 +334,9 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		glDisable(GL_CULL_FACE);
+		GLint oldCull;
+		glGetIntegerv(GL_CULL_FACE_MODE, &oldCull);
+		glCullFace(GL_FRONT);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -354,7 +356,7 @@ namespace Kitten {
 		viewMat = oldView;
 		projMat = oldProj;
 		uploadUBOCommonBuff();
-		glEnable(GL_CULL_FACE);
+		glCullFace(oldCull);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -366,7 +368,9 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		glDisable(GL_CULL_FACE);
+		GLint oldCull;
+		glGetIntegerv(GL_CULL_FACE_MODE, &oldCull);
+		glCullFace(GL_FRONT);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -386,7 +390,7 @@ namespace Kitten {
 		viewMat = oldView;
 		projMat = oldProj;
 		uploadUBOCommonBuff();
-		glEnable(GL_CULL_FACE);
+		glCullFace(oldCull);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
