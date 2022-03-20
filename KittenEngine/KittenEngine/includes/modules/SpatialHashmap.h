@@ -66,6 +66,7 @@ namespace Kitten {
 
 			int order = 0;
 			uint32_t expected = 0;
+			std::atomic<int> test;
 
 			while (true) {
 				if (keys[cell].hash.compare_exchange_strong(expected, hash)) {
