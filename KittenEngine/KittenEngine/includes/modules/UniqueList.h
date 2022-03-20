@@ -94,7 +94,7 @@ namespace Kitten {
 		}
 	};
 
-	void testUniqueList() {
+	inline void testUniqueList() {
 		UniqueList<int> list(1024);
 
 		list.add(0, 1);
