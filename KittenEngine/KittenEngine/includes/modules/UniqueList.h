@@ -55,6 +55,7 @@ namespace Kitten {
 			while (true) {
 				if (table[cell].key.compare_exchange_strong(expected, key)) {
 					size_t n = count.fetch_add(1);
+					table[cell].index = n;
 					data[n] = val;
 					return true;
 				}
@@ -66,7 +67,7 @@ namespace Kitten {
 			}
 		}
 
-		bool contains(uint64_t key) {
+		T* find(uint64_t key) {
 			key = scramble(key);
 			uint64_t cell = key % tableSize;
 			uint64_t stride = 1;
@@ -76,13 +77,17 @@ namespace Kitten {
 			while (true) {
 				size_t v = table[cell].key;
 				if (v == key)
-					return true;
+					return &data[table[cell].index];
 				else if (v == 0xFFFFFFFFllu)
-					return false;
+					return nullptr;
 
 				cell = (cell + (stride++)) % tableSize;
 				expected = 0xFFFFFFFFllu;
 			}
+		}
+
+		bool contains(uint64_t key) {
+			return find(key) != nullptr;
 		}
 
 		T& operator[](size_t i) {
