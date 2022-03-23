@@ -152,5 +152,8 @@
     <ClInclude Include="KittenEngine\includes\modules\UniqueList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\glTempVar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

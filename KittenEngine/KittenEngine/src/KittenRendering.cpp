@@ -242,7 +242,7 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glTempVar<ivec2> blend(GL_BLEND_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);
@@ -254,7 +254,7 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glTempVar<ivec2> blend(GL_BLEND_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);
@@ -266,14 +266,14 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glTempVar<ivec2> blend(GL_BLEND_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);
 		glDrawElements(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
 
 		if (light) {
-			glBlendFunc(GL_ONE, GL_ONE);
+			glTempVar<ivec2> lblend(GL_BLEND_ALPHA, GL_ONE, GL_ONE);
 
 			light->use();
 			for (size_t i = 0; i < lights.size(); i++) {
@@ -287,7 +287,6 @@ namespace Kitten {
 
 				glDrawElements(light->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
 			}
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		glBindVertexArray(0);
@@ -299,14 +298,14 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uploadUniformBuff(d_lightCommon, &ambientLight, sizeof(UBOLight));
 
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glTempVar<ivec2> blend(GL_BLEND_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
 		base->use();
 		glBindVertexArray(mesh->VAO);
 		glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
 
 		if (light) {
-			glBlendFunc(GL_ONE, GL_ONE);
+			glTempVar<ivec2> lblend(GL_BLEND_ALPHA, GL_ONE, GL_ONE);
 
 			light->use();
 			for (size_t i = 0; i < lights.size(); i++) {
@@ -320,7 +319,6 @@ namespace Kitten {
 
 				glDrawElementsInstanced(light->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
 			}
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		glBindVertexArray(0);
@@ -334,9 +332,7 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		GLint oldCull;
-		glGetIntegerv(GL_CULL_FACE_MODE, &oldCull);
-		glCullFace(GL_FRONT);
+		glTempVar cullMode(GL_CULL_FACE_MODE, GL_FRONT);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -356,7 +352,6 @@ namespace Kitten {
 		viewMat = oldView;
 		projMat = oldProj;
 		uploadUBOCommonBuff();
-		glCullFace(oldCull);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -368,9 +363,7 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		GLint oldCull;
-		glGetIntegerv(GL_CULL_FACE_MODE, &oldCull);
-		glCullFace(GL_FRONT);
+		glTempVar cullMode(GL_CULL_FACE_MODE, GL_FRONT);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -390,7 +383,6 @@ namespace Kitten {
 		viewMat = oldView;
 		projMat = oldProj;
 		uploadUBOCommonBuff();
-		glCullFace(oldCull);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}

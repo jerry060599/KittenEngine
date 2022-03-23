@@ -10,6 +10,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include "KittenEngine/includes/KittenEngine.h"
+#include "KittenEngine/includes/modules/glTempVar.h"
 
 #include <cassert>
 #include <iostream>

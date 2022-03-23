@@ -455,20 +455,20 @@ namespace Kitten {
 			mesh->vertices[2 * i + 0] = { n };
 			mesh->vertices[2 * i + 1] = { n + vec3(0, 1, 0) };
 
-			mesh->indices[6 * i + 0] = 2 * i;
-			mesh->indices[6 * i + 1] = 2 * i + 1;
-			mesh->indices[6 * i + 2] = wrap(2 * i + 3, mesh->vertices.size());
-			mesh->indices[6 * i + 3] = wrap(2 * i + 2, mesh->vertices.size());
-			mesh->indices[6 * i + 4] = 2 * i;
-			mesh->indices[6 * i + 5] = wrap(2 * i + 3, mesh->vertices.size());
+			mesh->indices[6 * i + 0] = (int)(2 * i);
+			mesh->indices[6 * i + 1] = (int)(2 * i + 1);
+			mesh->indices[6 * i + 2] = wrap((int)(2 * i + 3), (int)mesh->vertices.size());
+			mesh->indices[6 * i + 3] = wrap((int)(2 * i + 2), (int)mesh->vertices.size());
+			mesh->indices[6 * i + 4] = (int)(2 * i);
+			mesh->indices[6 * i + 5] = wrap((int)(2 * i + 3), (int)mesh->vertices.size());
 
 			if (cap && i > 1) {
 				mesh->indices[6 * (i + radialSegments) - 12] = 0;
-				mesh->indices[6 * (i + radialSegments) - 11] = 2 * i - 2;
-				mesh->indices[6 * (i + radialSegments) - 10] = 2 * i;
-				mesh->indices[6 * (i + radialSegments) - 9] = 2 * i - 1;
+				mesh->indices[6 * (i + radialSegments) - 11] = (int)(2 * i - 2);
+				mesh->indices[6 * (i + radialSegments) - 10] = (int)(2 * i);
+				mesh->indices[6 * (i + radialSegments) - 9] = (int)(2 * i - 1);
 				mesh->indices[6 * (i + radialSegments) - 8] = 1;
-				mesh->indices[6 * (i + radialSegments) - 7] = 2 * i + 1;
+				mesh->indices[6 * (i + radialSegments) - 7] = (int)(2 * i + 1);
 			}
 		}
 

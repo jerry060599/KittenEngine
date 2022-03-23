@@ -191,6 +191,7 @@
     <ClInclude Include="KittenEngine\includes\modules\Common.h" />
     <ClInclude Include="KittenEngine\includes\modules\ComputeBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\FrameBuffer.h" />
+    <ClInclude Include="KittenEngine\includes\modules\glTempVar.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenAssets.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenInit.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenPreprocessor.h" />
