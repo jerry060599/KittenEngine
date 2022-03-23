@@ -88,6 +88,7 @@ namespace Kitten {
 		case GL_UNPACK_SKIP_ROWS: glPixelStorei(GL_UNPACK_SKIP_ROWS, val); break;
 		case GL_UNPACK_SWAP_BYTES: glPixelStorei(GL_UNPACK_SWAP_BYTES, val); break;
 		case GL_VERTEX_ARRAY_BINDING: glBindVertexArray(val); break;
+		case GL_POLYGON_MODE: glPolygonMode(GL_FRONT_AND_BACK, val); break;
 
 		default:
 			throw new exception("Invalid GLenum for Kitten: : glTempVar<int>");
