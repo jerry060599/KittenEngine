@@ -15,7 +15,7 @@ namespace Kitten {
 		glTempVar(GLenum key, T val);
 	};
 
-	inline void glSetBool(GLenum key, bool val) {
+	inline void glSetBool(const GLenum key, bool val) {
 		switch (key) {
 		case GL_BLEND: if (val) glEnable(GL_BLEND); else glDisable(GL_BLEND); break;
 		case GL_CULL_FACE: if (val) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE); break;
@@ -32,7 +32,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetInt(GLenum key, int val) {
+	inline void glSetInt(const GLenum key, int val) {
 		switch (key) {
 		case GL_ACTIVE_TEXTURE: glActiveTexture(val); break;
 		case GL_ARRAY_BUFFER_BINDING: glBindBuffer(GL_ARRAY_BUFFER, val); break;
@@ -95,7 +95,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetFloat(GLenum key, float val) {
+	inline void glSetFloat(const GLenum key, float val) {
 		switch (key) {
 		case GL_DEPTH_CLEAR_VALUE: glClearDepthf(val); break;
 		case GL_LINE_WIDTH: glLineWidth(val); break;
@@ -107,7 +107,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetVec2(GLenum key, vec2 val) {
+	inline void glSetVec2(const GLenum key, vec2 val) {
 		switch (key) {
 		case GL_DEPTH_RANGE:  glDepthRangef(val.x, val.y); break;
 
@@ -116,7 +116,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetIvec2(GLenum key, ivec2 val) {
+	inline void glSetIvec2(const GLenum key, ivec2 val) {
 		switch (key) {
 		case GL_BLEND_DST_ALPHA: case GL_BLEND_SRC_ALPHA: glBlendFunc(val.x, val.y); break;
 
@@ -125,7 +125,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetVec4(GLenum key, vec4 val) {
+	inline void glSetVec4(const GLenum key, vec4 val) {
 		switch (key) {
 		case GL_BLEND_COLOR: glBlendColor(val.x, val.y, val.z, val.w); break;
 		case GL_COLOR_CLEAR_VALUE: glClearColor(val.x, val.y, val.z, val.w); break;
@@ -136,7 +136,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetIvec4(GLenum key, ivec4 val) {
+	inline void glSetIvec4(const GLenum key, ivec4 val) {
 		switch (key) {
 		case GL_SCISSOR_BOX: glScissor(val[0], val[1], val[2], val[3]); break;
 		case GL_VIEWPORT: glViewport(val[0], val[1], val[2], val[3]); break;
@@ -146,7 +146,7 @@ namespace Kitten {
 		}
 	}
 
-	inline void glSetBvec4(GLenum key, bvec4 val) {
+	inline void glSetBvec4(const GLenum key, bvec4 val) {
 		switch (key) {
 		case GL_COLOR_WRITEMASK: glColorMask(val[0], val[1], val[2], val[3]); break;
 
