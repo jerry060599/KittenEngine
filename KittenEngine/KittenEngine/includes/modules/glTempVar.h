@@ -134,9 +134,47 @@ public:																\
 		glGetIntegerv(GL_BLEND_DST_ALPHA, (int*)&oldVal.y);			\
 		glBlendFunc(val.x, val.y);									\
 	}																\
-	glTempVar(int a, int b) : glTempVar(ivec2(a, b)) {}				\
+	glTempVar(GLenum sfactor, GLenum  dfactor) :					\
+		glTempVar(ivec2(sfactor, dfactor)) {}						\
 	~glTempVar() {													\
 		glBlendFunc(oldVal.x, oldVal.y);							\
+	}																\
+};
+
+#define GEN_STENCIL_OP_SPEC(key)									\
+template <>															\
+class glTempVar<key> {												\
+public:																\
+	const ivec3 oldVal;												\
+	glTempVar(ivec3 val) : oldVal(0) {								\
+		glGetIntegerv(GL_STENCIL_FAIL, (int*)&oldVal.x);			\
+		glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, (int*)&oldVal.y);	\
+		glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, (int*)&oldVal.y);	\
+		glStencilOp(val.x, val.y, val.z);							\
+	}																\
+	glTempVar(GLenum sfail, GLenum dpfail, GLenum dppass) :			\
+		glTempVar(ivec3(sfail, dpfail, dppass)) {}					\
+	~glTempVar() {													\
+		glStencilOp(oldVal.x, oldVal.y, oldVal.z);					\
+	}																\
+};
+
+#define GEN_STENCIL_FUNC_SPEC(key)									\
+template <>															\
+class glTempVar<key> {												\
+public:																\
+	const GLenum oldVal0;											\
+	const GLint oldVal1;											\
+	const GLuint oldVal2;											\
+	glTempVar(GLenum func, GLint ref, GLuint mask) :				\
+			oldVal0(0), oldVal1(0), oldVal2(0) {					\
+		glGetIntegerv(GL_STENCIL_FUNC, (int*)&oldVal0);				\
+		glGetIntegerv(GL_STENCIL_REF, (int*)&oldVal1);				\
+		glGetIntegerv(GL_STENCIL_VALUE_MASK, (int*)&oldVal2);		\
+		glStencilFunc(func, ref, mask);								\
+	}																\
+	~glTempVar() {													\
+		glStencilFunc(oldVal0, oldVal1, oldVal2);					\
 	}																\
 };
 
@@ -155,6 +193,7 @@ namespace Kitten {
 	GEN_BOOL_SPEC(GL_PROGRAM_POINT_SIZE);
 	GEN_BOOL_SPEC(GL_POLYGON_SMOOTH);
 	GEN_BOOL_SPEC(GL_SCISSOR_TEST);
+	GEN_BOOL_SPEC(GL_STENCIL_TEST);
 
 	GEN_INT_SPEC(GL_ACTIVE_TEXTURE, glActiveTexture);
 	GEN_INT_SPEC(GL_COLOR_LOGIC_OP, glLogicOp);
@@ -169,6 +208,7 @@ namespace Kitten {
 	GEN_INT_SPEC(GL_READ_BUFFER, glReadBuffer);
 	GEN_INT_SPEC(GL_STENCIL_CLEAR_VALUE, glClearStencil);
 	GEN_INT_SPEC(GL_VERTEX_ARRAY_BINDING, glBindVertexArray);
+	GEN_INT_SPEC(GL_STENCIL_WRITEMASK, glStencilMask);
 
 	GEN_INT_SPEC_PARAM(GL_ARRAY_BUFFER_BINDING, glBindBuffer, GL_ARRAY_BUFFER);
 	GEN_INT_SPEC_PARAM(GL_DRAW_FRAMEBUFFER_BINDING, glBindFramebuffer, GL_DRAW_FRAMEBUFFER);
@@ -231,4 +271,14 @@ namespace Kitten {
 
 	GEN_BLEND_SPEC(GL_BLEND_ALPHA);
 	GEN_BLEND_SPEC(GL_BLEND_DST_ALPHA);
+
+	inline constexpr GLenum GL_STENCIL_OP = GL_STENCIL_PASS_DEPTH_PASS;
+
+	GEN_STENCIL_OP_SPEC(GL_STENCIL_OP);
+	GEN_STENCIL_OP_SPEC(GL_STENCIL_FAIL);
+	GEN_STENCIL_OP_SPEC(GL_STENCIL_PASS_DEPTH_FAIL);
+
+	GEN_STENCIL_FUNC_SPEC(GL_STENCIL_FUNC);
+	GEN_STENCIL_FUNC_SPEC(GL_STENCIL_REF);
+	GEN_STENCIL_FUNC_SPEC(GL_STENCIL_VALUE_MASK);
 }
