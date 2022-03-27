@@ -151,7 +151,7 @@ namespace Kitten {
 	/// <param name="b"></param>
 	/// <param name="tol"></param>
 	/// <returns></returns>
-	inline double goldenIntMinSearch(std::function<double(double)> f, double a, double b, double tol = 0.001) {
+	inline dvec2 goldenIntMinSearch(std::function<double(double)> f, double a, double b, double tol = 0.001) {
 		const double invPhi = (sqrt(5) - 1) * 0.5;
 		const double invPhi2 = pow2(invPhi);
 
@@ -182,7 +182,7 @@ namespace Kitten {
 				yd = f(d);
 			}
 
-		return (yc < yd) ? (a + d) * 0.5 : (c + b) * 0.5;
+		return dvec2((yc < yd) ? (a + d) * 0.5 : (c + b) * 0.5, glm::min(yc, yd));
 	}
 
 	/// <summary>
