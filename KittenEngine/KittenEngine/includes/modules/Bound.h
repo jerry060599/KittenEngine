@@ -10,6 +10,10 @@ namespace Kitten {
 		vec<dim, Real, defaultp> min;
 		vec<dim, Real, defaultp> max;
 
+		Bound() {}
+		Bound(vec<dim, Real, defaultp> center) : min(center), max(center) {}
+		Bound(vec<dim, Real, defaultp> min, vec<dim, Real, defaultp> max) : min(min), max(max) {}
+
 		inline vec<dim, Real, defaultp> center() {
 			return (min + max) * 0.5f;
 		}
@@ -62,6 +66,10 @@ namespace Kitten {
 	struct Bound<1, Real> {
 		Real min;
 		Real max;
+
+		Bound() {}
+		Bound(Real center) : min(center), max(center) {}
+		Bound(Real min, Real max) : min(min), max(max) {}
 
 		inline Real center() {
 			return (min + max) * 0.5f;

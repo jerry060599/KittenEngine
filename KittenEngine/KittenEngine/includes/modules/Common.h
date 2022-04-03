@@ -241,11 +241,20 @@ inline int numBatches(size_t n, int batchSize) {
 	return numBatches((int)n, batchSize);
 }
 
+// Returns the closest points between two lines in the form mix(a0, a1, uv.x) and mix(b0, b1, uv.y)
+inline vec2 lineClosestPoints(vec3 a0, vec3 a1, vec3 b0, vec3 b1) {
+	mat2x3 A(a1 - a0, b0 - b1);
+	//return inverse(transpose(A) * A) * (transpose(A) * (b0 - a0));
+	vec3 diff = b0 - a0;
+	mat2 M(length2(A[0]), dot(A[0], A[1]), 0, length2(A[1]));
+	M[1][0] = M[0][1];
+	return inverse(M) * vec2(dot(A[0], diff), dot(A[1], diff));
+}
+
 inline vec2 lineInt(vec2 a0, vec2 a1, vec2 b0, vec2 b1) {
 	vec2 d0 = a0 - a1;
 	vec2 d1 = b1 - b0;
 
-	vec2 diff = a0 - b0;
 	float c = cross(d0, d1);
 	return (vec2(d1.y, -d0.y) * (a0.x - b0.x) + vec2(-d1.x, d0.x) * (a0.y - b0.y)) / (c + 0.00001f * float(c == 0));
 }
@@ -381,4 +390,22 @@ float compSum(mat<s, s, T, defaultp> a) {
 	for (int i = 1; i < s; i++)
 		sum += a[i];
 	return compSum(sum);
+}
+
+// Returns the bary-centric coords of the closest point to x on triangle p
+inline vec3 baryCoord(const mat3& p, const vec3& x) {
+	mat2x3 a(p[1] - p[0], p[2] - p[0]);
+	vec3 e2 = x - p[0];
+
+	mat2 m2(length2(a[0]), dot(a[0], a[1]), 0, length2(a[1]));
+	m2[1][0] = m2[0][1];
+
+	vec2 uv = inverse(m2) * vec2(dot(a[0], e2), dot(a[1], e2));
+
+	return vec3(1 - uv.x - uv.y, uv.x, uv.y);
+}
+
+// Returns the bary-centric coords of the closest point to p[3] on triangle (p[0],p[1],p[2])
+inline vec3 baryCoord(const mat4x3& p) {
+	return baryCoord(*(mat3*)&p, p[3]);
 }
