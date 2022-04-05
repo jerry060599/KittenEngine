@@ -7,6 +7,7 @@
 #include <string>
 #include <functional>
 #include "Timer.h"
+#include "StopWatch.h"
 #include <tuple>
 
 using namespace glm;
@@ -328,17 +329,17 @@ namespace std {
 	};
 }
 
-template <int s>
-void print(mat<s, s, f32, defaultp> m, const char* format = "%.4f") {
-	for (int i = 0; i < s; i++) {
+template <int c, int r>
+void print(mat<c, r, f32, defaultp> m, const char* format = "%.4f") {
+	for (int i = 0; i < r; i++) {
 		printf(i == 0 ? "{{" : " {");
 
-		for (int j = 0; j < s; j++) {
+		for (int j = 0; j < c; j++) {
 			printf(format, m[j][i]);
-			if (j != s - 1) printf(", ");
+			if (j != c - 1) printf(", ");
 		}
 
-		printf(i == s - 1 ? "}}\n" : "}\n");
+		printf(i == r - 1 ? "}}\n" : "}\n");
 	}
 }
 

@@ -4,24 +4,32 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <unordered_map>
+#include "Dist.h"
 
 namespace Kitten {
 	using namespace std::chrono;
 
+	/// <summary>
+	/// A timer that keeps track of the distribution instead of the timeline
+	/// </summary>
 	class Timer {
 	public:
-		steady_clock::time_point lastPoint;
-		std::vector<double> deltaTimes;
-		std::vector<double> times;
-		std::vector<const char*> tags;
+		struct entry {
+			Dist dist;
+			steady_clock::time_point lastPoint;
+			bool inFence = false;
+		};
+
 	private:
 		double totSecs = 0;
+		std::unordered_map<const char*, entry> entries;
 
 	public:
 		Timer();
-		double totTime();
 		void printTimes();
-		double time(const char* tag = nullptr);
+		void start(const char* tag = nullptr);
+		double end(const char* tag = nullptr);
 		void reset();
 	};
 }

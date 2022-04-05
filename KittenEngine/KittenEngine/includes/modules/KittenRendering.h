@@ -43,7 +43,7 @@ namespace Kitten {
 		vec3 dir = vec3(0, -1, 0);
 		float radius = 0.05f;
 
-		float param;
+		float shadowBias = 0.0005f;
 		int hasShadow = false;
 		float spread = 0.5f;
 		float focus = 0.3f;

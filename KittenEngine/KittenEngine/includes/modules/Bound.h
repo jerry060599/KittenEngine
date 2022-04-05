@@ -18,12 +18,12 @@ namespace Kitten {
 			return (min + max) * 0.5f;
 		}
 
-		inline Bound<dim, Real> absorb(Bound<dim, Real>& b) {
-			return Bound<dim, Real>{ glm::min(min, b.min), glm::max(max, b.max) };
+		inline void absorb(Bound<dim, Real>& b) {
+			min = glm::min(min, b.min); max = glm::max(max, b.max);
 		}
 
-		inline Bound<dim, Real> absorb(vec<dim, Real, defaultp> b) {
-			return Bound<dim, Real>{ glm::min(min, b), glm::max(max, b) };
+		inline void absorb(vec<dim, Real, defaultp> b) {
+			min = glm::min(min, b); max = glm::max(max, b);
 		}
 
 		inline bool contains(vec<dim, Real, defaultp> point) {
@@ -38,8 +38,8 @@ namespace Kitten {
 			return !(any(lessThanEqual(max, b.min)) || any(greaterThanEqual(min, b.max)));
 		}
 
-		inline Bound<dim, Real> pad(Real padding) {
-			return Bound<dim, Real>{ min - vec<dim, Real, defaultp>(padding), max + vec<dim, Real, defaultp>(padding) };
+		inline void pad(Real padding) {
+			min -= vec<dim, Real, defaultp>(padding); max += vec<dim, Real, defaultp>(padding);
 		}
 
 		inline Real volume() {
@@ -75,12 +75,12 @@ namespace Kitten {
 			return (min + max) * 0.5f;
 		}
 
-		inline Bound<1, Real> absorb(Bound<1, Real>& b) {
-			return Bound<1, Real>{ glm::min(min, b.min), glm::max(max, b.max) };
+		inline void absorb(Bound<1, Real>& b) {
+			min = glm::min(min, b.min); max = glm::max(max, b.max);
 		}
 
-		inline Bound<1, Real> absorb(Real b) {
-			return Bound<1, Real>{ glm::min(min, b), glm::max(max, b) };
+		inline void absorb(Real b) {
+			min = glm::min(min, b); max = glm::max(max, b);
 		}
 
 		inline bool contains(Real point) {
@@ -95,8 +95,8 @@ namespace Kitten {
 			return max > b.min && min < b.max;
 		}
 
-		inline Bound<1, Real> pad(Real padding) {
-			return Bound<1, Real>{ min - padding, max + padding };
+		inline void pad(Real padding) {
+			min -= padding; max += padding;
 		}
 
 		inline Real volume() {

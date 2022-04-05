@@ -5,7 +5,7 @@ layout (binding = 3, std140) uniform lightUBO {
 	vec3 light_dir;
 	float light_radius;
 
-	float light_param;
+	float light_bias;
 	int light_hasShadow;
 	float light_spread;
 	float light_focus;
@@ -42,7 +42,7 @@ float getLightShadow(vec3 worldPos) {
 				0.0, 0.0, 0.5, 0.0,
 				0.5, 0.5, 0.5, 1.0
 			) * (light_shadowProj * vec4(worldPos, 1));
-	p.z -= 0.0005;
+	p.z -= light_bias;
 	return textureProj(tex_shadow, p);
 }
 

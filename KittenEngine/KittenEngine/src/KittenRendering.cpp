@@ -332,7 +332,7 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		glTempVar<GL_CULL_FACE_MODE> cullMode(GL_FRONT);
+		glTempVar<GL_CULL_FACE> cull(false);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -363,7 +363,7 @@ namespace Kitten {
 		mat4 oldView = viewMat;
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
-		glTempVar<GL_CULL_FACE_MODE> cullMode(GL_FRONT);
+		glTempVar<GL_CULL_FACE> cull(false);
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();

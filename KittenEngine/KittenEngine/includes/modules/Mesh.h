@@ -33,6 +33,8 @@ namespace Kitten {
 
 		bool initialized = false;
 
+		Mesh();
+		Mesh(Mesh& m);
 		~Mesh();
 
 		void setFromLine(vector<vec3>& points);

@@ -16,6 +16,23 @@
 namespace Kitten {
 	unsigned int meshImportFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
 
+	Mesh::Mesh() {
+	}
+
+	Mesh::Mesh(Mesh& m) {
+		vertices.insert(vertices.begin(), m.vertices.begin(), m.vertices.end());
+		indices.insert(indices.begin(), m.indices.begin(), m.indices.end());
+		groups.insert(groups.begin(), m.groups.begin(), m.groups.end());
+		bounds = m.bounds;
+		defMaterial = m.defMaterial;
+		defTransform = m.defTransform;
+
+		if (m.initialized) {
+			initGL();
+			upload();
+		}
+	}
+
 	Mesh::~Mesh() {
 		if (initialized) {
 			glDeleteBuffers(1, &VBO);
@@ -106,9 +123,9 @@ namespace Kitten {
 	}
 
 	void Mesh::calculateBounds() {
-		bounds = { vertices[0].pos, vertices[0].pos };
+		bounds = Bound<>(vertices[0].pos);
 		for (size_t i = 0; i < vertices.size(); i++)
-			bounds = bounds.absorb(vertices[i].pos);
+			bounds.absorb(vertices[i].pos);
 	}
 
 	void Mesh::writeOBJ(string p) {
