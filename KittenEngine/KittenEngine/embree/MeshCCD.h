@@ -10,12 +10,19 @@ namespace Kitten {
 	class MeshCCD {
 	public:
 		typedef struct {
-			RTCGeometry rtcGeom;
-			unsigned int geomID;
+			RTCGeometry rtcTriGeom;
+			unsigned int triGeomID;
+
+			RTCGeometry rtcEdgeGeom;
+			unsigned int edgeGeomID;
+
+			RTCGeometry rtcVertGeom;
+			unsigned int vertGeomID;
+
 			Kitten::Mesh* mesh;
 			glm::vec3* delta;
-			glm::bvec3* ownsEdge;
-			glm::bvec3* ownsVert;
+			glm::ivec2* edges;
+			int nEdges;
 			bool dirty;
 		} RTCMesh;
 
@@ -59,10 +66,14 @@ namespace Kitten {
 
 	private:
 		RTCDevice rtcDevice;
-		RTCScene rtcScene;
+
+		RTCScene rtcTriScene;
+		RTCScene rtcEdgeScene;
+		RTCScene rtcVertScene;
 
 		std::unordered_map<Kitten::Mesh*, RTCMesh*> meshes;
-		void triangleCCD(struct RTCCollision*, unsigned int, std::function<void(TriVertCollision)> triVertColCallback, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback);
+		void triVertCCD(struct RTCCollision*, unsigned int, std::function<void(TriVertCollision)> triVertColCallback);
+		void edgeEdgeCCD(struct RTCCollision*, unsigned int, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback);
 
 	public:
 		MeshCCD();

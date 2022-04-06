@@ -74,65 +74,42 @@ namespace Kitten {
 			printf("error %d: cannot create device\n", rtcGetDeviceError(NULL));
 		rtcSetDeviceErrorFunction(rtcDevice, rtcErrorFunc, NULL);
 
-		rtcScene = rtcNewScene(rtcDevice);
+		rtcTriScene = rtcNewScene(rtcDevice);
+		rtcEdgeScene = rtcNewScene(rtcDevice);
+		rtcVertScene = rtcNewScene(rtcDevice);
 	}
 
 	MeshCCD::~MeshCCD() {
 		for (auto p : meshes) {
-			rtcDetachGeometry(rtcScene, p.second->geomID);
-			delete[] p.second->ownsEdge;
-			delete[] p.second->ownsVert;
+			rtcDetachGeometry(rtcTriScene, p.second->triGeomID);
+			rtcDetachGeometry(rtcEdgeScene, p.second->edgeGeomID);
+			rtcDetachGeometry(rtcVertScene, p.second->vertGeomID);
+			delete[] p.second->edges;
 			delete p.second;
 		}
-		rtcReleaseScene(rtcScene);
+		rtcReleaseScene(rtcTriScene);
+		rtcReleaseScene(rtcEdgeScene);
+		rtcReleaseScene(rtcVertScene);
 		rtcReleaseDevice(rtcDevice);
 	}
 
-	bvec3* calcEdgeOwnership(Kitten::Mesh* mesh) {
-		bvec3* ownership = new bvec3[mesh->indices.size() / 3];
-
+	ivec2* calcEdgeList(Kitten::Mesh* mesh, int& nEdges) {
 		std::unordered_set<pair<int, int>> edgeSet;
-		for (size_t i = 0; i < mesh->indices.size() / 3; i++) {
-			bvec3 o(true);
-
+		vector<ivec2> edges;
+		for (size_t i = 0; i < mesh->indices.size() / 3; i++)
 			for (int k = 0; k < 3; k++) {
 				auto e = std::make_pair(mesh->indices[k + 3 * i], mesh->indices[((k + 1) % 3) + 3 * i]);
 				if (e.first > e.second) std::swap(e.first, e.second);
-				if (edgeSet.count(e))
-					o[k] = false;
-				else {
-					o[k] = true;
+				if (!edgeSet.count(e)) {
+					edges.push_back({ e.first, e.second });
 					edgeSet.insert(e);
 				}
 			}
-			ownership[i] = o;
-		}
 
-		return ownership;
-	}
-
-	bvec3* calcVertOwnership(Kitten::Mesh* mesh) {
-		bvec3* ownership = new bvec3[mesh->indices.size() / 3];
-		bool* visited = new bool[mesh->vertices.size()];
-		for (size_t i = 0; i < mesh->vertices.size(); i++)
-			visited[i] = false;
-
-		for (size_t i = 0; i < mesh->indices.size() / 3; i++) {
-			bvec3 o(true);
-			for (int k = 0; k < 3; k++) {
-				bool* v = &visited[mesh->indices[k + 3 * i]];
-				if (*v)
-					o[k] = false;
-				else {
-					o[k] = true;
-					*v = true;
-				}
-			}
-			ownership[i] = o;
-		}
-
-		delete[] visited;
-		return ownership;
+		ivec2* dat = new ivec2[edges.size()];
+		memcpy(dat, &edges[0], sizeof(ivec2) * edges.size());
+		nEdges = edges.size();
+		return dat;
 	}
 
 	glm::vec3*& MeshCCD::operator[](Kitten::Mesh* mesh) {
@@ -143,8 +120,7 @@ namespace Kitten {
 		RTCMesh* ptr = new RTCMesh;
 		*ptr = {};
 		ptr->mesh = mesh;
-		ptr->ownsEdge = calcEdgeOwnership(mesh);
-		ptr->ownsVert = calcVertOwnership(mesh);
+		ptr->edges = calcEdgeList(mesh, ptr->nEdges);
 		meshes[mesh] = ptr;
 		return ptr->delta;
 	}
@@ -159,9 +135,10 @@ namespace Kitten {
 
 	void MeshCCD::detach(Kitten::Mesh* mesh) {
 		auto itr = meshes.find(mesh);
-		rtcDetachGeometry(rtcScene, itr->second->geomID);
-		delete[] itr->second->ownsEdge;
-		delete[] itr->second->ownsVert;
+		rtcDetachGeometry(rtcTriScene, itr->second->triGeomID);
+		rtcDetachGeometry(rtcEdgeScene, itr->second->edgeGeomID);
+		rtcDetachGeometry(rtcVertScene, itr->second->vertGeomID);
+		delete[] itr->second->edges;
 		delete itr->second;
 		meshes.erase(itr);
 	}
@@ -170,7 +147,7 @@ namespace Kitten {
 		meshes[mesh]->dirty = true;
 	}
 
-	void boundFunc(const struct RTCBoundsFunctionArguments* args) {
+	void triBoundFunc(const struct RTCBoundsFunctionArguments* args) {
 		MeshCCD::RTCMesh& data = *(MeshCCD::RTCMesh*)args->geometryUserPtr;
 		Kitten::Mesh& mesh = *data.mesh;
 
@@ -191,23 +168,76 @@ namespace Kitten {
 		*(vec3*)&args->bounds_o->upper_x = bound.max;
 	}
 
+	void edgeBoundFunc(const struct RTCBoundsFunctionArguments* args) {
+		MeshCCD::RTCMesh& data = *(MeshCCD::RTCMesh*)args->geometryUserPtr;
+		Kitten::Mesh& mesh = *data.mesh;
+
+		ivec2 i = data.edges[args->primID];
+
+		Kitten::Bound<> bound(mesh.vertices[i.x].pos);
+		bound.absorb(mesh.vertices[i.y].pos);
+
+		if (data.delta) {
+			bound.absorb(mesh.vertices[i.x].pos + data.delta[i.x]);
+			bound.absorb(mesh.vertices[i.y].pos + data.delta[i.y]);
+		}
+
+		*(vec3*)&args->bounds_o->lower_x = bound.min;
+		*(vec3*)&args->bounds_o->upper_x = bound.max;
+	}
+
+	void vertBoundFunc(const struct RTCBoundsFunctionArguments* args) {
+		MeshCCD::RTCMesh& data = *(MeshCCD::RTCMesh*)args->geometryUserPtr;
+		Kitten::Mesh& mesh = *data.mesh;
+
+		Kitten::Bound<> bound(mesh.vertices[args->primID].pos);
+		if (data.delta) bound.absorb(mesh.vertices[args->primID].pos + data.delta[args->primID]);
+
+		*(vec3*)&args->bounds_o->lower_x = bound.min;
+		*(vec3*)&args->bounds_o->upper_x = bound.max;
+	}
+
 	void MeshCCD::rebuildBVH() {
 		// Loop through every mesh
 		for (auto pair : meshes) {
 			// Allocate rtcGeom and attach to scene if needed.
-			if (pair.second->rtcGeom == nullptr) {
-				// Allocate
-				pair.second->rtcGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
-				rtcSetGeometryUserPrimitiveCount(pair.second->rtcGeom, pair.first->indices.size() / 3);
-				rtcSetGeometryUserData(pair.second->rtcGeom, pair.second);
-				rtcSetGeometryBoundsFunction(pair.second->rtcGeom, boundFunc, pair.first);
-				rtcSetGeometryIntersectFunction(pair.second->rtcGeom, nullptr);
-				rtcSetGeometryOccludedFunction(pair.second->rtcGeom, nullptr);
+			if (pair.second->rtcTriGeom == nullptr) {
+				// Allocate tri
+				pair.second->rtcTriGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcTriGeom, pair.first->indices.size() / 3);
+				rtcSetGeometryUserData(pair.second->rtcTriGeom, pair.second);
+				rtcSetGeometryBoundsFunction(pair.second->rtcTriGeom, triBoundFunc, pair.first);
+				rtcSetGeometryIntersectFunction(pair.second->rtcTriGeom, nullptr);
+				rtcSetGeometryOccludedFunction(pair.second->rtcTriGeom, nullptr);
+
+				// Allocate edge
+				pair.second->rtcEdgeGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcEdgeGeom, pair.second->nEdges);
+				rtcSetGeometryUserData(pair.second->rtcEdgeGeom, pair.second);
+				rtcSetGeometryBoundsFunction(pair.second->rtcEdgeGeom, edgeBoundFunc, pair.first);
+				rtcSetGeometryIntersectFunction(pair.second->rtcEdgeGeom, nullptr);
+				rtcSetGeometryOccludedFunction(pair.second->rtcEdgeGeom, nullptr);
+
+				// Allocate vert
+				pair.second->rtcVertGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcVertGeom, pair.first->vertices.size());
+				rtcSetGeometryUserData(pair.second->rtcVertGeom, pair.second);
+				rtcSetGeometryBoundsFunction(pair.second->rtcVertGeom, vertBoundFunc, pair.first);
+				rtcSetGeometryIntersectFunction(pair.second->rtcVertGeom, nullptr);
+				rtcSetGeometryOccludedFunction(pair.second->rtcVertGeom, nullptr);
 
 				// Attach
-				rtcCommitGeometry(pair.second->rtcGeom);
-				pair.second->geomID = rtcAttachGeometry(rtcScene, pair.second->rtcGeom);
-				rtcReleaseGeometry(pair.second->rtcGeom);
+				rtcCommitGeometry(pair.second->rtcTriGeom);
+				pair.second->triGeomID = rtcAttachGeometry(rtcTriScene, pair.second->rtcTriGeom);
+				rtcReleaseGeometry(pair.second->rtcTriGeom);
+
+				rtcCommitGeometry(pair.second->rtcEdgeGeom);
+				pair.second->edgeGeomID = rtcAttachGeometry(rtcEdgeScene, pair.second->rtcEdgeGeom);
+				rtcReleaseGeometry(pair.second->rtcEdgeGeom);
+
+				rtcCommitGeometry(pair.second->rtcVertGeom);
+				pair.second->vertGeomID = rtcAttachGeometry(rtcVertScene, pair.second->rtcVertGeom);
+				rtcReleaseGeometry(pair.second->rtcVertGeom);
 
 				pair.second->dirty = false;
 			}
@@ -215,132 +245,126 @@ namespace Kitten {
 			if (pair.second->dirty) {
 				pair.second->dirty = false;
 				// Recommit
-				rtcCommitGeometry(pair.second->rtcGeom);
+				rtcCommitGeometry(pair.second->rtcTriGeom);
+				rtcCommitGeometry(pair.second->rtcEdgeGeom);
+				rtcCommitGeometry(pair.second->rtcVertGeom);
 			}
 		}
 
-		rtcCommitScene(rtcScene);
+		rtcCommitScene(rtcTriScene);
+		rtcCommitScene(rtcEdgeScene);
+		rtcCommitScene(rtcVertScene);
 	}
 
-	void MeshCCD::triangleCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(TriVertCollision)> triVertColCallback, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback) {
+	void MeshCCD::triVertCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(TriVertCollision)> triVertColCallback) {
+		for (int i = 0; i < num_collisions; i++) {
+			const RTCCollision& col = collisions[i];
+			const RTCMesh& rtcTri = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcTriScene, col.geomID0));
+			const RTCMesh& rtcVert = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcVertScene, col.geomID1));
+
+			Mesh& triMesh = *rtcTri.mesh;
+			Mesh& vertMesh = *rtcVert.mesh;
+
+			ivec3 triIndices = ivec3(0, 1, 2) + 3 * (int)col.primID0;
+			triIndices = ivec3(triMesh.indices[triIndices[0]], triMesh.indices[triIndices[1]], triMesh.indices[triIndices[2]]);
+
+			if (&triMesh == &vertMesh && any(equal(triIndices, ivec3(col.primID1)))) continue;
+
+			mat4x3 pos(
+				triMesh.vertices[triIndices[0]].pos,
+				triMesh.vertices[triIndices[1]].pos,
+				triMesh.vertices[triIndices[2]].pos,
+				vertMesh.vertices[col.primID1].pos
+			);
+
+			mat4x3 delta(0);
+			if (rtcTri.delta) {
+				delta[0] = rtcTri.delta[triIndices[0]];
+				delta[1] = rtcTri.delta[triIndices[1]];
+				delta[2] = rtcTri.delta[triIndices[2]];
+			}
+			if (rtcVert.delta)
+				delta[3] = rtcVert.delta[col.primID1];
+
+			float t;
+			vec3 bary;
+			if (intMovingTriPoint(pos, delta, t, bary)) {
+				// Found intersection
+				mat4x3 cur = pos + t * delta;
+				vec3 norm = cross(cur[1] - cur[0], cur[2] - cur[0]);
+				norm *= sign(dot(norm, mat3(delta) * bary - delta[3]));
+
+				// call callback
+				TriVertCollision dat;
+				dat.triMesh = &triMesh;
+				dat.triIndex = col.primID0;
+
+				dat.vertMesh = &vertMesh;
+				dat.vertIndex = col.primID1;
+
+				dat.t = t;
+				dat.bary = bary;
+				dat.norm = norm;
+
+				triVertColCallback(dat);
+			}
+		}
+	}
+
+	void MeshCCD::edgeEdgeCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback) {
 		for (int i = 0; i < num_collisions; i++) {
 			const RTCCollision& col = collisions[i];
 			if (col.geomID0 == col.geomID1 && col.primID0 == col.primID1) continue;
-			const RTCMesh& artc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcScene, col.geomID0));
-			const RTCMesh& brtc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcScene, col.geomID1));
+			const RTCMesh& artc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcEdgeScene, col.geomID0));
+			const RTCMesh& brtc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcEdgeScene, col.geomID1));
 			Mesh& a = *artc.mesh;
 			Mesh& b = *brtc.mesh;
 
-			// Get indices
-			ivec3 aIndices = ivec3(0, 1, 2) + 3 * (int)col.primID0;
-			aIndices = ivec3(a.indices[aIndices[0]], a.indices[aIndices[1]], a.indices[aIndices[2]]);
-			ivec3 bIndices = ivec3(0, 1, 2) + 3 * (int)col.primID1;
-			bIndices = ivec3(b.indices[bIndices[0]], b.indices[bIndices[1]], b.indices[bIndices[2]]);
+			ivec2 aIndices = artc.edges[col.primID0];
+			ivec2 bIndices = brtc.edges[col.primID1];
 
-			// Get positions
-			mat3 apos(a.vertices[aIndices[0]].pos, a.vertices[aIndices[1]].pos, a.vertices[aIndices[2]].pos);
-			mat3 bpos(b.vertices[bIndices[0]].pos, b.vertices[bIndices[1]].pos, b.vertices[bIndices[2]].pos);
+			if (&a == &b)
+				if (any(equal(aIndices, ivec2(bIndices.x))) ||
+					any(equal(aIndices, ivec2(bIndices.y)))) continue;
 
-			// Get positional deltas
-			mat3 adelta(0);
-			if (artc.delta) adelta = mat3(artc.delta[aIndices[0]], artc.delta[aIndices[1]], artc.delta[aIndices[2]]);
-			mat3 bdelta(0);
-			if (brtc.delta) bdelta = mat3(brtc.delta[bIndices[0]], brtc.delta[bIndices[1]], brtc.delta[bIndices[2]]);
+			mat4x3 pos(
+				a.vertices[aIndices[0]].pos,
+				a.vertices[aIndices[1]].pos,
+				b.vertices[bIndices[0]].pos,
+				b.vertices[bIndices[1]].pos
+			);
 
-			// Perform triangle-vertex tests
-			for (int tri = 0; tri < 2; tri++) {
-				mat4x3 pos(tri ? bpos : apos);
-				mat4x3 delta(tri ? bdelta : adelta);
-				bvec3 ownsVert = tri ? artc.ownsVert[col.primID0] : brtc.ownsVert[col.primID1];
-
-				for (int k = 0; k < 3; k++) {
-					if (!ownsVert[k]) continue;
-					// Ignore the vertex if its part of the triangle.
-					if (&a == &b && any(equal(tri ? bIndices : aIndices, ivec3(tri ? aIndices[k] : bIndices[k]))))
-						continue;
-
-					float t;
-					vec3 bary;
-					pos[3] = tri ? apos[k] : bpos[k];
-					delta[3] = tri ? adelta[k] : bdelta[k];
-
-					if (intMovingTriPoint(pos, delta, t, bary)) {
-						// Found intersection
-						mat4x3 cur = pos + t * delta;
-						vec3 norm = cross(cur[1] - cur[0], cur[2] - cur[0]);
-						norm *= sign(dot(norm, mat3(delta) * bary - delta[3]));
-
-						// call callback
-						TriVertCollision dat;
-						dat.triMesh = tri ? &b : &a;
-						dat.triIndex = tri ? col.primID1 : col.primID0;
-
-						dat.vertMesh = tri ? &a : &b;
-						dat.vertIndex = tri ? aIndices[k] : bIndices[k];
-
-						dat.t = t;
-						dat.bary = bary;
-						dat.norm = norm;
-
-						triVertColCallback(dat);
-					}
-				}
+			mat4x3 delta(0);
+			if (artc.delta) {
+				delta[0] = artc.delta[aIndices[0]];
+				delta[1] = artc.delta[aIndices[1]];
+			}
+			if (brtc.delta) {
+				delta[2] = brtc.delta[bIndices[0]];
+				delta[3] = brtc.delta[bIndices[1]];
 			}
 
-			// Perform edge-edge tests
-			bvec3 aOwnsEdge = artc.ownsEdge[col.primID0];
-			bvec3 bOwnsEdge = brtc.ownsEdge[col.primID1];
-			for (int ka = 0; ka < 3; ka++) {
-				if (!aOwnsEdge[ka]) continue;
-				ivec2 aEdgeOrder(ka, (ka + 1) % 3);
-				mat4x3 pos;
-				mat4x3 delta;
+			float t;
+			vec2 uv;
+			if (intMovingEdgeEdge(pos, delta, t, uv)) {
+				// Found intersection
+				mat4x3 cur = pos + t * delta;
+				vec3 norm = cross(pos[1] - pos[0], pos[2] - pos[0]);
+				norm *= sign(dot(norm, mix(delta[0], delta[1], uv.x) - mix(delta[2], delta[3], uv.y)));
 
-				pos[0] = apos[aEdgeOrder[0]];
-				pos[1] = apos[aEdgeOrder[1]];
-				delta[0] = adelta[aEdgeOrder[0]];
-				delta[1] = adelta[aEdgeOrder[1]];
+				// call callback
+				EdgeEdgeCollision dat;
+				dat.aMesh = &a;
+				dat.bMesh = &b;
 
-				for (int kb = 0; kb < 3; kb++) {
-					if (!bOwnsEdge[kb]) continue;
-					ivec2 bEdgeOrder(kb, (kb + 1) % 3);
+				dat.ai = aIndices;
+				dat.bi = bIndices;
 
-					// Ignore collision if the edges share a vertex
-					if (&a == &b) {
-						ivec2 edge(aIndices[aEdgeOrder.x], aIndices[aEdgeOrder.y]);
-						if (any(equal(edge, ivec2(bIndices[bEdgeOrder.x]))) ||
-							any(equal(edge, ivec2(bIndices[bEdgeOrder.y]))))
-							continue;
-					}
+				dat.t = t;
+				dat.uv = uv;
+				dat.norm = norm;
 
-					pos[2] = bpos[bEdgeOrder[0]];
-					pos[3] = bpos[bEdgeOrder[1]];
-					delta[2] = bdelta[bEdgeOrder[0]];
-					delta[3] = bdelta[bEdgeOrder[1]];
-
-					float t;
-					vec2 uv;
-					if (intMovingEdgeEdge(pos, delta, t, uv)) {
-						// Found intersection
-						mat4x3 cur = pos + t * delta;
-						vec3 norm = cross(pos[1] - pos[0], pos[2] - pos[0]);
-						norm *= sign(dot(norm, mix(delta[0], delta[1], uv.x) - mix(delta[2], delta[3], uv.y)));
-
-						// call callback
-						EdgeEdgeCollision dat;
-						dat.aMesh = &a;
-						dat.bMesh = &b;
-
-						dat.ai = ivec2(aIndices[aEdgeOrder.x], aIndices[aEdgeOrder.y]);
-						dat.bi = ivec2(bIndices[bEdgeOrder.x], bIndices[bEdgeOrder.y]);
-
-						dat.t = t;
-						dat.uv = uv;
-						dat.norm = norm;
-
-						edgeEdgeColCallback(dat);
-					}
-				}
+				edgeEdgeColCallback(dat);
 			}
 		}
 	}
@@ -353,9 +377,14 @@ namespace Kitten {
 		};
 		params p{ this, triVertColCallback, edgeEdgeColCallback };
 
-		rtcCollide(rtcScene, rtcScene, [](void* userPtr, struct RTCCollision* collisions, unsigned int num_collisions) {
+		rtcCollide(rtcTriScene, rtcVertScene, [](void* userPtr, struct RTCCollision* collisions, unsigned int num_collisions) {
 			params& p = *(params*)userPtr;
-			p.ccd->triangleCCD(collisions, num_collisions, p.tvf, p.eef);
+			p.ccd->triVertCCD(collisions, num_collisions, p.tvf);
+			}, &p);
+
+		rtcCollide(rtcEdgeScene, rtcEdgeScene, [](void* userPtr, struct RTCCollision* collisions, unsigned int num_collisions) {
+			params& p = *(params*)userPtr;
+			p.ccd->edgeEdgeCCD(collisions, num_collisions, p.eef);
 			}, &p);
 	}
 }
