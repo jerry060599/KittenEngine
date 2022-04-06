@@ -1,4 +1,5 @@
 #pragma once
+// Jerry Hsu 2022
 
 #include <unordered_map>
 #include <embree3/rtcore.h>
