@@ -80,8 +80,8 @@ namespace Kitten {
 	MeshCCD::~MeshCCD() {
 		for (auto p : meshes) {
 			rtcDetachGeometry(rtcScene, p.second->geomID);
-			delete p.second->ownsEdge;
-			delete p.second->ownsVert;
+			delete[] p.second->ownsEdge;
+			delete[] p.second->ownsVert;
 			delete p.second;
 		}
 		rtcReleaseScene(rtcScene);
@@ -160,8 +160,8 @@ namespace Kitten {
 	void MeshCCD::detach(Kitten::Mesh* mesh) {
 		auto itr = meshes.find(mesh);
 		rtcDetachGeometry(rtcScene, itr->second->geomID);
-		delete itr->second->ownsEdge;
-		delete itr->second->ownsVert;
+		delete[] itr->second->ownsEdge;
+		delete[] itr->second->ownsVert;
 		delete itr->second;
 		meshes.erase(itr);
 	}
