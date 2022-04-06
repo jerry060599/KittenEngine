@@ -78,6 +78,12 @@ namespace Kitten {
 	}
 
 	MeshCCD::~MeshCCD() {
+		for (auto p : meshes) {
+			rtcDetachGeometry(rtcScene, p.second->geomID);
+			delete p.second->ownsEdge;
+			delete p.second->ownsVert;
+			delete p.second;
+		}
 		rtcReleaseScene(rtcScene);
 		rtcReleaseDevice(rtcDevice);
 	}
