@@ -42,7 +42,7 @@ namespace Kitten {
 			float t;
 			// The bary centric coordinates of the collision point on the triangle
 			glm::vec3 bary;
-			// The collision normal
+			// The collision normal (pointing away from tri)
 			glm::vec3 norm;
 		} TriVertCollision;
 
@@ -61,7 +61,7 @@ namespace Kitten {
 			float t;
 			// The position of the collision encoded as u in [0, 1] from a0 to a1 and v in [0, 1] from b0 to b1
 			glm::vec2 uv;
-			// The collision normal
+			// The collision normal (pointing away from a)
 			glm::vec3 norm;
 		} EdgeEdgeCollision;
 

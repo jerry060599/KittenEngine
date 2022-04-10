@@ -327,6 +327,36 @@ namespace std {
 			return s ^ (h + 0x9e3779b9 + (s << 6) + (s >> 2));
 		}
 	};
+
+	template <int N>
+	struct hash<glm::vec<N, int, defaultp>> {
+		std::size_t operator() (const glm::vec<N, int, defaultp>& v) const {
+			size_t h = 0x9e3779b9;
+			for (int i = 0; i < N; i++)
+				h = v[i] ^ (h + 0x9e3779b9 + (v[i] << 6) + (v[i] >> 2));
+			return h;
+		}
+	};
+
+	template <int N>
+	struct hash<glm::vec<N, bool, defaultp>> {
+		std::size_t operator() (const glm::vec<N, int, defaultp>& v) const {
+			size_t h = 0;
+			for (int i = 0; i < N; i++)
+				h = (h << 1) + v[i];
+			return h;
+		}
+	};
+
+	template <int N>
+	struct hash<glm::vec<N, glm::i64, defaultp>> {
+		std::size_t operator() (const glm::vec<N, int, defaultp>& v) const {
+			size_t h = 0x9e3779b9;
+			for (int i = 0; i < N; i++)
+				h = v[i] ^ (h + 0x9e3779b9llu + (v[i] << 6) + (v[i] >> 2));
+			return h;
+		}
+	};
 }
 
 template <int c, int r>

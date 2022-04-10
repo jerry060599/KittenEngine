@@ -32,7 +32,7 @@ namespace Kitten {
 	bool intMovingTriPoint(const mat4x3& points, const mat4x3& deltas, float& t, vec3& bary) {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
-		for (size_t i = 0; i < nt; i++) {
+		for (int i = 0; i < nt; i++) {
 			if (ts[i] < 0) continue;
 			if (ts[i] > 1) return false;
 
@@ -51,7 +51,7 @@ namespace Kitten {
 		return false;
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
-		for (size_t i = 0; i < nt; i++) {
+		for (int i = 0; i < nt; i++) {
 			if (ts[i] < 0) continue;
 			if (ts[i] > 1) return false;
 			mat4x3 x = points + deltas * ts[i];
@@ -108,7 +108,7 @@ namespace Kitten {
 
 		ivec2* dat = new ivec2[edges.size()];
 		memcpy(dat, &edges[0], sizeof(ivec2) * edges.size());
-		nEdges = edges.size();
+		nEdges = (int)edges.size();
 		return dat;
 	}
 
@@ -204,7 +204,7 @@ namespace Kitten {
 			if (pair.second->rtcTriGeom == nullptr) {
 				// Allocate tri
 				pair.second->rtcTriGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
-				rtcSetGeometryUserPrimitiveCount(pair.second->rtcTriGeom, pair.first->indices.size() / 3);
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcTriGeom, (unsigned int)(pair.first->indices.size() / 3));
 				rtcSetGeometryUserData(pair.second->rtcTriGeom, pair.second);
 				rtcSetGeometryBoundsFunction(pair.second->rtcTriGeom, triBoundFunc, pair.first);
 				rtcSetGeometryIntersectFunction(pair.second->rtcTriGeom, nullptr);
@@ -212,7 +212,7 @@ namespace Kitten {
 
 				// Allocate edge
 				pair.second->rtcEdgeGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
-				rtcSetGeometryUserPrimitiveCount(pair.second->rtcEdgeGeom, pair.second->nEdges);
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcEdgeGeom, (unsigned int)pair.second->nEdges);
 				rtcSetGeometryUserData(pair.second->rtcEdgeGeom, pair.second);
 				rtcSetGeometryBoundsFunction(pair.second->rtcEdgeGeom, edgeBoundFunc, pair.first);
 				rtcSetGeometryIntersectFunction(pair.second->rtcEdgeGeom, nullptr);
@@ -220,7 +220,7 @@ namespace Kitten {
 
 				// Allocate vert
 				pair.second->rtcVertGeom = rtcNewGeometry(rtcDevice, RTC_GEOMETRY_TYPE_USER);
-				rtcSetGeometryUserPrimitiveCount(pair.second->rtcVertGeom, pair.first->vertices.size());
+				rtcSetGeometryUserPrimitiveCount(pair.second->rtcVertGeom, (unsigned int)pair.first->vertices.size());
 				rtcSetGeometryUserData(pair.second->rtcVertGeom, pair.second);
 				rtcSetGeometryBoundsFunction(pair.second->rtcVertGeom, vertBoundFunc, pair.first);
 				rtcSetGeometryIntersectFunction(pair.second->rtcVertGeom, nullptr);
@@ -257,7 +257,7 @@ namespace Kitten {
 	}
 
 	void MeshCCD::triVertCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(TriVertCollision)> triVertColCallback) {
-		for (int i = 0; i < num_collisions; i++) {
+		for (unsigned int i = 0; i < num_collisions; i++) {
 			const RTCCollision& col = collisions[i];
 			const RTCMesh& rtcTri = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcTriScene, col.geomID0));
 			const RTCMesh& rtcVert = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcVertScene, col.geomID1));
@@ -312,7 +312,7 @@ namespace Kitten {
 	}
 
 	void MeshCCD::edgeEdgeCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback) {
-		for (int i = 0; i < num_collisions; i++) {
+		for (unsigned int i = 0; i < num_collisions; i++) {
 			const RTCCollision& col = collisions[i];
 			if (col.geomID0 == col.geomID1 && col.primID0 == col.primID1) continue;
 			const RTCMesh& artc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcEdgeScene, col.geomID0));
