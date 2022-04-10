@@ -440,3 +440,14 @@ inline vec3 baryCoord(const mat3& p, const vec3& x) {
 inline vec3 baryCoord(const mat4x3& p) {
 	return baryCoord(*(mat3*)&p, p[3]);
 }
+
+template <typename Real>
+inline Real wrap01(Real x) {
+	return glm::fract(1 + glm::fract(x));
+}
+
+template <typename Real>
+inline Real reflect01(Real x) {
+	x /= 2;
+	return 2 * glm::abs(x - glm::floor(x + (Real)0.5));
+}
