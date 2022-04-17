@@ -93,8 +93,6 @@ void initScene() {
 }
 
 void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
-	if (ImGui::GetIO().WantCaptureMouse) return;
-
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		// Activate rotation mode
 		camRot = true;
@@ -116,8 +114,6 @@ void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
 }
 
 void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
-	if (ImGui::GetIO().WantCaptureMouse) return;
-
 	if (camRot) {
 		vec2* target;
 		target = &camEuler;
@@ -142,6 +138,12 @@ void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
 	}
 }
 
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+	float* target;
+	target = &camDist;
+	*target = glm::max(0.5f, *target * powf(1.2f, (float)yoffset));
+}
+
 void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
 	res.x = width;
 	res.y = height;
@@ -155,22 +157,15 @@ void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
 	if (ImGui::GetIO().WantCaptureMouse) return;
 }
 
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	if (ImGui::GetIO().WantCaptureMouse) return;
-	float* target;
-	target = &camDist;
-	*target = glm::max(0.5f, *target * powf(1.2f, (float)yoffset));
-}
-
 int main(int argc, char** argv) {
 	Kit::initWindow(res);
 	Kit::initRender();
 
-	glfwSetMouseButtonCallback(Kit::window, mouseButtonCallback);
-	glfwSetCursorPosCallback(Kit::window, cursorPosCallback);
-	glfwSetFramebufferSizeCallback(Kit::window, framebufferSizeCallback);
-	glfwSetKeyCallback(Kit::window, keyCallback);
-	glfwSetScrollCallback(Kit::window, scrollCallback);
+	Kit::getIO().mouseButtonCallback = mouseButtonCallback;
+	Kit::getIO().cursorPosCallback = cursorPosCallback;
+	Kit::getIO().scrollCallback = scrollCallback;
+	Kit::getIO().framebufferSizeCallback = framebufferSizeCallback;
+	Kit::getIO().keyCallback = keyCallback;
 
 	if (argc > 1) meshPath = string(argv[1]);
 	initScene();

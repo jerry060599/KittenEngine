@@ -199,10 +199,10 @@ namespace Kitten {
 	}
 
 	void startFrame() {
+		glfwPollEvents();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		glfwPollEvents();
 		checkErr("frame_start");
 	}
 

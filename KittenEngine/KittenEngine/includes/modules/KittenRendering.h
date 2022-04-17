@@ -73,6 +73,7 @@ namespace Kitten {
 	extern Shader* defEnvShader;
 	extern Shader* defBlitShader;
 
+
 	void checkErr(const char* tag = nullptr);
 	void initRender();
 	void startRender();
