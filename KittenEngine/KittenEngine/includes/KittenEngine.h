@@ -67,6 +67,9 @@ int main(int argc, char** argv) {
 		renderGui();		// GUI Render
 		Kit::endFrame();
 	}
+
+	Kit::terminate();
+	return 0;
 }
 
 */

@@ -48,7 +48,6 @@ namespace Kitten {
 
 	// ccd between edges formed by points 0,1 and 2,3.
 	bool intMovingEdgeEdge(const mat4x3& points, const mat4x3& deltas, float& t, vec2& uv) {
-		return false;
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
@@ -199,7 +198,7 @@ namespace Kitten {
 
 	void MeshCCD::rebuildBVH() {
 		// Loop through every mesh
-		for (auto pair : meshes) {
+		for (auto& pair : meshes) {
 			// Allocate rtcGeom and attach to scene if needed.
 			if (pair.second->rtcTriGeom == nullptr) {
 				// Allocate tri
@@ -304,7 +303,7 @@ namespace Kitten {
 
 				dat.t = t;
 				dat.bary = bary;
-				dat.norm = norm;
+				dat.norm = normalize(norm);
 
 				triVertColCallback(dat);
 			}
@@ -362,7 +361,7 @@ namespace Kitten {
 
 				dat.t = t;
 				dat.uv = uv;
-				dat.norm = norm;
+				dat.norm = normalize(norm);
 
 				edgeEdgeColCallback(dat);
 			}

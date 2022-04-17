@@ -22,4 +22,5 @@ namespace Kitten {
 
 	GLFWCallbacks& getIO();
 	void initWindow(glm::ivec2 res, const char* title = "OpenGL Window");
+	void terminate();
 }
