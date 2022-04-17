@@ -49,7 +49,6 @@ void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
 int main(int argc, char** argv) {
 	// Init window and OpenGL
 	Kit::initWindow(res, "OpenGL Window");
-	Kit::initRender();
 
 	// Register callbacks
 	Kit::getIO().mouseButtonCallback = mouseButtonCallback;

@@ -1,4 +1,5 @@
 #include "../includes/modules/KittenInit.h"
+#include "../includes/modules/KittenRendering.h"
 
 #include <iostream>
 #include <imgui_impl_glfw.h>
@@ -89,6 +90,8 @@ namespace Kitten {
 		imGuiCallbacks.framebufferSizeCallback = glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 		imGuiCallbacks.keyCallback = glfwSetKeyCallback(window, keyCallback);
 		imGuiCallbacks.scrollCallback = glfwSetScrollCallback(window, scrollCallback);
+
+		initRender();
 	}
 
 	void terminate() {
