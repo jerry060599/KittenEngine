@@ -133,21 +133,24 @@ void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
 }
 
 int main(int argc, char** argv) {
-	Kit::initWindow(res);
+	// Init window and OpenGL
+	Kit::initWindow(res, "OpenGL Window");
 	Kit::initRender();
 
+	// Register callbacks
 	Kit::getIO().mouseButtonCallback = mouseButtonCallback;
 	Kit::getIO().cursorPosCallback = cursorPosCallback;
 	Kit::getIO().scrollCallback = scrollCallback;
 	Kit::getIO().framebufferSizeCallback = framebufferSizeCallback;
 	Kit::getIO().keyCallback = keyCallback;
 
+	// Init scene
 	initScene();
 
-	while (!glfwWindowShouldClose(Kit::window)) {
+	while (!Kit::shouldClose()) {
 		Kit::startFrame();
-		renderScene();
-		renderGui();
+		renderScene();		// Render
+		renderGui();		// GUI Render
 		Kit::endFrame();
 	}
 }

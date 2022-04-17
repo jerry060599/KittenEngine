@@ -1,12 +1,14 @@
 #pragma once
 
 /*
-
 // KittenEngine Quick Start Skeleton Code
 
-using namespace glm;
+#include "KittenEngine/includes/KittenEngine.h"
 
-vec2 res = vec2(800, 600);
+using namespace glm;
+using namespace std;
+
+ivec2 res(800, 600);
 
 void renderScene() {
 	Kit::startRender();
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
 	// Init scene
 	initScene();
 
-	while (!glfwWindowShouldClose(Kit::window)) {
+	while (!Kit::shouldClose()) {
 		Kit::startFrame();
 		renderScene();		// Render
 		renderGui();		// GUI Render

@@ -71,6 +71,10 @@ namespace Kitten {
 		}
 	}
 
+	bool shouldClose() {
+		return glfwWindowShouldClose(window);
+	}
+
 	void checkErr(const char* tag) {
 		unsigned int error = glGetError();
 		if (error != GL_NO_ERROR)
