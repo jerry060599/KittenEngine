@@ -1,8 +1,8 @@
-#include "KittenEngine/includes/KittenEngine.h"
-#include "KittenEngine/includes/modules/glTempVar.h"
 
 #include <cassert>
 #include <iostream>
+
+#include "KittenEngine/includes/KittenEngine.h"
 
 using namespace glm;
 using namespace std;
@@ -16,11 +16,6 @@ vec2 lastMousePos = vec2(0.0, 0.0);
 bool camRot = false;
 bool camSlide = false;
 
-string meshPath = "resources\\teapot\\teapot.obj";
-
-namespace Kit = Kitten;
-
-Kit::Material quadMat = Kit::defMaterial;
 Kit::Mesh* mesh;
 
 void renderScene() {
@@ -51,11 +46,10 @@ void renderGui() {
 }
 
 void initScene() {
-	Kit::loadAsset(meshPath);
 	Kit::loadDirectory("resources");
-	mesh = (Kit::Mesh*)Kit::resources[meshPath];
+	mesh = (Kit::Mesh*)Kit::resources["resources\\teapot\\teapot.obj"];
 
-	Kit::defMesh->defMaterial = &quadMat;
+	Kit::defMesh->defMaterial = &Kit::defMaterial;
 	Kit::defMesh->defMaterial->props.col = vec4(0.4f, 0.4f, 0.5f, 1);
 	Kit::defMesh->defMaterial->props.col1 = vec4(0.5f, 0.5f, 0.5f, 1);
 	Kit::defMesh->defMaterial->props.params0.x = 6;
@@ -104,33 +98,25 @@ void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
 
 void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
 	if (camRot) {
-		vec2* target;
-		target = &camEuler;
-
 		vec2 curMousePos = vec2(xp, yp);
 		vec2 mouseDelta = curMousePos - lastMousePos;
 		mouseDelta *= 0.8f;
 
-		*target += mouseDelta;
-		(*target).y = glm::clamp((*target).y, -70.f, 70.f);
+		camEuler += mouseDelta;
+		camEuler.y = glm::clamp(camEuler.y, -70.f, 70.f);
 		lastMousePos = curMousePos;
 	}
 	if (camSlide) {
-		float* target;
-		target = &camDist;
-
 		vec2 curMousePos = vec2(xp, yp);
 		vec2 mouseDelta = curMousePos - lastMousePos;
 		mouseDelta *= 0.2f;
-		*target = glm::max(0.5f, *target * powf(1.2f, mouseDelta.x));
+		camDist = glm::max(0.5f, camDist * powf(1.2f, mouseDelta.x));
 		lastMousePos = curMousePos;
 	}
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	float* target;
-	target = &camDist;
-	*target = glm::max(0.5f, *target * powf(1.2f, (float)yoffset));
+	camDist = glm::max(0.5f, camDist * powf(1.2f, (float)yoffset));
 }
 
 void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
@@ -156,7 +142,6 @@ int main(int argc, char** argv) {
 	Kit::getIO().framebufferSizeCallback = framebufferSizeCallback;
 	Kit::getIO().keyCallback = keyCallback;
 
-	if (argc > 1) meshPath = string(argv[1]);
 	initScene();
 
 	while (!glfwWindowShouldClose(Kit::window)) {
