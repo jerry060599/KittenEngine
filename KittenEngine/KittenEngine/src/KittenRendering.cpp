@@ -71,6 +71,10 @@ namespace Kitten {
 		}
 	}
 
+	double getTime() {
+		return glfwGetTime();
+	}
+
 	bool shouldClose() {
 		return glfwWindowShouldClose(window);
 	}
