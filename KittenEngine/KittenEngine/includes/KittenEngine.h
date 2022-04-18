@@ -1,41 +1,50 @@
 #pragma once
 
 /*
+
 // KittenEngine Quick Start Skeleton Code
 
 #include "KittenEngine/includes/KittenEngine.h"
+#include "KittenEngine/includes/modules/BasicCameraControl.h"
 
 using namespace glm;
 using namespace std;
 
-ivec2 res(800, 600);
+Kit::BasicCameraControl camera;
 
 void renderScene() {
 	Kit::startRender();
+	Kit::projMat = glm::perspective(45.0f, Kit::getAspect(), 0.05f, 512.f);
+	Kit::viewMat = camera.getViewMatrix();
+
 	// Do rendering here
 }
 
 void renderGui() {
 	ImGui::Begin("ImGui Window");
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
 	// Do ImGui here
+
 	ImGui::End();
 }
 
 void initScene() {
 	Kit::loadDirectory("resources");
+
 	// Do scene preprocessing here
 }
 
 void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
-	// Mouse inputs here
+	camera.processMouseButton(button, action, mode);
 }
 
 void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
-	// Mouse inputs here
+	camera.processMousePos(xp, yp);
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	// Mouse inputs here
+	camera.processMouseScroll(xoffset, yoffset);
 }
 
 void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
@@ -48,7 +57,7 @@ void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
 
 int main(int argc, char** argv) {
 	// Init window and OpenGL
-	Kit::initWindow(res, "OpenGL Window");
+	Kit::initWindow(ivec2(800, 600), "OpenGL Window");
 
 	// Register callbacks
 	Kit::getIO().mouseButtonCallback = mouseButtonCallback;

@@ -188,6 +188,7 @@
     <ClInclude Include="KittenEngine\includes\KittenEngine.h" />
     <ClInclude Include="KittenEngine\includes\modules\Algo.h" />
     <ClInclude Include="KittenEngine\includes\modules\atomic_map.h" />
+    <ClInclude Include="KittenEngine\includes\modules\BasicCameraControl.h" />
     <ClInclude Include="KittenEngine\includes\modules\Bound.h" />
     <ClInclude Include="KittenEngine\includes\modules\Common.h" />
     <ClInclude Include="KittenEngine\includes\modules\ComputeBuffer.h" />

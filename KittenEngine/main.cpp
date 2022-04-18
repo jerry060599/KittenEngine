@@ -3,29 +3,18 @@
 #include <iostream>
 
 #include "KittenEngine/includes/KittenEngine.h"
+#include "KittenEngine/includes/modules/BasicCameraControl.h"
 
 using namespace glm;
 using namespace std;
 
-ivec2 res(800, 600);
-
-vec2 camEuler = vec2(30.0, 30.0);
-float camDist = 2;
-
-vec2 lastMousePos = vec2(0.0, 0.0);
-bool camRot = false;
-bool camSlide = false;
-
+Kit::BasicCameraControl camera;
 Kit::Mesh* mesh;
 
 void renderScene() {
 	Kit::lights[0].dir = -normalize(Kit::lights[0].pos);
-
-	float aspect = (float)res.x / (float)res.y;
-	Kit::projMat = glm::perspective(45.0f, aspect, 0.05f, 512.f);
-	Kit::viewMat = glm::rotate(glm::mat4(1.0f), glm::radians(camEuler.y), { 1.0f, 0.0f, 0.0f });
-	Kit::viewMat = glm::rotate(Kit::viewMat, glm::radians(camEuler.x), { 0.0f, 1.0f, 0.0f });
-	Kit::viewMat = glm::translate(mat4(1.f), { 0.0f, 0.0f, -camDist }) * Kit::viewMat;
+	Kit::projMat = glm::perspective(45.0f, Kit::getAspect(), 0.05f, 512.f);
+	Kit::viewMat = camera.getViewMatrix();
 
 	// Render everything
 	Kit::startRender();
@@ -73,74 +62,35 @@ void initScene() {
 	light.hasShadow = true;
 	light.type = (int)Kit::KittenLight::SPOT;
 	Kit::lights.push_back(light);
+
+	camera.angle = vec2(30, 30);
 }
 
 void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		// Activate rotation mode
-		camRot = true;
-		double xpos, ypos;
-		glfwGetCursorPos(w, &xpos, &ypos);
-		lastMousePos = glm::vec2(xpos, ypos);
-	}
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-		// Activate rotation mode
-		camSlide = true;
-		double xpos, ypos;
-		glfwGetCursorPos(w, &xpos, &ypos);
-		lastMousePos = glm::vec2(xpos, ypos);
-	}
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-		camRot = false;
-	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-		camSlide = false;
+	camera.processMouseButton(button, action, mode);
 }
 
 void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
-	if (camRot) {
-		vec2 curMousePos = vec2(xp, yp);
-		vec2 mouseDelta = curMousePos - lastMousePos;
-		mouseDelta *= 0.8f;
-
-		camEuler += mouseDelta;
-		camEuler.y = glm::clamp(camEuler.y, -70.f, 70.f);
-		lastMousePos = curMousePos;
-	}
-	if (camSlide) {
-		vec2 curMousePos = vec2(xp, yp);
-		vec2 mouseDelta = curMousePos - lastMousePos;
-		mouseDelta *= 0.2f;
-		camDist = glm::max(0.5f, camDist * powf(1.2f, mouseDelta.x));
-		lastMousePos = curMousePos;
-	}
+	camera.processMousePos(xp, yp);
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	camDist = glm::max(0.5f, camDist * powf(1.2f, (float)yoffset));
-}
-
-void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
-	res.x = width;
-	res.y = height;
-	glViewport(0, 0, width, height);
+	camera.processMouseScroll(xoffset, yoffset);
 }
 
 void keyCallback(GLFWwindow* w, int key, int scancode, int action, int mode) {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(w, true);
-
-	if (ImGui::GetIO().WantCaptureMouse) return;
 }
 
 int main(int argc, char** argv) {
 	// Init window and OpenGL
-	Kit::initWindow(res, "OpenGL Window");
+	Kit::initWindow(ivec2(800, 600), "OpenGL Window");
 
 	// Register callbacks
 	Kit::getIO().mouseButtonCallback = mouseButtonCallback;
 	Kit::getIO().cursorPosCallback = cursorPosCallback;
 	Kit::getIO().scrollCallback = scrollCallback;
-	Kit::getIO().framebufferSizeCallback = framebufferSizeCallback;
 	Kit::getIO().keyCallback = keyCallback;
 
 	// Init scene

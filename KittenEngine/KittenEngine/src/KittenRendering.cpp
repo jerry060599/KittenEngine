@@ -42,6 +42,8 @@ namespace Kitten {
 	bool initialized = false;
 	vector<FrameBuffer*> shadowMaps;
 
+	ivec2 windowRes;
+
 	void allocShadowMaps() {
 		while (lights.size() > shadowMaps.size())
 			shadowMaps.push_back(new FrameBuffer(shadowRes, shadowRes, 0));
@@ -73,6 +75,10 @@ namespace Kitten {
 
 	double getTime() {
 		return glfwGetTime();
+	}
+
+	float getAspect() {
+		return windowRes.x / (float)windowRes.y;
 	}
 
 	bool shouldClose() {

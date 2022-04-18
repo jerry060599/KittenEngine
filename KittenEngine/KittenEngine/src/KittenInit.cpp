@@ -39,6 +39,10 @@ namespace Kitten {
 	}
 
 	void framebufferSizeCallback(GLFWwindow* w, int width, int height) {
+		windowRes.x = width;
+		windowRes.y = height;
+		glViewport(0, 0, width, height);
+
 		if (imGuiCallbacks.framebufferSizeCallback)
 			imGuiCallbacks.framebufferSizeCallback(w, width, height);
 		if (glfwCallbacks.framebufferSizeCallback)
@@ -53,6 +57,7 @@ namespace Kitten {
 	}
 
 	void initWindow(glm::ivec2 res, const char* title) {
+		windowRes = res;
 		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);

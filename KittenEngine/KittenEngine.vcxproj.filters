@@ -167,5 +167,8 @@
     <ClInclude Include="KittenEngine\opt\polynomial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\BasicCameraControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
