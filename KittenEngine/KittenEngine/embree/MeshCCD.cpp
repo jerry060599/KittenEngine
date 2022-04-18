@@ -25,7 +25,7 @@ namespace Kitten {
 		poly[2] = dot(e2, d0xd1) + dot(d2, cs);
 		poly[3] = dot(d0xd1, d2);
 
-		return cy::PolynomialRoots<3>((float*)&t, poly);
+		return cy::PolynomialRoots<3>((float*)&t, poly, -4e-5f, 1 + 4e-5f, 1e-5f);
 	}
 
 	// ccd between triangle formed by points 0,1,2 and point 3.
@@ -38,7 +38,7 @@ namespace Kitten {
 
 			mat4x3 x = points + deltas * ts[i];
 			bary = baryCoord(x);
-			if (all(greaterThanEqual(bary, vec3(0)))) {
+			if (all(greaterThanEqual(bary, vec3(-5 * numeric_limits<float>::epsilon())))) {
 				t = ts[i];
 				return true;
 			}
@@ -55,7 +55,7 @@ namespace Kitten {
 			if (ts[i] > 1) return false;
 			mat4x3 x = points + deltas * ts[i];
 			uv = lineClosestPoints(x[0], x[1], x[2], x[3]);
-			if (lineHasInt(uv)) {
+			if (uv.x >= -1e-7 && uv.x <= 1 + 1e-7 && uv.y >= -1e-7 && uv.y <= 1 + 1e-7) {
 				t = ts[i];
 				return true;
 			}
