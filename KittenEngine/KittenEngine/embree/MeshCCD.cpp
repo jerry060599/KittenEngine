@@ -7,25 +7,29 @@
 namespace Kitten {
 	// Determines when the tetrahedra formed by the four points in p becomes degenerate
 	int planarMovingPoints(const mat4x3& p, const mat4x3& d, vec3& t) {
-		vec3 e0 = p[1] - p[0];
-		vec3 e1 = p[2] - p[0];
-		vec3 e2 = p[3] - p[0];
+		dvec3 e0 = dvec3(p[1]) - dvec3(p[0]);
+		dvec3 e1 = dvec3(p[2]) - dvec3(p[0]);
+		dvec3 e2 = dvec3(p[3]) - dvec3(p[0]);
 
-		vec3 d0 = d[1] - d[0];
-		vec3 d1 = d[2] - d[0];
-		vec3 d2 = d[3] - d[0];
+		dvec3 d0 = dvec3(d[1]) - dvec3(d[0]);
+		dvec3 d1 = dvec3(d[2]) - dvec3(d[0]);
+		dvec3 d2 = dvec3(d[3]) - dvec3(d[0]);
 
-		vec3 e0xe1 = cross(e0, e1);
-		vec3 d0xd1 = cross(d0, d1);
-		vec3 cs = cross(e0, d1) + cross(d0, e1);
+		dvec3 e0xe1 = cross(e0, e1);
+		dvec3 d0xd1 = cross(d0, d1);
+		dvec3 cs = cross(e0, d1) + cross(d0, e1);
 
-		float poly[4];
+		double poly[4];
 		poly[0] = dot(e0xe1, e2);
 		poly[1] = dot(d2, e0xe1) + dot(e2, cs);
 		poly[2] = dot(e2, d0xd1) + dot(d2, cs);
 		poly[3] = dot(d0xd1, d2);
 
-		return cy::PolynomialRoots<3>((float*)&t, poly, -4e-5f, 1 + 4e-5f, 1e-5f);
+		dvec3 dt;
+		int n = cy::PolynomialRoots<3>((double*)&dt, poly, -1e-6, 1 + 1e-6, 1e-9);
+
+		t = vec3(dt);
+		return n;
 	}
 
 	// ccd between triangle formed by points 0,1,2 and point 3.
@@ -33,9 +37,6 @@ namespace Kitten {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
-			if (ts[i] < 0) continue;
-			if (ts[i] > 1) return false;
-
 			mat4x3 x = points + deltas * ts[i];
 			bary = baryCoord(x);
 			if (all(greaterThanEqual(bary, vec3(-5 * numeric_limits<float>::epsilon())))) {
@@ -51,8 +52,6 @@ namespace Kitten {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
-			if (ts[i] < 0) continue;
-			if (ts[i] > 1) return false;
 			mat4x3 x = points + deltas * ts[i];
 			uv = lineClosestPoints(x[0], x[1], x[2], x[3]);
 			if (uv.x >= -1e-7 && uv.x <= 1 + 1e-7 && uv.y >= -1e-7 && uv.y <= 1 + 1e-7) {
