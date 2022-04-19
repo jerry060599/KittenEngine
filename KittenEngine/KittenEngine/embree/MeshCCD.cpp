@@ -47,15 +47,30 @@ namespace Kitten {
 		return false;
 	}
 
+	inline vec3 largestMag(vec3 a, vec3 b) {
+		return length2(a) > length2(b) ? a : b;
+	}
+
 	// ccd between edges formed by points 0,1 and 2,3.
 	bool intMovingEdgeEdge(const mat4x3& points, const mat4x3& deltas, float& t, vec2& uv) {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
 			mat4x3 x = points + deltas * ts[i];
-			uv = lineClosestPoints(x[0], x[1], x[2], x[3]);
-			if (uv.x >= -1e-7 && uv.x <= 1 + 1e-7 && uv.y >= -1e-7 && uv.y <= 1 + 1e-7) {
-				t = ts[i];
+			vec3 ad = x[1] - x[0];
+			vec3 bd = x[3] - x[2];
+			vec3 diff = x[2] - x[0];
+
+			vec3 norm = largestMag(cross(ad, bd), cross(ad, diff));
+			vec3 an = cross(norm, ad);
+			vec3 bn = cross(norm, bd);
+
+			float ax = dot(diff, an);
+			float bx = -dot(diff, bn);
+
+			if (ax * (ax + dot(bd, an)) <= 0 &&
+				bx * (bx + dot(ad, bn)) <= 0) {
+				uv = lineClosestPoints(x[0], x[1], x[2], x[3]);
 				return true;
 			}
 		}
@@ -347,7 +362,7 @@ namespace Kitten {
 			if (intMovingEdgeEdge(pos, delta, t, uv)) {
 				// Found intersection
 				mat4x3 cur = pos + t * delta;
-				vec3 norm = cross(pos[1] - pos[0], pos[2] - pos[0]);
+				vec3 norm = cross(pos[1] - pos[0], pos[3] - pos[2]);
 				norm *= sign(dot(norm, mix(delta[0], delta[1], uv.x) - mix(delta[2], delta[3], uv.y)));
 
 				// call callback
