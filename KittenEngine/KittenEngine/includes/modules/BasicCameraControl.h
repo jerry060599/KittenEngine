@@ -62,8 +62,7 @@ namespace Kitten {
 			vec2 mouseDelta = mousePos - lastMousePos;
 
 			if (buttonDown[0]) {
-				vec3 dir = inverse(mat3(getViewMatrix())) *
-					vec4(-mouseSensitivity.x * mouseDelta.x, mouseSensitivity.y * mouseDelta.y, 0, 0);
+				vec3 dir = vec4(-mouseSensitivity.x * mouseDelta.x, mouseSensitivity.y * mouseDelta.y, 0, 0) * mat3(getViewMatrix());
 				pos += distance * moveSpeed * dir;
 			}
 			if (buttonDown[1]) {
