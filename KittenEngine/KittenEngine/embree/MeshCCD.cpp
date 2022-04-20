@@ -33,11 +33,11 @@ namespace Kitten {
 	}
 
 	// ccd between triangle formed by points 0,1,2 and point 3.
-	bool intMovingTriPoint(const mat4x3& points, const mat4x3& deltas, float& t, vec3& bary) {
+	bool intMovingTriPoint(const mat4x3& points, const mat4x3& deltas, mat4x3& x, float& t, vec3& bary) {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
-			mat4x3 x = points + deltas * ts[i];
+			x = points + deltas * ts[i];
 			bary = baryCoord(x);
 			if (all(greaterThanEqual(bary, vec3(-5 * numeric_limits<float>::epsilon())))) {
 				t = ts[i];
@@ -52,24 +52,25 @@ namespace Kitten {
 	}
 
 	// ccd between edges formed by points 0,1 and 2,3.
-	bool intMovingEdgeEdge(const mat4x3& points, const mat4x3& deltas, float& t, vec2& uv) {
+	bool intMovingEdgeEdge(const mat4x3& points, const mat4x3& deltas, mat4x3& x, float& t, vec2& uv, vec3& norm) {
 		vec3 ts;
 		int nt = planarMovingPoints(points, deltas, ts);
 		for (int i = 0; i < nt; i++) {
-			mat4x3 x = points + deltas * ts[i];
+			x = points + deltas * ts[i];
 			vec3 ad = x[1] - x[0];
 			vec3 bd = x[3] - x[2];
 			vec3 diff = x[2] - x[0];
 
-			vec3 norm = largestMag(cross(ad, bd), cross(ad, diff));
+			norm = largestMag(cross(ad, bd), cross(ad, diff));
 			vec3 an = cross(norm, ad);
 			vec3 bn = cross(norm, bd);
 
 			float ax = dot(diff, an);
+			ax *= (ax + dot(bd, an));
 			float bx = -dot(diff, bn);
+			bx *= (bx + dot(ad, bn));
 
-			if (ax * (ax + dot(bd, an)) <= 0 &&
-				bx * (bx + dot(ad, bn)) <= 0) {
+			if (ax <= 0 && bx <= 0 && (ax != 0 || bx != 0)) {
 				uv = lineClosestPoints(x[0], x[1], x[2], x[3]);
 				return true;
 			}
@@ -258,8 +259,11 @@ namespace Kitten {
 			if (pair.second->dirty) {
 				pair.second->dirty = false;
 				// Recommit
+				rtcUpdateGeometryBuffer(pair.second->rtcTriGeom, RTC_BUFFER_TYPE_VERTEX, 0);
 				rtcCommitGeometry(pair.second->rtcTriGeom);
+				rtcUpdateGeometryBuffer(pair.second->rtcEdgeGeom, RTC_BUFFER_TYPE_VERTEX, 0);
 				rtcCommitGeometry(pair.second->rtcEdgeGeom);
+				rtcUpdateGeometryBuffer(pair.second->rtcVertGeom, RTC_BUFFER_TYPE_VERTEX, 0);
 				rtcCommitGeometry(pair.second->rtcVertGeom);
 			}
 		}
@@ -270,7 +274,7 @@ namespace Kitten {
 	}
 
 	void MeshCCD::triVertCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(TriVertCollision)> triVertColCallback) {
-		for (unsigned int i = 0; i < num_collisions; i++) {
+		for (int i = 0; i < (int)num_collisions; i++) {
 			const RTCCollision& col = collisions[i];
 			const RTCMesh& rtcTri = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcTriScene, col.geomID0));
 			const RTCMesh& rtcVert = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcVertScene, col.geomID1));
@@ -283,7 +287,7 @@ namespace Kitten {
 
 			if (&triMesh == &vertMesh && any(equal(triIndices, ivec3(col.primID1)))) continue;
 
-			mat4x3 pos(
+			const mat4x3 pos(
 				triMesh.vertices[triIndices[0]].pos,
 				triMesh.vertices[triIndices[1]].pos,
 				triMesh.vertices[triIndices[2]].pos,
@@ -299,25 +303,29 @@ namespace Kitten {
 			if (rtcVert.delta)
 				delta[3] = rtcVert.delta[col.primID1];
 
-			float t;
-			vec3 bary;
-			if (intMovingTriPoint(pos, delta, t, bary)) {
+			mat4x3 cur;
+			TriVertCollision dat;
+			if (intMovingTriPoint(pos, delta, cur, dat.t, dat.bary)) {
+				if (!all(isfinite(dat.bary))) continue;
+
 				// Found intersection
-				mat4x3 cur = pos + t * delta;
-				vec3 norm = cross(cur[1] - cur[0], cur[2] - cur[0]);
-				norm *= sign(dot(norm, mat3(delta) * bary - delta[3]));
+				dat.norm = cross(cur[1] - cur[0], cur[2] - cur[0]);
+				vec3 relDelta = delta * vec4(dat.bary, -1);
+
+				float s = dot(dat.norm, relDelta);
+				if (s < 0) dat.norm *= -1;
+				else if (s == 0) continue; // Discard in favor of edge-edge collision.
+
+				float d = length2(dat.norm);
+				if (d > 0) dat.norm *= inversesqrt(d);
+				else continue;
 
 				// call callback
-				TriVertCollision dat;
 				dat.triMesh = &triMesh;
-				dat.triIndex = col.primID0;
-
 				dat.vertMesh = &vertMesh;
-				dat.vertIndex = col.primID1;
 
-				dat.t = t;
-				dat.bary = bary;
-				dat.norm = normalize(norm);
+				dat.triIndex = col.primID0;
+				dat.vertIndex = col.primID1;
 
 				triVertColCallback(dat);
 			}
@@ -325,7 +333,7 @@ namespace Kitten {
 	}
 
 	void MeshCCD::edgeEdgeCCD(struct RTCCollision* collisions, unsigned int num_collisions, std::function<void(EdgeEdgeCollision)> edgeEdgeColCallback) {
-		for (unsigned int i = 0; i < num_collisions; i++) {
+		for (int i = 0; i < (int)num_collisions; i++) {
 			const RTCCollision& col = collisions[i];
 			if (col.geomID0 == col.geomID1 && col.primID0 == col.primID1) continue;
 			const RTCMesh& artc = *(RTCMesh*)rtcGetGeometryUserData(rtcGetGeometry(rtcEdgeScene, col.geomID0));
@@ -333,14 +341,14 @@ namespace Kitten {
 			Mesh& a = *artc.mesh;
 			Mesh& b = *brtc.mesh;
 
-			ivec2 aIndices = artc.edges[col.primID0];
-			ivec2 bIndices = brtc.edges[col.primID1];
+			const ivec2 aIndices = artc.edges[col.primID0];
+			const ivec2 bIndices = brtc.edges[col.primID1];
 
 			if (&a == &b)
 				if (any(equal(aIndices, ivec2(bIndices.x))) ||
 					any(equal(aIndices, ivec2(bIndices.y)))) continue;
 
-			mat4x3 pos(
+			const mat4x3 pos(
 				a.vertices[aIndices[0]].pos,
 				a.vertices[aIndices[1]].pos,
 				b.vertices[bIndices[0]].pos,
@@ -357,25 +365,31 @@ namespace Kitten {
 				delta[3] = brtc.delta[bIndices[1]];
 			}
 
-			float t;
-			vec2 uv;
-			if (intMovingEdgeEdge(pos, delta, t, uv)) {
+			mat4x3 cur;
+			EdgeEdgeCollision dat;
+			if (intMovingEdgeEdge(pos, delta, cur, dat.t, dat.uv, dat.norm)) {
 				// Found intersection
-				mat4x3 cur = pos + t * delta;
-				vec3 norm = cross(pos[1] - pos[0], pos[3] - pos[2]);
-				norm *= sign(dot(norm, mix(delta[0], delta[1], uv.x) - mix(delta[2], delta[3], uv.y)));
+				vec3 relDelta = delta * vec4(1 - dat.uv.x, dat.uv.x, dat.uv.y - 1, -dat.uv.y);
+
+				float s = dot(dat.norm, relDelta);
+				if (s < 0) dat.norm *= -1;
+				else if (s == 0) {
+					dat.uv = clamp(lineClosestPoints(pos[0], pos[1], pos[2], pos[3]), vec2(0), vec2(1));
+					dat.norm = delta * vec4(1 - dat.uv.x, dat.uv.x, dat.uv.y - 1, -dat.uv.y);
+				}
+
+				if (!all(isfinite(dat.uv))) continue;
+
+				float d = length2(dat.norm);
+				if (d > 0) dat.norm *= inversesqrt(d);
+				else continue;
 
 				// call callback
-				EdgeEdgeCollision dat;
 				dat.aMesh = &a;
 				dat.bMesh = &b;
 
 				dat.ai = aIndices;
 				dat.bi = bIndices;
-
-				dat.t = t;
-				dat.uv = uv;
-				dat.norm = normalize(norm);
 
 				edgeEdgeColCallback(dat);
 			}

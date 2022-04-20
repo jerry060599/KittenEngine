@@ -171,4 +171,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="KittenEngine\shaders\blingBase.frag" />
+    <CopyFileToFolders Include="KittenEngine\shaders\blingBase.vert" />
+    <CopyFileToFolders Include="KittenEngine\shaders\blingForward.frag" />
+    <CopyFileToFolders Include="KittenEngine\shaders\blingForward.vert" />
+    <CopyFileToFolders Include="KittenEngine\shaders\blit.frag" />
+    <CopyFileToFolders Include="KittenEngine\shaders\blit.vert" />
+    <CopyFileToFolders Include="KittenEngine\shaders\env.frag" />
+    <CopyFileToFolders Include="KittenEngine\shaders\env.vert" />
+    <CopyFileToFolders Include="KittenEngine\shaders\kittenCommon.glsl" />
+    <CopyFileToFolders Include="KittenEngine\shaders\kittenCommonFrag.glsl" />
+    <CopyFileToFolders Include="KittenEngine\shaders\kittenCommonVert.glsl" />
+    <CopyFileToFolders Include="KittenEngine\shaders\kittenLighting.glsl" />
+    <CopyFileToFolders Include="KittenEngine\shaders\kittenUtils.glsl" />
+    <CopyFileToFolders Include="KittenEngine\shaders\unlit.frag" />
+    <CopyFileToFolders Include="KittenEngine\shaders\unlit.vert" />
+  </ItemGroup>
 </Project>

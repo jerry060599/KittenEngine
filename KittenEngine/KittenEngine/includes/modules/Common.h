@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <string>
 #include <functional>
 #include "Timer.h"
@@ -383,6 +384,16 @@ void print(vec<s, float, defaultp> v, const char* format = "%.4f") {
 	printf("}\n");
 }
 
+template <int s>
+void print(vec<s, int, defaultp> v, const char* format = "%d") {
+	printf("{");
+	for (int i = 0; i < s; i++) {
+		printf(format, v[i]);
+		if (i != s - 1) printf(", ");
+	}
+	printf("}\n");
+}
+
 /// <summary>
 /// Performs the element-wise multiplcation of a .* b
 /// </summary>
@@ -445,4 +456,12 @@ template <typename Real>
 inline Real reflect01(Real x) {
 	x /= 2;
 	return 2 * glm::abs(x - glm::floor(x + (Real)0.5));
+}
+
+template <int s, typename T>
+inline void sort(vec<s, T, defaultp>& v) {
+	for (int i = s - 1; i > 0; --i)
+		for (int j = 0; j < i; ++j)
+			if (v[j] > v[j + 1])
+				std::swap(v[j], v[j + 1]);
 }

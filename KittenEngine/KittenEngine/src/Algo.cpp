@@ -139,13 +139,22 @@ Eigen::VectorXd Kitten::bccg(
 
 	// Initialize preconditioner
 	VectorXd invDiag(A.rows());
-	VectorXd x(invDiag.size());
+	//VectorXd x(invDiag.size());
+	VectorXd x;
+
+	{
+		ConjugateGradient<SparseMatrix<double, RowMajor>, Lower | Upper, DiagonalPreconditioner<double>> cg;
+		cg.setTolerance(tol);
+		cg.compute(A);
+		x = cg.solve(b);
+	}
+	printf("sdfg");
 
 #pragma omp parallel for schedule(static, 512)
 	for (int i = 0; i < x.size(); i++) {
 		double v = A.coeff(i, i);
 		invDiag[i] = abs(v) < 1e-10 ? 1 : 1 / v;
-		x[i] = std::max(0., lower[i]);
+		x[i] = std::max(x[i], lower[i]);
 	}
 
 	VectorXd r_tilde = b - A * x;
