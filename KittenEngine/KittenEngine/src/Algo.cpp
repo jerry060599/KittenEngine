@@ -144,11 +144,10 @@ Eigen::VectorXd Kitten::bccg(
 
 	{
 		ConjugateGradient<SparseMatrix<double, RowMajor>, Lower | Upper, DiagonalPreconditioner<double>> cg;
-		cg.setTolerance(tol);
+		cg.setTolerance(512 * tol);
 		cg.compute(A);
 		x = cg.solve(b);
 	}
-	printf("sdfg");
 
 #pragma omp parallel for schedule(static, 512)
 	for (int i = 0; i < x.size(); i++) {
