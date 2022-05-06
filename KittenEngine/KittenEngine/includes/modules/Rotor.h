@@ -5,39 +5,20 @@ namespace Kitten {
 		glm::vec3 q;	// The bivector part laid out in the { y^z, -x^z, x^y } basis
 		float w;		// The scaler part
 
-		inline void setFromOuter(glm::vec3 a, glm::vec3 b) {
-			q = cross(a, b);
-			q.y = -q.y;
-			w = dot(a, b);
-		}
-
-		static Rotor outerProduct(glm::vec3 a, glm::vec3 b) {
-			Rotor r;
-			r.setFromOuter(a, b);
-			return r;
-		}
-
 		static Rotor angleAxis(float rad, glm::vec3 axis) {
-			mat3 basis = orthoBasisZ(axis);
 			rad /= 2;
-			return outerProduct(basis[1], cos(rad) * basis[1] + sin(rad) * basis[0]);
+			axis.y = -axis.y;
+			return Rotor(sin(rad) * axis, cos(rad));
 		}
 
 		static Rotor eulerAngles(vec3 rad) {
 			rad /= 2;
 			vec3 c = cos(rad);
 			vec3 s = sin(rad);
-			return outerProduct(vec3(0, 1, 0), vec3(s.z, c.z, 0))
-				* outerProduct(vec3(1, 0, 0), vec3(c.y, 0, s.y))
-				* outerProduct(vec3(0, 0, 1), vec3(0, s.x, c.x));
+			return Rotor(vec3(0, 0, s.z), c.z) * Rotor(vec3(0, -s.y, 0), c.y) * Rotor(vec3(s.x, 0, 0), c.x);
 		}
 
 		Rotor() : q(vec3(0)), w(1) {}
-
-		// The geometric product a*b
-		Rotor(glm::vec3 a, glm::vec3 b) {
-			setFromOuter(a, b);
-		}
 
 		Rotor(glm::vec3 q, float w) : q(q), w(w) {}
 
@@ -65,7 +46,13 @@ namespace Kitten {
 			return abT(q, q) + mat3(w * w) + 2 * w * cm + cm * cm;
 		}
 
-		// glm::vec3 euler() { }
+		glm::vec3 euler() {
+			return vec3(
+				atan2(2 * (w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y)),
+				-asin(2 * (w * q.y - q.x * q.z)),
+				atan2(2 * (w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
+			);
+		}
 
 		friend glm::vec3 operator*(Rotor lhs, const glm::vec3& rhs) {
 			return lhs.rotate(rhs);
