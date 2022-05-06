@@ -143,6 +143,7 @@ namespace Kitten {
 		}
 	};
 
+	// mix rotors a to b from t=[0, 1] (unclamped)
 	inline Rotor mix(Rotor a, Rotor b, float t) {
 		return (t * (b * a.inverse())) * a;
 	}
