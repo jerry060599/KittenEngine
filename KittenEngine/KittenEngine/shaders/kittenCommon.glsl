@@ -31,3 +31,14 @@ vec3 camWPos() {
 vec3 getViewDir(vec3 worldPos){
 	return normalize(camWPos() - worldPos);
 }
+
+vec3 applyRotor(vec4 r, vec3 v) {
+	// Calculate v * ab
+	vec3 a = r.w * v + cross(r.xyz, v);	// The vector
+	float c = dot(v, r.xyz);			// The trivector
+
+	// Calculate (r.w - r.xyz) * (a + c). Ignoring the scaler-trivector parts
+	return r.w * a			// The scaler-vector product
+		+ cross(r.xyz, a)	// The bivector-vector product
+		+ c * r.xyz;		// The bivector-trivector product
+}

@@ -6,6 +6,7 @@
 #include <glad/glad.h> 
 #include <glm/glm.hpp>
 #include "ComputeBuffer.h"
+#include "Rotor.h"
 
 using namespace std;
 namespace Kitten {
@@ -42,6 +43,7 @@ namespace Kitten {
 		void setFloat2(const char* name, glm::vec2 v);
 		void setFloat3(const char* name, glm::vec3 v);
 		void setFloat4(const char* name, glm::vec4 v);
+		void setRotor(const char* name, Rotor v);
 		void setMat2(const char* name, glm::mat2 v);
 		void setMat3(const char* name, glm::mat3 v);
 		void setMat4(const char* name, glm::mat4 v);

@@ -77,7 +77,9 @@ namespace Kitten {
 		unuse();
 	}
 
-	void Shader::setBuffer(const char* name, ComputeBuffer* buffer) {/*
+	void Shader::setBuffer(const char* name, ComputeBuffer* buffer) {
+		throw new exception("TODO here.");
+		/*
 		glUseProgram(glHandle);
 		int binding = glGetProgramResourceIndex(glHandle, GL_SHADER_STORAGE_BLOCK, name);
 		//glGetActiveUniformBlockiv(glHandle, glGetUniformLocation(glHandle, name), GL_UNIFORM_BLOCK_BINDING, &binding);
@@ -88,56 +90,52 @@ namespace Kitten {
 	}
 
 	void Shader::setBool(const char* name, bool v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform1i(glGetUniformLocation(glHandle, name), v);
-		glUseProgram(0);
 	}
 
 	void Shader::setInt(const char* name, int v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform1i(glGetUniformLocation(glHandle, name), v);
-		glUseProgram(0);
 	}
 
 	void Shader::setFloat(const char* name, float v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform1f(glGetUniformLocation(glHandle, name), v);
-		glUseProgram(0);
 	}
 
 	void Shader::setFloat2(const char* name, glm::vec2 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform2fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
-		glUseProgram(0);
 	}
 
 	void Shader::setFloat3(const char* name, glm::vec3 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform3fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
-		glUseProgram(0);
 	}
 
 	void Shader::setFloat4(const char* name, glm::vec4 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniform4fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
-		glUseProgram(0);
+	}
+
+	void Shader::setRotor(const char* name, Rotor v) {
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glUniform4fv(glGetUniformLocation(glHandle, name), 1, (float*)&v);
 	}
 
 	void Shader::setMat2(const char* name, glm::mat2 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniformMatrix2fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
-		glUseProgram(0);
 	}
 
 	void Shader::setMat3(const char* name, glm::mat3 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniformMatrix3fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
-		glUseProgram(0);
 	}
 
 	void Shader::setMat4(const char* name, glm::mat4 v) {
-		glUseProgram(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
 		glUniformMatrix4fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
-		glUseProgram(0);
 	}
 }
