@@ -465,3 +465,12 @@ inline void sort(vec<s, T, defaultp>& v) {
 			if (v[j] > v[j + 1])
 				std::swap(v[j], v[j + 1]);
 }
+
+template <typename T>
+inline mat<3, 3, T, defaultp> crossMatrix(vec<3, T, defaultp> v) {
+	return mat<3, 3, T, defaultp>(
+		0, v.z, -v.y,
+		-v.z, 0, v.x,
+		v.y, -v.x, 0
+		);
+}

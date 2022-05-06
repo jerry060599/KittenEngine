@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "KittenAssets.h"
+#include "Rotor.h"
 #include "glTempVar.h"
 
 using namespace glm;

@@ -200,6 +200,7 @@
     <ClInclude Include="KittenEngine\includes\modules\KittenPreprocessor.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenRendering.h" />
     <ClInclude Include="KittenEngine\includes\modules\Mesh.h" />
+    <ClInclude Include="KittenEngine\includes\modules\Rotor.h" />
     <ClInclude Include="KittenEngine\includes\modules\Shader.h" />
     <ClInclude Include="KittenEngine\includes\modules\SpatialHashmap.h" />
     <ClInclude Include="KittenEngine\includes\modules\StopWatch.h" />

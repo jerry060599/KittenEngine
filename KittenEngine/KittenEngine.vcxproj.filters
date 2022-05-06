@@ -170,6 +170,9 @@
     <ClInclude Include="KittenEngine\includes\modules\BasicCameraControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\Rotor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="KittenEngine\shaders\blingBase.frag" />
