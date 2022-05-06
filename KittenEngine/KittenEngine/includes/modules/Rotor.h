@@ -4,26 +4,54 @@
 
 namespace Kitten {
 	struct Rotor {
-		glm::vec3 q;	// The bivector part laid out in the { y^z, -x^z, x^y } basis
+		glm::vec3 q;	// The bivector part laid out in the { y^z, z^x, x^y } basis
 		float w;		// The scaler part
 
+		// Create a quaternion from an angle (in radians) and rotation axis
 		static Rotor angleAxis(float rad, glm::vec3 axis) {
-			rad /= 2;
-			axis.y = -axis.y;
+			rad *= 0.5;
 			return Rotor(sin(rad) * axis, cos(rad));
 		}
 
+		// Create a quaternion from an angle (in degrees) and rotation axis
+		static Rotor angleAxisDeg(float deg, glm::vec3 axis) {
+			deg *= 0.00872664625997165;
+			return Rotor(sin(deg) * axis, cos(deg));
+		}
+
+		// Create a quaternion from euler angles in radians
 		static Rotor eulerAngles(vec3 rad) {
-			rad /= 2;
+			rad *= 0.5;
 			vec3 c = cos(rad);
 			vec3 s = sin(rad);
-			return Rotor(vec3(0, 0, s.z), c.z) * Rotor(vec3(0, -s.y, 0), c.y) * Rotor(vec3(s.x, 0, 0), c.x);
+			return Rotor(vec3(0, 0, s.z), c.z) * Rotor(vec3(0, s.y, 0), c.y) * Rotor(vec3(s.x, 0, 0), c.x);
+		}
+
+		// Create a quaternion from euler angles in radians
+		static Rotor eulerAngles(float x, float y, float z) {
+			return eulerAngles(vec3(x, y, z));
+		}
+
+		// Create a quaternion from euler angles in degrees
+		static Rotor eulerAnglesDeg(vec3 deg) {
+			return eulerAngles(deg * 0.0174532925199432958f);
+		}
+
+		// Create a quaternion from euler angles in degrees
+		static Rotor eulerAnglesDeg(float x, float y, float z) {
+			return eulerAnglesDeg(vec3(x, y, z));
+		}
+
+		// Returns the multiplicative identity rotor
+		static Rotor identity() {
+			return Rotor();
 		}
 
 		Rotor() : q(vec3(0)), w(1) {}
 
 		Rotor(glm::vec3 q, float w) : q(q), w(w) {}
 
+		// Get the multiplicative inverse
 		Rotor inverse() const {
 			return Rotor(-q, w);
 		}
@@ -32,6 +60,7 @@ namespace Kitten {
 			return inverse();
 		}
 
+		// Rotate a vector by this rotor
 		glm::vec3 rotate(glm::vec3 v) const {
 			// Calculate v * ab
 			vec3 a = w * v + cross(q, v);	// The vector
@@ -48,13 +77,47 @@ namespace Kitten {
 			return abT(q, q) + mat3(w * w) + 2 * w * cm + cm * cm;
 		}
 
+		// Get the euler angle in radians
 		glm::vec3 euler() {
 			return vec3(
 				atan2(2 * (w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y)),
-				asin(2 * (q.x * q.z - w * q.y)),
+				asin(2 * (w * q.y - q.x * q.z)),
 				atan2(2 * (w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
 			);
 		}
+
+		// Get the euler angle in degrees
+		glm::vec3 eulerDeg() {
+			return euler() * 57.29577951308232f;
+		}
+
+		// Returns both the axis and rotation angle in radians
+		vec3 axis(float& angle) {
+			float l = length(q);
+			if (l == 0) {
+				angle = 0;
+				return vec3(1, 0, 0);
+			}
+
+			angle = 2 * atan2(l, w);
+			return q / l;
+		}
+
+		// Returns the axis of rotation
+		vec3 axis() { float a; return axis(a); }
+
+		// Returns both the axis and rotation angle in degrees
+		vec3 axisDeg(float& angle) {
+			vec3 a = axis(angle);
+			angle *= 57.29577951308232f;
+			return a;
+		}
+
+		// Returns the angle of rotation in radians
+		float angle() { float a; axis(a); return a; }
+
+		// Returns the angle of rotation in degrees
+		float angleDeg() { float a; axis(a); return a * 57.29577951308232f; }
 
 		friend glm::vec3 operator*(Rotor lhs, const glm::vec3& rhs) {
 			return lhs.rotate(rhs);
@@ -74,6 +137,7 @@ namespace Kitten {
 			return Rotor(rhs.q * s, nw);
 		}
 
+		// Gets the vec4 repersentation laid out in { y^z, z^x, x^y, scaler }
 		explicit operator glm::vec4() const {
 			return vec4(q, w);
 		}
