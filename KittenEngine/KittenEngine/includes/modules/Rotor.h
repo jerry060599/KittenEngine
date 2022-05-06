@@ -49,7 +49,7 @@ namespace Kitten {
 		glm::vec3 euler() {
 			return vec3(
 				atan2(2 * (w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y)),
-				-asin(2 * (w * q.y - q.x * q.z)),
+				asin(2 * (q.x * q.z - w * q.y)),
 				atan2(2 * (w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
 			);
 		}
