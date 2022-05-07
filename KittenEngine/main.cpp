@@ -36,7 +36,7 @@ void renderGui() {
 
 void initScene() {
 	Kit::loadDirectory("resources");
-	mesh = (Kit::Mesh*)Kit::resources["resources\\teapot\\teapot.obj"];
+	mesh = Kit::get<Kit::Mesh>("resources\\teapot\\teapot.obj");
 
 	Kit::defMesh->defMaterial = &Kit::defMaterial;
 	Kit::defMesh->defMaterial->props.col = vec4(0.4f, 0.4f, 0.5f, 1);
