@@ -9,19 +9,19 @@ namespace Kitten {
 
 		// Create a quaternion from an angle (in radians) and rotation axis
 		static Rotor angleAxis(float rad, glm::vec3 axis) {
-			rad *= 0.5;
+			rad *= 0.5f;
 			return Rotor(sin(rad) * axis, cos(rad));
 		}
 
 		// Create a quaternion from an angle (in degrees) and rotation axis
 		static Rotor angleAxisDeg(float deg, glm::vec3 axis) {
-			deg *= 0.00872664625997165;
+			deg *= 0.00872664625997165f;
 			return Rotor(sin(deg) * axis, cos(deg));
 		}
 
 		// Create a quaternion from euler angles in radians
 		static Rotor eulerAngles(vec3 rad) {
-			rad *= 0.5;
+			rad *= 0.5f;
 			vec3 c = cos(rad);
 			vec3 s = sin(rad);
 			return Rotor(vec3(0, 0, s.z), c.z) * Rotor(vec3(0, s.y, 0), c.y) * Rotor(vec3(s.x, 0, 0), c.x);

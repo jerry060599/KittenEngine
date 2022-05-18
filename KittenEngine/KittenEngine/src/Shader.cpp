@@ -90,52 +90,52 @@ namespace Kitten {
 	}
 
 	void Shader::setBool(const char* name, bool v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform1i(glGetUniformLocation(glHandle, name), v);
 	}
 
 	void Shader::setInt(const char* name, int v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform1i(glGetUniformLocation(glHandle, name), v);
 	}
 
 	void Shader::setFloat(const char* name, float v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform1f(glGetUniformLocation(glHandle, name), v);
 	}
 
 	void Shader::setFloat2(const char* name, glm::vec2 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform2fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
 	}
 
 	void Shader::setFloat3(const char* name, glm::vec3 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform3fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
 	}
 
 	void Shader::setFloat4(const char* name, glm::vec4 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform4fv(glGetUniformLocation(glHandle, name), 1, glm::value_ptr(v));
 	}
 
 	void Shader::setRotor(const char* name, Rotor v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniform4fv(glGetUniformLocation(glHandle, name), 1, (float*)&v);
 	}
 
 	void Shader::setMat2(const char* name, glm::mat2 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniformMatrix2fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
 	}
 
 	void Shader::setMat3(const char* name, glm::mat3 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniformMatrix3fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
 	}
 
 	void Shader::setMat4(const char* name, glm::mat4 v) {
-		glTempVar<GL_CURRENT_PROGRAM> prog(glHandle);
+		glTempVar<GL_CURRENT_PROGRAM> prog(this);
 		glUniformMatrix4fv(glGetUniformLocation(glHandle, name), 1, GL_FALSE, glm::value_ptr(v));
 	}
 }

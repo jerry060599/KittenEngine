@@ -1,6 +1,7 @@
 #pragma once
 // Jerry Hsu, 2022
 
+#include "Shader.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -198,7 +199,7 @@ namespace Kitten {
 	GEN_INT_SPEC(GL_ACTIVE_TEXTURE, glActiveTexture);
 	GEN_INT_SPEC(GL_COLOR_LOGIC_OP, glLogicOp);
 	GEN_INT_SPEC(GL_CULL_FACE_MODE, glCullFace);
-	GEN_INT_SPEC(GL_CURRENT_PROGRAM, glUseProgram);
+	// GEN_INT_SPEC(GL_CURRENT_PROGRAM, glUseProgram);
 	GEN_INT_SPEC(GL_DEPTH_FUNC, glDepthFunc);
 	GEN_INT_SPEC(GL_DRAW_BUFFER, glDrawBuffer);
 	GEN_INT_SPEC(GL_LOGIC_OP_MODE, glLogicOp);
@@ -209,6 +210,26 @@ namespace Kitten {
 	GEN_INT_SPEC(GL_STENCIL_CLEAR_VALUE, glClearStencil);
 	GEN_INT_SPEC(GL_VERTEX_ARRAY_BINDING, glBindVertexArray);
 	GEN_INT_SPEC(GL_STENCIL_WRITEMASK, glStencilMask);
+
+	template <>
+	class glTempVar<GL_CURRENT_PROGRAM> {
+	public:
+		const int oldVal;
+
+		glTempVar(int val) : oldVal(0) {
+			glGetIntegerv(GL_CURRENT_PROGRAM, (int*)&oldVal);
+			glUseProgram(val);
+		}
+
+		glTempVar(Kitten::Shader* shader) : oldVal(0) {
+			glGetIntegerv(GL_CURRENT_PROGRAM, (int*)&oldVal);
+			shader->use();
+		}
+
+		~glTempVar() {
+			glUseProgram(oldVal);
+		}
+	};
 
 	GEN_INT_SPEC_PARAM(GL_ARRAY_BUFFER_BINDING, glBindBuffer, GL_ARRAY_BUFFER);
 	GEN_INT_SPEC_PARAM(GL_DRAW_FRAMEBUFFER_BINDING, glBindFramebuffer, GL_DRAW_FRAMEBUFFER);

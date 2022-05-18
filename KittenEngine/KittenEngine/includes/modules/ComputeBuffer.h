@@ -18,7 +18,7 @@ namespace Kitten {
 		GLenum usage;
 
 		ComputeBuffer();
-		ComputeBuffer(size_t elementSize, size_t size, GLenum usage = GL_DYNAMIC_READ);
+		ComputeBuffer(size_t elementSize, size_t count, GLenum usage = GL_DYNAMIC_READ);
 		~ComputeBuffer();
 
 		void bind(int loc);
