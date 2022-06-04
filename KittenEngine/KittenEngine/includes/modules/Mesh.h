@@ -8,11 +8,11 @@
 
 #include "KittenAssets.h"
 
-using namespace std;
-using namespace std::filesystem;
-using namespace glm;
-
 namespace Kitten {
+	using namespace std;
+	using namespace std::filesystem;
+	using namespace glm;
+
 	typedef struct {
 		vec3 pos;
 		vec3 norm;

@@ -9,9 +9,10 @@
 #include "Rotor.h"
 #include "glTempVar.h"
 
-using namespace glm;
 
 namespace Kitten {
+	using namespace glm;
+
 	const int MAT_TEX0 = 0;
 	const int MAT_TEX1 = 1;
 	const int MAT_TEX2 = 2;

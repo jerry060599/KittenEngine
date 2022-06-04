@@ -8,9 +8,6 @@
 #include <glad/glad.h>
 #include "Shader.h"
 
-using namespace glm;
-using namespace std;
-
 namespace Kitten {
 	class Texture {
 	public:

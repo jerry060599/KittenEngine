@@ -7,9 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
-using namespace glm;
-using namespace std;
-
 namespace Kitten {
 	class ComputeBuffer {
 	public:

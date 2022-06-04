@@ -2,7 +2,6 @@
 // Jerry Hsu, 2021
 
 #include "Common.h"
-using namespace glm;
 
 namespace Kitten {
 	template<int dim = 3, typename Real = float>

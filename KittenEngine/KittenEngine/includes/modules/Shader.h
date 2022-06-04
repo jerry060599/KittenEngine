@@ -8,8 +8,9 @@
 #include "ComputeBuffer.h"
 #include "Rotor.h"
 
-using namespace std;
 namespace Kitten {
+	using namespace std;
+
 	enum class ShaderType {
 		VERT = 1,
 		FRAG = 2,

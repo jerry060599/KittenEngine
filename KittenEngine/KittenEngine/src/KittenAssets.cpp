@@ -15,9 +15,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-using namespace std;
-using namespace glm;
-
 namespace Kitten {
 	map<string, void*> resources;
 
