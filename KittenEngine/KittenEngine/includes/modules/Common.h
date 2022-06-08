@@ -47,6 +47,10 @@ namespace Kitten {
 		return a.x * b.y - a.y * b.x;
 	}
 
+	KITTEN_FUNC_SPEC inline float length2(vec4 v) {
+		return dot(v, v);
+	}
+
 	KITTEN_FUNC_SPEC inline float length2(vec3 v) {
 		return dot(v, v);
 	}
