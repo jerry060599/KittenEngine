@@ -92,3 +92,35 @@ mat3 orthoBasisZ(vec3 n) {
 	}
 	return basis;
 }
+
+mat3 abT(vec3 a, vec3 b) {
+	return mat3(
+		b.x * a.x, b.y * a.x, b.z * a.x,
+		b.x * a.y, b.y * a.y, b.z * a.y,
+		b.x * a.z, b.y * a.z, b.z * a.z
+	);
+}
+
+mat3 crossMatrix(vec3 v) {
+	return mat3(
+		0, v.z, -v.y,
+		-v.z, 0, v.x,
+		v.y, -v.x, 0
+		);
+}
+
+vec3 applyRotor(vec4 r, vec3 v) {
+	// Calculate v * ab
+	vec3 a = r.w * v + cross(r.xyz, v);	// The vector
+	float c = dot(v, r.xyz);			// The trivector
+
+	// Calculate (r.w - r.xyz) * (a + c). Ignoring the scaler-trivector parts
+	return r.w * a			// The scaler-vector product
+		+ cross(r.xyz, a)	// The bivector-vector product
+		+ c * r.xyz;		// The bivector-trivector product
+}
+
+mat3 rotorMatrix(vec4 r) {
+	mat3 cm = crossMatrix(r.xyz);
+	return abT(r.xyz, r.xyz) + mat3(r.w * r.w) + 2 * r.w * cm + cm * cm;
+}

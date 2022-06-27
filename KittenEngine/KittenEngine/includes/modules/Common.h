@@ -1,6 +1,15 @@
 #pragma once
 // Jerry Hsu, 2021
 
+#define KITTEN_FUNC_DECL 
+#ifdef __CUDA_ARCH__
+// #pragma nv_diag_suppress 20012
+#pragma nv_diag_suppress esa_on_defaulted_function_ignored
+#include <cuda.h>
+#undef KITTEN_FUNC_DECL
+#define KITTEN_FUNC_DECL __device__ __host__
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,12 +19,6 @@
 #include "Timer.h"
 #include "StopWatch.h"
 #include <tuple>
-
-#define KITTEN_FUNC_SPEC 
-#ifdef __CUDA_ARCH__
-#include <cuda.h>
-#define KITTEN_FUNC_SPEC __device__ __host__
-#endif
 
 namespace Kitten {
 	using namespace glm;
@@ -27,7 +30,7 @@ namespace Kitten {
 		return h;
 	}
 
-	KITTEN_FUNC_SPEC inline mat4 TRSMat(vec3 t, float r, vec2 s) {
+	KITTEN_FUNC_DECL inline mat4 TRSMat(vec3 t, float r, vec2 s) {
 		mat4 mat(1);
 		mat = rotate(mat, -r, vec3(0, 0, 1));
 		mat = scale(mat, vec3(s, 1));
@@ -35,7 +38,7 @@ namespace Kitten {
 		return mat;
 	}
 
-	KITTEN_FUNC_SPEC inline mat4 TRSMat(vec2 t, float r, vec2 s) {
+	KITTEN_FUNC_DECL inline mat4 TRSMat(vec2 t, float r, vec2 s) {
 		mat4 mat(1);
 		mat = rotate(mat, -r, vec3(0, 0, 1));
 		mat = scale(mat, vec3(s, 1));
@@ -43,44 +46,44 @@ namespace Kitten {
 		return mat;
 	}
 
-	KITTEN_FUNC_SPEC inline float cross(vec2 a, vec2 b) {
+	KITTEN_FUNC_DECL inline float cross(vec2 a, vec2 b) {
 		return a.x * b.y - a.y * b.x;
 	}
 
-	KITTEN_FUNC_SPEC inline float length2(vec4 v) {
+	KITTEN_FUNC_DECL inline float length2(vec4 v) {
 		return dot(v, v);
 	}
 
-	KITTEN_FUNC_SPEC inline float length2(vec3 v) {
+	KITTEN_FUNC_DECL inline float length2(vec3 v) {
 		return dot(v, v);
 	}
 
-	KITTEN_FUNC_SPEC inline float length2(vec2 v) {
+	KITTEN_FUNC_DECL inline float length2(vec2 v) {
 		return dot(v, v);
 	}
 
-	KITTEN_FUNC_SPEC inline double pow2(double v) {
+	KITTEN_FUNC_DECL inline double pow2(double v) {
 		return v * v;
 	}
 
-	KITTEN_FUNC_SPEC inline int pow2(int v) {
+	KITTEN_FUNC_DECL inline int pow2(int v) {
 		return v * v;
 	}
 
-	KITTEN_FUNC_SPEC inline float pow2(float v) {
+	KITTEN_FUNC_DECL inline float pow2(float v) {
 		return v * v;
 	}
 
-	KITTEN_FUNC_SPEC inline float pow3(float v) {
+	KITTEN_FUNC_DECL inline float pow3(float v) {
 		return v * v * v;
 	}
 
-	KITTEN_FUNC_SPEC inline float pow4(float v) {
+	KITTEN_FUNC_DECL inline float pow4(float v) {
 		v *= v;
 		return v * v;
 	}
 
-	KITTEN_FUNC_SPEC inline mat4 diag(vec4 d) {
+	KITTEN_FUNC_DECL inline mat4 diag(vec4 d) {
 		return mat4(
 			d.x, 0, 0, 0,
 			0, d.y, 0, 0,
@@ -89,7 +92,7 @@ namespace Kitten {
 		);
 	}
 
-	KITTEN_FUNC_SPEC inline mat3 diag(vec3 d) {
+	KITTEN_FUNC_DECL inline mat3 diag(vec3 d) {
 		return mat3(
 			d.x, 0, 0,
 			0, d.y, 0,
@@ -97,84 +100,84 @@ namespace Kitten {
 		);
 	}
 
-	KITTEN_FUNC_SPEC inline mat2 diag(vec2 d) {
+	KITTEN_FUNC_DECL inline mat2 diag(vec2 d) {
 		return mat2(
 			d.x, 0,
 			0, d.y
 		);
 	}
 
-	KITTEN_FUNC_SPEC inline float min(vec2 v) {
+	KITTEN_FUNC_DECL inline float min(vec2 v) {
 		return glm::min(v.x, v.y);
 	}
 
-	KITTEN_FUNC_SPEC inline float min(vec3 v) {
+	KITTEN_FUNC_DECL inline float min(vec3 v) {
 		return glm::min(v.x, glm::min(v.y, v.z));
 	}
 
-	KITTEN_FUNC_SPEC inline float min(vec4 v) {
+	KITTEN_FUNC_DECL inline float min(vec4 v) {
 		return glm::min(glm::min(v.x, v.y), glm::min(v.z, v.w));
 	}
 
-	KITTEN_FUNC_SPEC inline float max(vec2 v) {
+	KITTEN_FUNC_DECL inline float max(vec2 v) {
 		return glm::max(v.x, v.y);
 	}
 
-	KITTEN_FUNC_SPEC inline float max(vec3 v) {
+	KITTEN_FUNC_DECL inline float max(vec3 v) {
 		return glm::max(v.x, glm::max(v.y, v.z));
 	}
 
-	KITTEN_FUNC_SPEC inline float max(vec4 v) {
+	KITTEN_FUNC_DECL inline float max(vec4 v) {
 		return glm::max(glm::max(v.x, v.y), glm::max(v.z, v.w));
 	}
 
-	KITTEN_FUNC_SPEC inline vec4 diag(mat4 m) {
+	KITTEN_FUNC_DECL inline vec4 diag(mat4 m) {
 		return vec4(m[0][0], m[1][1], m[2][2], m[3][3]);
 	}
 
-	KITTEN_FUNC_SPEC inline vec3 diag(mat3 m) {
+	KITTEN_FUNC_DECL inline vec3 diag(mat3 m) {
 		return vec3(m[0][0], m[1][1], m[2][2]);
 	}
 
-	KITTEN_FUNC_SPEC inline vec2 diag(mat2 m) {
+	KITTEN_FUNC_DECL inline vec2 diag(mat2 m) {
 		return vec2(m[0][0], m[1][1]);
 	}
 
-	KITTEN_FUNC_SPEC inline float trace(mat4 m) {
+	KITTEN_FUNC_DECL inline float trace(mat4 m) {
 		return m[0][0] + m[1][1] + m[2][2] + m[3][3];
 	}
 
-	KITTEN_FUNC_SPEC inline float trace(mat3 m) {
+	KITTEN_FUNC_DECL inline float trace(mat3 m) {
 		return m[0][0] + m[1][1] + m[2][2];
 	}
 
-	KITTEN_FUNC_SPEC inline float trace(mat2 m) {
+	KITTEN_FUNC_DECL inline float trace(mat2 m) {
 		return m[0][0] + m[1][1];
 	}
 
-	KITTEN_FUNC_SPEC inline vec3 reflect(vec3 v, vec3 norm) {
+	KITTEN_FUNC_DECL inline vec3 reflect(vec3 v, vec3 norm) {
 		return v - 2 * dot(norm, v) * norm;
 	}
 
-	KITTEN_FUNC_SPEC inline vec2 clampLen(vec2 v, float l) {
+	KITTEN_FUNC_DECL inline vec2 clampLen(vec2 v, float l) {
 		float len = v.x * v.x + v.y * v.y;
 		if (len > l * l)
 			return v / sqrtf(len) * l;
 		return v;
 	}
 
-	KITTEN_FUNC_SPEC inline mat4 normalTransform(mat4 mat) {
+	KITTEN_FUNC_DECL inline mat4 normalTransform(mat4 mat) {
 		mat4 outMat = transpose(inverse(mat3(mat)));
 		outMat[3] = vec4(0, 0, 0, 1);
 		return outMat;
 	}
 
-	KITTEN_FUNC_SPEC inline vec3 perturb(vec3 x, float h, int ind) {
+	KITTEN_FUNC_DECL inline vec3 perturb(vec3 x, float h, int ind) {
 		x[ind] += h;
 		return x;
 	}
 
-	KITTEN_FUNC_SPEC inline mat3 abT(vec3 a, vec3 b) {
+	KITTEN_FUNC_DECL inline mat3 abT(vec3 a, vec3 b) {
 		return mat3(
 			b.x * a.x, b.y * a.x, b.z * a.x,
 			b.x * a.y, b.y * a.y, b.z * a.y,
@@ -182,13 +185,13 @@ namespace Kitten {
 		);
 	}
 
-	KITTEN_FUNC_SPEC inline vec3 safeOrthonorm(vec3 v) {
+	KITTEN_FUNC_DECL inline vec3 safeOrthonorm(vec3 v) {
 		if (abs(v.y) == 1) return normalize(cross(vec3(1, 0, 0), v));
 		return normalize(cross(vec3(0, 1, 0), v));
 	}
 
 	// http://psgraphics.blogspot.com/2014/11/making-orthonormal-basis-from-unit.html
-	KITTEN_FUNC_SPEC inline mat3 orthoBasisX(vec3 n) {
+	KITTEN_FUNC_DECL inline mat3 orthoBasisX(vec3 n) {
 		mat3 basis;
 		basis[0] = n;
 		if (n.z >= n.y) {
@@ -206,7 +209,7 @@ namespace Kitten {
 		return basis;
 	}
 
-	KITTEN_FUNC_SPEC inline mat3 orthoBasisY(vec3 n) {
+	KITTEN_FUNC_DECL inline mat3 orthoBasisY(vec3 n) {
 		mat3 basis;
 		basis[1] = n;
 		if (n.z >= n.y) {
@@ -224,7 +227,7 @@ namespace Kitten {
 		return basis;
 	}
 
-	KITTEN_FUNC_SPEC inline mat3 orthoBasisZ(vec3 n) {
+	KITTEN_FUNC_DECL inline mat3 orthoBasisZ(vec3 n) {
 		mat3 basis;
 		basis[2] = n;
 		if (n.z >= n.y) {
@@ -242,20 +245,20 @@ namespace Kitten {
 		return basis;
 	}
 
-	KITTEN_FUNC_SPEC inline mat4 rotateView(vec3 dir) {
+	KITTEN_FUNC_DECL inline mat4 rotateView(vec3 dir) {
 		return mat4(transpose(orthoBasisZ(normalize(-dir))));
 	}
 
-	KITTEN_FUNC_SPEC inline int numBatches(int n, int batchSize) {
+	KITTEN_FUNC_DECL inline int numBatches(int n, int batchSize) {
 		return (n - 1) / batchSize + 1;
 	}
 
-	KITTEN_FUNC_SPEC inline int numBatches(size_t n, int batchSize) {
+	KITTEN_FUNC_DECL inline int numBatches(size_t n, int batchSize) {
 		return numBatches((int)n, batchSize);
 	}
 
 	// Returns the closest points between two lines in the form mix(a0, a1, uv.x) and mix(b0, b1, uv.y)
-	KITTEN_FUNC_SPEC inline vec2 lineClosestPoints(vec3 a0, vec3 a1, vec3 b0, vec3 b1) {
+	KITTEN_FUNC_DECL inline vec2 lineClosestPoints(vec3 a0, vec3 a1, vec3 b0, vec3 b1) {
 		mat2x3 A(a1 - a0, b0 - b1);
 		//return inverse(transpose(A) * A) * (transpose(A) * (b0 - a0));
 		vec3 diff = b0 - a0;
@@ -264,7 +267,7 @@ namespace Kitten {
 		return inverse(M) * vec2(dot(A[0], diff), dot(A[1], diff));
 	}
 
-	KITTEN_FUNC_SPEC inline vec2 lineInt(vec2 a0, vec2 a1, vec2 b0, vec2 b1) {
+	KITTEN_FUNC_DECL inline vec2 lineInt(vec2 a0, vec2 a1, vec2 b0, vec2 b1) {
 		vec2 d0 = a0 - a1;
 		vec2 d1 = b1 - b0;
 
@@ -272,21 +275,21 @@ namespace Kitten {
 		return (vec2(d1.y, -d0.y) * (a0.x - b0.x) + vec2(-d1.x, d0.x) * (a0.y - b0.y)) / (c + 0.00001f * float(c == 0));
 	}
 
-	KITTEN_FUNC_SPEC inline bool lineHasInt(vec2 s) {
+	KITTEN_FUNC_DECL inline bool lineHasInt(vec2 s) {
 		return s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1;
 	}
 
-	KITTEN_FUNC_SPEC inline int wrap(int i, int period) {
+	KITTEN_FUNC_DECL inline int wrap(int i, int period) {
 		return (i + period) % period;
 	}
 
 	// Returns the distance between a and b modulo len
-	KITTEN_FUNC_SPEC inline int cyclicDist(int a, int b, int len) {
+	KITTEN_FUNC_DECL inline int cyclicDist(int a, int b, int len) {
 		return ((b - a) + len / 2 + len) % len - len / 2;
 	}
 
 	template <typename T>
-	KITTEN_FUNC_SPEC T& slice(void* x, size_t index) {
+	KITTEN_FUNC_DECL T& slice(void* x, size_t index) {
 		return ((T*)x)[index];
 	}
 
@@ -331,7 +334,7 @@ namespace Kitten {
 	/// <param name="b">b matrix</param>
 	/// <returns>a .* b</returns>
 	template <int s, typename T>
-	KITTEN_FUNC_SPEC mat<s, s, T, defaultp> elemMul(mat<s, s, T, defaultp> a, mat<s, s, T, defaultp> b) {
+	KITTEN_FUNC_DECL mat<s, s, T, defaultp> elemMul(mat<s, s, T, defaultp> a, mat<s, s, T, defaultp> b) {
 		for (int i = 0; i < s; i++)
 			a[i] *= b[i];
 		return a;
@@ -344,12 +347,12 @@ namespace Kitten {
 	/// <param name="b">b vector</param>
 	/// <returns>a .* b</returns>
 	template <int s, typename T>
-	KITTEN_FUNC_SPEC vec<s, T, defaultp> elemMul(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
+	KITTEN_FUNC_DECL vec<s, T, defaultp> elemMul(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
 		return a * b;
 	}
 
 	template <int s, typename T>
-	KITTEN_FUNC_SPEC T compSum(vec<s, T, defaultp> v) {
+	KITTEN_FUNC_DECL T compSum(vec<s, T, defaultp> v) {
 		T sum = v[0];
 		for (int i = 1; i < s; i++)
 			sum += v[i];
@@ -357,7 +360,7 @@ namespace Kitten {
 	}
 
 	template <int s, typename T>
-	KITTEN_FUNC_SPEC float compSum(mat<s, s, T, defaultp> a) {
+	KITTEN_FUNC_DECL float compSum(mat<s, s, T, defaultp> a) {
 		vec<s, T, defaultp> sum = a[0];
 		for (int i = 1; i < s; i++)
 			sum += a[i];
@@ -365,7 +368,7 @@ namespace Kitten {
 	}
 
 	// Returns the bary-centric coords of the closest point to x on triangle p
-	KITTEN_FUNC_SPEC inline vec3 baryCoord(const mat3& p, const vec3& x) {
+	KITTEN_FUNC_DECL inline vec3 baryCoord(const mat3& p, const vec3& x) {
 		mat2x3 a(p[1] - p[0], p[2] - p[0]);
 		vec3 e2 = x - p[0];
 
@@ -378,18 +381,18 @@ namespace Kitten {
 	}
 
 	// Returns the bary-centric coords of the closest point to p[3] on triangle (p[0],p[1],p[2])
-	KITTEN_FUNC_SPEC inline vec3 baryCoord(const mat4x3& p) {
+	KITTEN_FUNC_DECL inline vec3 baryCoord(const mat4x3& p) {
 		return baryCoord(*(mat3*)&p, p[3]);
 	}
 
 	template <typename Real>
-	KITTEN_FUNC_SPEC inline Real reflect01(Real x) {
+	KITTEN_FUNC_DECL inline Real reflect01(Real x) {
 		x /= 2;
 		return 2 * glm::abs(x - glm::floor(x + (Real)0.5));
 	}
 
 	template <int s, typename T>
-	KITTEN_FUNC_SPEC inline void sort(vec<s, T, defaultp>& v) {
+	KITTEN_FUNC_DECL inline void sort(vec<s, T, defaultp>& v) {
 		for (int i = s - 1; i > 0; --i)
 			for (int j = 0; j < i; ++j)
 				if (v[j] > v[j + 1])
@@ -397,7 +400,7 @@ namespace Kitten {
 	}
 
 	template <typename T>
-	KITTEN_FUNC_SPEC inline mat<3, 3, T, defaultp> crossMatrix(vec<3, T, defaultp> v) {
+	KITTEN_FUNC_DECL inline mat<3, 3, T, defaultp> crossMatrix(vec<3, T, defaultp> v) {
 		return mat<3, 3, T, defaultp>(
 			0, v.z, -v.y,
 			-v.z, 0, v.x,

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -140,6 +141,21 @@ namespace Kitten {
 				nx[i] = v;
 			}
 			return g * (1 / (12 * h));
+		}
+	}
+
+	template<typename T>
+	T nDiff(std::function<T(double)> f, double x, const double h = 0.001) {
+		if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value)
+			return (T)((f(x - 2 * h) - 8 * f(x - h) + 8 * f(x + h) - f(x + 2 * h)) / (12 * h));
+		else {
+			T g(0);
+			int s = T::length();
+			g += f(x - 2 * h);
+			g -= 8.f * f(x - h);
+			g += 8.f * f(x + h);
+			g -= f(x + 2 * h);
+			return g * (float)(1 / (12 * h));
 		}
 	}
 
