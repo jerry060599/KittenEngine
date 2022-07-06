@@ -50,6 +50,18 @@ namespace Kitten {
 		return a.x * b.y - a.y * b.x;
 	}
 
+	KITTEN_FUNC_DECL inline double length2(dvec4 v) {
+		return dot(v, v);
+	}
+
+	KITTEN_FUNC_DECL inline double length2(dvec3 v) {
+		return dot(v, v);
+	}
+
+	KITTEN_FUNC_DECL inline double length2(dvec2 v) {
+		return dot(v, v);
+	}
+
 	KITTEN_FUNC_DECL inline float length2(vec4 v) {
 		return dot(v, v);
 	}
@@ -291,6 +303,29 @@ namespace Kitten {
 	template <typename T>
 	KITTEN_FUNC_DECL T& slice(void* x, size_t index) {
 		return ((T*)x)[index];
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL T basis(int i) {
+		T v(0);
+		v[i] = 1;
+		return v;
+	}
+
+	inline void print(int x, const char* format = "%d") {
+		printf(format, x);
+	}
+
+	inline void printDiv() {
+		printf("\n----div----\n");
+	}
+
+	inline void print(float x, const char* format = "%f") {
+		printf(format, x);
+	}
+
+	inline void print(double x, const char* format = "%f") {
+		printf(format, x);
 	}
 
 	template <int c, int r>
