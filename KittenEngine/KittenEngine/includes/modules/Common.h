@@ -13,7 +13,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/norm.hpp>
+
 #include <string>
 #include <functional>
 #include "Timer.h"
@@ -28,6 +31,24 @@ namespace Kitten {
 		long h = 0;
 		for (char c : str) h = h * 31 + c;
 		return h;
+	}
+
+	template <int s>
+	KITTEN_FUNC_DECL inline int flatIdx(vec<s, int, defaultp> i, vec<s, int, defaultp> dim) {
+		int idx = i[s - 1];
+		for (int k = s - 2; k >= 0; k--)
+			idx = i[k] + dim[k] * idx;
+		return idx;
+	}
+
+	template <int s>
+	KITTEN_FUNC_DECL inline vec<s, int, defaultp> unflatIdx(int i, vec<s, int, defaultp> dim) {
+		vec<s, int, defaultp> idx;
+		for (int k = 0; k < s; k++) {
+			idx[k] = i % dim[k];
+			i /= dim[k];
+		}
+		return idx;
 	}
 
 	KITTEN_FUNC_DECL inline mat4 TRSMat(vec3 t, float r, vec2 s) {
@@ -46,125 +67,127 @@ namespace Kitten {
 		return mat;
 	}
 
-	KITTEN_FUNC_DECL inline float cross(vec2 a, vec2 b) {
+	template <typename T>
+	KITTEN_FUNC_DECL inline T cross(vec<2, T, defaultp> a, vec<2, T, defaultp> b) {
 		return a.x * b.y - a.y * b.x;
 	}
 
-	KITTEN_FUNC_DECL inline double length2(dvec4 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline double length2(dvec3 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline double length2(dvec2 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline float length2(vec4 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline float length2(vec3 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline float length2(vec2 v) {
-		return dot(v, v);
-	}
-
-	KITTEN_FUNC_DECL inline double pow2(double v) {
+	template <typename T>
+	KITTEN_FUNC_DECL inline T pow2(T v) {
 		return v * v;
 	}
 
-	KITTEN_FUNC_DECL inline int pow2(int v) {
-		return v * v;
-	}
-
-	KITTEN_FUNC_DECL inline float pow2(float v) {
-		return v * v;
-	}
-
-	KITTEN_FUNC_DECL inline float pow3(float v) {
+	template <typename T>
+	KITTEN_FUNC_DECL inline T pow3(T v) {
 		return v * v * v;
 	}
 
-	KITTEN_FUNC_DECL inline float pow4(float v) {
+	template <typename T>
+	KITTEN_FUNC_DECL inline T pow4(T v) {
 		v *= v;
 		return v * v;
 	}
 
-	KITTEN_FUNC_DECL inline mat4 diag(vec4 d) {
-		return mat4(
-			d.x, 0, 0, 0,
-			0, d.y, 0, 0,
-			0, 0, d.z, 0,
-			0, 0, 0, d.w
-		);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T min(vec<s, T, defaultp> v) {
+		T n = v[0];
+		for (int i = 1; i < s; i++)
+			n = glm::min(n, v[i]);
+		return n;
 	}
 
-	KITTEN_FUNC_DECL inline mat3 diag(vec3 d) {
-		return mat3(
-			d.x, 0, 0,
-			0, d.y, 0,
-			0, 0, d.z
-		);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> min(vec<s, T, defaultp> v, T num) {
+		vec<s, T, defaultp> r;
+		for (int i = 0; i < s; i++)
+			r[i] = glm::min(num, v[i]);
+		return r;
 	}
 
-	KITTEN_FUNC_DECL inline mat2 diag(vec2 d) {
-		return mat2(
-			d.x, 0,
-			0, d.y
-		);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> min(T num, vec<s, T, defaultp> v) {
+		return min(v, num);
 	}
 
-	KITTEN_FUNC_DECL inline float min(vec2 v) {
-		return glm::min(v.x, v.y);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> min(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
+		vec<s, T, defaultp> r;
+		for (int i = 0; i < s; i++)
+			r[i] = glm::min(a[i], b[i]);
+		return r;
 	}
 
-	KITTEN_FUNC_DECL inline float min(vec3 v) {
-		return glm::min(v.x, glm::min(v.y, v.z));
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T max(vec<s, T, defaultp> v) {
+		T n = v[0];
+		for (int i = 1; i < s; i++)
+			n = glm::max(n, v[i]);
+		return n;
 	}
 
-	KITTEN_FUNC_DECL inline float min(vec4 v) {
-		return glm::min(glm::min(v.x, v.y), glm::min(v.z, v.w));
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> max(vec<s, T, defaultp> v, T num) {
+		vec<s, T, defaultp> r;
+		for (int i = 0; i < s; i++)
+			r[i] = glm::max(num, v[i]);
+		return r;
 	}
 
-	KITTEN_FUNC_DECL inline float max(vec2 v) {
-		return glm::max(v.x, v.y);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> max(T num, vec<s, T, defaultp> v) {
+		return max(v, num);
 	}
 
-	KITTEN_FUNC_DECL inline float max(vec3 v) {
-		return glm::max(v.x, glm::max(v.y, v.z));
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> max(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
+		vec<s, T, defaultp> r;
+		for (int i = 0; i < s; i++)
+			r[i] = glm::max(a[i], b[i]);
+		return r;
 	}
 
-	KITTEN_FUNC_DECL inline float max(vec4 v) {
-		return glm::max(glm::max(v.x, v.y), glm::max(v.z, v.w));
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline mat<s, s, T, defaultp> diag(vec<s, T, defaultp> d) {
+		mat<s, s, T, defaultp> m(0);
+		for (int i = 0; i < s; i++) m[i][i] = d[i];
+		return m;
 	}
 
-	KITTEN_FUNC_DECL inline vec4 diag(mat4 m) {
-		return vec4(m[0][0], m[1][1], m[2][2], m[3][3]);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> diag(mat<s, s, T, defaultp> m) {
+		vec<s, T, defaultp> d;
+		for (int i = 0; i < s; i++) d[i] = m[i][i];
+		return d;
 	}
 
-	KITTEN_FUNC_DECL inline vec3 diag(mat3 m) {
-		return vec3(m[0][0], m[1][1], m[2][2]);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T trace(mat<s, s, T, defaultp> m) {
+		T d = 0;
+		for (int i = 0; i < s; i++) d += m[i][i];
+		return d;
 	}
 
-	KITTEN_FUNC_DECL inline vec2 diag(mat2 m) {
-		return vec2(m[0][0], m[1][1]);
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T trace(vec<s, T, defaultp> v) {
+		T d = 0;
+		for (int i = 0; i < s; i++) d += v[i];
+		return d;
 	}
 
-	KITTEN_FUNC_DECL inline float trace(mat4 m) {
-		return m[0][0] + m[1][1] + m[2][2] + m[3][3];
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T norm(mat<s, s, T, defaultp> m) {
+		T d = 0;
+		for (int i = 0; i < s; i++)
+			d += length(m[i]);
+		return d;
 	}
 
-	KITTEN_FUNC_DECL inline float trace(mat3 m) {
-		return m[0][0] + m[1][1] + m[2][2];
-	}
-
-	KITTEN_FUNC_DECL inline float trace(mat2 m) {
-		return m[0][0] + m[1][1];
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline T ferbNorm(mat<s, s, T, defaultp> m) {
+		T d = 0;
+		for (int i = 0; i < s; i++)
+			d += length2(m[i]);
+		return glm::sqrt(d);
 	}
 
 	KITTEN_FUNC_DECL inline vec3 reflect(vec3 v, vec3 norm) {
