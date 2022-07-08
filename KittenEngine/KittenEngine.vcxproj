@@ -168,6 +168,7 @@
     <ClCompile Include="KittenEngine\opt\lbfgs.c" />
     <ClCompile Include="KittenEngine\opt\math.cpp" />
     <ClCompile Include="KittenEngine\opt\praxis.cpp" />
+    <ClCompile Include="KittenEngine\opt\svd\svd.cpp" />
     <ClCompile Include="KittenEngine\opt\toms178.cpp" />
     <ClCompile Include="KittenEngine\src\Algo.cpp" />
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
@@ -216,6 +217,11 @@
     <ClInclude Include="KittenEngine\opt\math.h" />
     <ClInclude Include="KittenEngine\opt\polynomial.h" />
     <ClInclude Include="KittenEngine\opt\praxis.hpp" />
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.hpp" />
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.hpp" />
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Kernel_Declarations.hpp" />
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Main_Kernel_Body.hpp" />
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Preamble.hpp" />
     <ClInclude Include="KittenEngine\opt\toms178.hpp" />
   </ItemGroup>
   <ItemGroup>

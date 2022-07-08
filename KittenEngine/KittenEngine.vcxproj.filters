@@ -75,6 +75,9 @@
     <ClCompile Include="KittenEngine\src\StopWatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KittenEngine\opt\svd\svd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KittenEngine\includes\modules\Bound.h">
@@ -171,6 +174,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KittenEngine\includes\modules\Rotor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Givens_QR_Factorization_Kernel.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Jacobi_Conjugation_Kernel.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Kernel_Declarations.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Main_Kernel_Body.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\opt\svd\Singular_Value_Decomposition_Preamble.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
