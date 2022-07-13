@@ -351,8 +351,8 @@ namespace Kitten {
 		printf(format, x);
 	}
 
-	template <int c, int r>
-	void print(mat<c, r, f32, defaultp> m, const char* format = "%.4f") {
+	template <int c, int r, typename T>
+	void print(mat<c, r, T, defaultp> m, const char* format = "%.4f") {
 		for (int i = 0; i < r; i++) {
 			printf(i == 0 ? "{{" : " {");
 
@@ -365,8 +365,8 @@ namespace Kitten {
 		}
 	}
 
-	template <int s>
-	void print(vec<s, float, defaultp> v, const char* format = "%.4f") {
+	template <int s, typename T>
+	void print(vec<s, T, defaultp> v, const char* format = "%.4f") {
 		printf("{");
 		for (int i = 0; i < s; i++) {
 			printf(format, v[i]);
