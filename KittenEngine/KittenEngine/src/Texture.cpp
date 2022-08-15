@@ -145,4 +145,8 @@ namespace Kitten {
 		glTexImage2D(GL_TEXTURE_2D, 0, deviceFormat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	void savePNG(const char* path, unsigned char* data, int width, int height) {
+		stbi_write_png(path, width, height, 4, data, 0);
+	}
 }

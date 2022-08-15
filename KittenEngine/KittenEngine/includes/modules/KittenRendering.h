@@ -9,7 +9,6 @@
 #include "Rotor.h"
 #include "glTempVar.h"
 
-
 namespace Kitten {
 	using namespace glm;
 

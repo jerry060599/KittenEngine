@@ -38,4 +38,6 @@ namespace Kitten {
 		void setWrap(GLenum mode);
 		void save(const char* path);
 	};
+
+	void savePNG(const char* path, unsigned char* data, int width, int height);
 }

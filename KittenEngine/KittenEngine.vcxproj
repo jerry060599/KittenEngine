@@ -207,6 +207,7 @@
     <ClInclude Include="KittenEngine\includes\modules\StopWatch.h" />
     <ClInclude Include="KittenEngine\includes\modules\Texture.h" />
     <ClInclude Include="KittenEngine\includes\modules\Timer.h" />
+    <ClInclude Include="KittenEngine\includes\modules\UniformBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\UniqueList.h" />
     <ClInclude Include="KittenEngine\opt\arithmetic_ansi.h" />
     <ClInclude Include="KittenEngine\opt\arithmetic_sse_double.h" />
