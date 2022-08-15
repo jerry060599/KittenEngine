@@ -14,6 +14,7 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "ComputeBuffer.h"
+#include "UniformBuffer.h"
 #include "FrameBuffer.h"
 
 #include <assimp/Importer.hpp>
