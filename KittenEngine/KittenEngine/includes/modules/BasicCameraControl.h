@@ -82,4 +82,57 @@ namespace Kitten {
 			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, (float)(yoffset + xoffset)));
 		}
 	};
+
+	/// <summary>
+	/// An implementaiton of basic camera controls for 2D. 
+	/// Call processMousePos(), processMouseButton(), and processMouseScroll() to update.
+	/// Remember to multiply xp by aspect ratio
+	/// 
+	/// Left mouse drag - pan/move
+	/// Scroll wheel - zoom
+	/// 
+	/// </summary>
+	class BasicCameraControl2D {
+	public:
+		// Current camera position
+		vec2 pos = vec3(0);
+
+		// Current camera distance
+		float distance = 2;
+
+		// Zoom speed
+		float zoomSpeed = 0.2f;
+
+		// Minimum camera distance allowed.
+		float minDistance = 0.1f;
+
+	private:
+		vec2 lastMousePos = vec2(0);
+		bool buttonDown = false;
+
+	public:
+		mat4 getViewMatrix() {
+			return glm::translate(mat4(1), vec3(-pos, 0));
+		}
+
+		void processMousePos(double xp, double yp) {
+			vec2 mousePos = vec2(xp, yp);
+			vec2 mouseDelta = mousePos - lastMousePos;
+
+			if (buttonDown) {
+				vec2 dir = vec2(-mouseDelta.x, mouseDelta.y);
+				pos += dir * distance * 2.f;
+			}
+
+			lastMousePos = mousePos;
+		}
+
+		void processMouseButton(int button, int action, int mode) {
+			if (button == GLFW_MOUSE_BUTTON_LEFT) buttonDown = action == GLFW_PRESS;
+		}
+
+		void processMouseScroll(double xoffset, double yoffset) {
+			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, (float)(yoffset + xoffset)));
+		}
+	};
 }
