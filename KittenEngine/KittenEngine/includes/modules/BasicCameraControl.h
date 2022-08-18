@@ -128,7 +128,7 @@ namespace Kitten {
 		}
 
 		void processMouseButton(int button, int action, int mode) {
-			if (button == GLFW_MOUSE_BUTTON_LEFT) buttonDown = action == GLFW_PRESS;
+			if (button == GLFW_MOUSE_BUTTON_RIGHT) buttonDown = action == GLFW_PRESS;
 		}
 
 		void processMouseScroll(double xoffset, double yoffset) {
