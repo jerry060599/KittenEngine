@@ -132,7 +132,7 @@ namespace Kitten {
 		}
 
 		void processMouseScroll(double xoffset, double yoffset) {
-			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, (float)(yoffset + xoffset)));
+			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, -(float)(yoffset + xoffset)));
 		}
 	};
 }
