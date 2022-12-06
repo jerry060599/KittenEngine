@@ -343,11 +343,11 @@ namespace Kitten {
 		printf("\n----div----\n");
 	}
 
-	inline void print(float x, const char* format = "%f") {
+	inline void print(float x, const char* format = "%f\n") {
 		printf(format, x);
 	}
 
-	inline void print(double x, const char* format = "%f") {
+	inline void print(double x, const char* format = "%f\n") {
 		printf(format, x);
 	}
 

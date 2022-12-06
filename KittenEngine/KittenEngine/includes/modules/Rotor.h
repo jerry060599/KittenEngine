@@ -3,78 +3,80 @@
 #include "Common.h"
 
 namespace Kitten {
-	struct Rotor {
-		glm::vec3 q;	// The bivector part laid out in the { y^z, z^x, x^y } basis
-		float w;		// The scaler part
+	template <typename T>
+	struct RotorX {
+		typedef glm::vec<3, T, defaultp> q_type;
+		q_type q;	// The bivector part laid out in the { y^z, z^x, x^y } basis
+		T w;		// The scaler part
 
 		// Create a quaternion from an angle (in radians) and rotation axis
-		KITTEN_FUNC_DECL static Rotor angleAxis(float rad, glm::vec3 axis) {
-			rad *= 0.5f;
-			return Rotor(sin(rad) * axis, cos(rad));
+		KITTEN_FUNC_DECL static RotorX<T> angleAxis(T rad, q_type axis) {
+			rad *= 0.5;
+			return RotorX<T>(sin(rad) * axis, cos(rad));
 		}
 
 		// Create a quaternion from an angle (in degrees) and rotation axis
-		KITTEN_FUNC_DECL static Rotor angleAxisDeg(float deg, glm::vec3 axis) {
-			deg *= 0.00872664625997165f;
-			return Rotor(sin(deg) * axis, cos(deg));
+		KITTEN_FUNC_DECL static RotorX<T> angleAxisDeg(T deg, q_type axis) {
+			deg *= 0.00872664625997165;
+			return RotorX<T>(sin(deg) * axis, cos(deg));
 		}
 
 		// Create a quaternion from euler angles in radians
-		KITTEN_FUNC_DECL static Rotor eulerAngles(vec3 rad) {
-			rad *= 0.5f;
-			vec3 c = cos(rad);
-			vec3 s = sin(rad);
-			return Rotor(vec3(0, 0, s.z), c.z) * Rotor(vec3(0, s.y, 0), c.y) * Rotor(vec3(s.x, 0, 0), c.x);
+		KITTEN_FUNC_DECL static RotorX<T> eulerAngles(q_type rad) {
+			rad *= 0.5;
+			q_type c = cos(rad);
+			q_type s = sin(rad);
+			return RotorX<T>(q_type(0, 0, s.z), c.z) * RotorX<T>(q_type(0, s.y, 0), c.y) * RotorX<T>(q_type(s.x, 0, 0), c.x);
 		}
 
 		// Create a quaternion from euler angles in radians
-		KITTEN_FUNC_DECL static Rotor eulerAngles(float x, float y, float z) {
-			return eulerAngles(vec3(x, y, z));
+		KITTEN_FUNC_DECL static RotorX<T> eulerAngles(T x, T y, T z) {
+			return eulerAngles(q_type(x, y, z));
 		}
 
 		// Create a quaternion from euler angles in degrees
-		KITTEN_FUNC_DECL static Rotor eulerAnglesDeg(vec3 deg) {
+		KITTEN_FUNC_DECL static RotorX<T> eulerAnglesDeg(q_type deg) {
 			return eulerAngles(deg * 0.0174532925199432958f);
 		}
 
 		// Create a quaternion from euler angles in degrees
-		KITTEN_FUNC_DECL static Rotor eulerAnglesDeg(float x, float y, float z) {
-			return eulerAnglesDeg(vec3(x, y, z));
+		KITTEN_FUNC_DECL static RotorX<T> eulerAnglesDeg(T x, T y, T z) {
+			return eulerAnglesDeg(q_type(x, y, z));
 		}
 
-		KITTEN_FUNC_DECL static Rotor fromTo(vec3 from, vec3 to) {
-			vec3 h = (from + to) / 2.f;
-			float l = length2(h);
+		KITTEN_FUNC_DECL static RotorX<T> fromTo(q_type from, q_type to) {
+			q_type h = (from + to) / 2.f;
+			T l = length2(h);
 			if (l > 0) h *= inversesqrt(l);
-			else h = orthoBasisX(from)[1];
+			else h = orthoBasisX((vec3)from)[1];
 
-			return Rotor(cross(from, h), dot(from, h));
+			return RotorX<T>(cross(from, h), dot(from, h));
 		}
 
 		// Returns the multiplicative identity rotor
-		KITTEN_FUNC_DECL static Rotor identity() {
-			return Rotor();
+		KITTEN_FUNC_DECL static RotorX<T> identity() {
+			return RotorX<T>();
 		}
 
-		KITTEN_FUNC_DECL Rotor() : q(vec3(0)), w(1) {}
+		KITTEN_FUNC_DECL RotorX() : q(q_type(0)), w(1) {}
 
-		KITTEN_FUNC_DECL Rotor(glm::vec3 q, float w) : q(q), w(w) {}
-		KITTEN_FUNC_DECL Rotor(glm::vec4 v) : q(v), w(v.w) {}
+		KITTEN_FUNC_DECL RotorX(q_type q, T w) : q(q), w(w) {}
+		KITTEN_FUNC_DECL RotorX(glm::vec<4, T, defaultp> v) : q(v), w(v.w) {}
 
 		// Get the multiplicative inverse
-		KITTEN_FUNC_DECL Rotor inverse() const {
-			return Rotor(-q, w);
+		KITTEN_FUNC_DECL RotorX<T> inverse() const {
+			return RotorX<T>(-q, w);
 		}
 
-		KITTEN_FUNC_DECL Rotor operator- () const {
+		KITTEN_FUNC_DECL RotorX<T> operator- () const {
 			return inverse();
 		}
 
 		// Rotate a vector by this rotor
-		KITTEN_FUNC_DECL glm::vec3 rotate(glm::vec3 v) const {
+		KITTEN_FUNC_DECL q_type rotate(q_type v) const {
 			// Calculate v * ab
-			vec3 a = w * v + cross(q, v);	// The vector
-			float c = dot(v, q);			// The trivector
+			q_type a = w * v + cross(q, v);	// The vector
+			T c = dot(v, q);			// The trivector
 
 			// Calculate (w - q) * (a + c). Ignoring the scaler-trivector parts
 			return w * a		// The scaler-vector product
@@ -82,14 +84,14 @@ namespace Kitten {
 				+ c * q;		// The bivector-trivector product
 		}
 
-		KITTEN_FUNC_DECL glm::mat3 matrix() {
+		KITTEN_FUNC_DECL mat<3, 3, T, defaultp> matrix() {
 			mat3 cm = crossMatrix(q);
-			return abT(q, q) + mat3(w * w) + 2 * w * cm + cm * cm;
+			return abT((vec3)q, (vec3)q) + mat<3, 3, T, defaultp>(w * w) + 2 * w * cm + cm * cm;
 		}
 
 		// Get the euler angle in radians
-		KITTEN_FUNC_DECL glm::vec3 euler() {
-			return vec3(
+		KITTEN_FUNC_DECL q_type euler() {
+			return q_type(
 				atan2(2 * (w * q.x + q.y * q.z), 1 - 2 * (q.x * q.x + q.y * q.y)),
 				asin(2 * (w * q.y - q.x * q.z)),
 				atan2(2 * (w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
@@ -97,16 +99,16 @@ namespace Kitten {
 		}
 
 		// Get the euler angle in degrees
-		KITTEN_FUNC_DECL glm::vec3 eulerDeg() {
+		KITTEN_FUNC_DECL q_type eulerDeg() {
 			return euler() * 57.29577951308232f;
 		}
 
 		// Returns both the axis and rotation angle in radians
-		KITTEN_FUNC_DECL vec3 axis(float& angle) {
-			float l = length(q);
+		KITTEN_FUNC_DECL q_type axis(T& angle) {
+			T l = length(q);
 			if (l == 0) {
 				angle = 0;
-				return vec3(1, 0, 0);
+				return q_type(1, 0, 0);
 			}
 
 			angle = 2 * atan2(l, w);
@@ -114,47 +116,51 @@ namespace Kitten {
 		}
 
 		// Returns the axis of rotation
-		KITTEN_FUNC_DECL vec3 axis() { float a; return axis(a); }
+		KITTEN_FUNC_DECL q_type axis() { T a; return axis(a); }
 
 		// Returns both the axis and rotation angle in degrees
-		KITTEN_FUNC_DECL vec3 axisDeg(float& angle) {
-			vec3 a = axis(angle);
+		KITTEN_FUNC_DECL q_type axisDeg(T& angle) {
+			q_type a = axis(angle);
 			angle *= 57.29577951308232f;
 			return a;
 		}
 
 		// Returns the angle of rotation in radians
-		KITTEN_FUNC_DECL float angle() { float a; axis(a); return a; }
+		KITTEN_FUNC_DECL T angle() { T a; axis(a); return a; }
 
 		// Returns the angle of rotation in degrees
-		KITTEN_FUNC_DECL float angleDeg() { float a; axis(a); return a * 57.29577951308232f; }
+		KITTEN_FUNC_DECL T angleDeg() { T a; axis(a); return a * 57.29577951308232; }
 
-		KITTEN_FUNC_DECL friend glm::vec3 operator*(Rotor lhs, const glm::vec3& rhs) {
+		KITTEN_FUNC_DECL friend q_type operator*(RotorX<T> lhs, const q_type& rhs) {
 			return lhs.rotate(rhs);
 		}
 
-		KITTEN_FUNC_DECL friend Rotor operator*(Rotor lhs, const Rotor& rhs) {
-			return Rotor(lhs.w * rhs.q + rhs.w * lhs.q + cross(lhs.q, rhs.q),
+		KITTEN_FUNC_DECL friend RotorX<T> operator*(RotorX<T> lhs, const RotorX<T>& rhs) {
+			return RotorX<T>(lhs.w * rhs.q + rhs.w * lhs.q + cross(lhs.q, rhs.q),
 				lhs.w * rhs.w - dot(lhs.q, rhs.q));
 		}
 
-		KITTEN_FUNC_DECL friend Rotor operator*(float lhs, const Rotor& rhs) {
-			if (rhs.w == 1) return Rotor();
-			float na = lhs * acos(rhs.w);	// New angle
-			float nw = cos(na);				// New cosine
-			float s = sqrt((1 - nw * nw) / length2(rhs.q));
+		KITTEN_FUNC_DECL friend RotorX<T> operator*(T lhs, const RotorX<T>& rhs) {
+			if (rhs.w == 1) return RotorX<T>();
+			T na = lhs * acos(rhs.w);	// New angle
+			T nw = cos(na);				// New cosine
+			T s = sqrt((1 - nw * nw) / length2(rhs.q));
 			if (fract(na * 0.1591549430918954) > 0.5) s = -s;
-			return Rotor(rhs.q * s, nw);
+			return RotorX<T>(rhs.q * s, nw);
 		}
 
 		// Gets the vec4 repersentation laid out in { y^z, z^x, x^y, scaler }
-		KITTEN_FUNC_DECL explicit operator glm::vec4() const {
-			return vec4(q, w);
+		KITTEN_FUNC_DECL explicit operator glm::vec<4, T, defaultp>() const {
+			return vec<4, T, defaultp>(q, w);
 		}
 	};
 
 	// mix rotors a to b from t=[0, 1] (unclamped)
-	KITTEN_FUNC_DECL inline Rotor mix(Rotor a, Rotor b, float t) {
+	template<typename T>
+	KITTEN_FUNC_DECL inline RotorX<T> mix(RotorX<T> a, RotorX<T> b, T t) {
 		return (t * (b * a.inverse())) * a;
 	}
+
+	using Rotor = RotorX<float>;
+	using RotorD = RotorX<double>;
 }
