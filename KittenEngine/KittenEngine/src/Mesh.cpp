@@ -154,6 +154,32 @@ namespace Kitten {
 		}
 	}
 
+	void Mesh::writeOBJ(string p, mat4 transform) {
+		FILE* file;
+		fopen_s(&file, p.c_str(), "w");
+		if (file) {
+			fprintf(file, "# WaveFront *.obj file\n\n");
+
+			for (size_t i = 0; i < vertices.size(); i++) {
+				vec3 v = vertices[i].pos;
+				v = transform * vec4(v, 1);
+				fprintf(file, "v %.16f %.16f %.16f\n", v.x, v.y, v.z);
+			}
+
+			fprintf(file, "# %zd vertices\n\no mesh\n", vertices.size());
+			for (size_t i = 0; i < indices.size() / 3; i++) {
+				ivec3 v = ivec3(
+					indices[3 * i + 0],
+					indices[3 * i + 1],
+					indices[3 * i + 2]
+				) + 1;
+				fprintf(file, "f %d %d %d\n", v.x, v.y, v.z);
+			}
+			fprintf(file, "# %zd triangles\n\n", indices.size() / 3);
+
+			fclose(file);
+		}
+	}
 
 	void Mesh::writePOLY(string p) {
 		FILE* file;

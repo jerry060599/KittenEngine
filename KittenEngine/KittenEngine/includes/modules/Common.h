@@ -339,20 +339,20 @@ namespace Kitten {
 		printf(format, x);
 	}
 
-	inline void printDiv() {
+	KITTEN_FUNC_DECL inline void printDiv() {
 		printf("\n----div----\n");
 	}
 
-	inline void print(float x, const char* format = "%f\n") {
+	KITTEN_FUNC_DECL inline void print(float x, const char* format = "%f\n") {
 		printf(format, x);
 	}
 
-	inline void print(double x, const char* format = "%f\n") {
+	KITTEN_FUNC_DECL inline void print(double x, const char* format = "%f\n") {
 		printf(format, x);
 	}
 
 	template <int c, int r, typename T>
-	void print(mat<c, r, T, defaultp> m, const char* format = "%.4f") {
+	KITTEN_FUNC_DECL void print(mat<c, r, T, defaultp> m, const char* format = "%.4f") {
 		for (int i = 0; i < r; i++) {
 			printf(i == 0 ? "{{" : " {");
 
@@ -366,7 +366,7 @@ namespace Kitten {
 	}
 
 	template <int s, typename T>
-	void print(vec<s, T, defaultp> v, const char* format = "%.4f") {
+	KITTEN_FUNC_DECL void print(vec<s, T, defaultp> v, const char* format = "%.4f") {
 		printf("{");
 		for (int i = 0; i < s; i++) {
 			printf(format, v[i]);
@@ -376,7 +376,7 @@ namespace Kitten {
 	}
 
 	template <int s>
-	void print(vec<s, int, defaultp> v, const char* format = "%d") {
+	KITTEN_FUNC_DECL void print(vec<s, int, defaultp> v, const char* format = "%d") {
 		printf("{");
 		for (int i = 0; i < s; i++) {
 			printf(format, v[i]);

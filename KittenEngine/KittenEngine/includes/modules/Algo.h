@@ -10,6 +10,8 @@
 #include "Common.h"
 
 namespace Kitten {
+	std::vector<float> polylineUniformSample(std::function<vec3(float)> f, float a, float b, const int numSamples, const int numItr = 64, const float learningRate = 1.f);
+
 	/// <summary>
 	/// A constant-memory trapezoidal adaptive romberg integrator. 
 	/// Jerry Hsu 2021

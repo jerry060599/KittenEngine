@@ -45,6 +45,7 @@ namespace Kitten {
 		void upload();
 		void calculateBounds();
 		void writeOBJ(string p);
+		void writeOBJ(string p, mat4 transform);
 		void writePOLY(string p);
 
 		// The zeroth moment of the mesh. Only works if triangle index ordering is correct.

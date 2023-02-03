@@ -2,6 +2,42 @@
 
 using namespace Eigen;
 
+std::vector<float> Kitten::polylineUniformSample(std::function<vec3(float)> f, float a, float b, const int numSamples, const int numItr, const float learningRate) {
+	std::vector<float> ts(numSamples);
+	for (size_t i = 0; i < numSamples; i++)
+		ts[i] = glm::mix(a, b, i / (float)(numSamples - 1));
+
+	vec3 root = f(a);
+	for (size_t k = 0; k < numItr; k++) {
+		float lt = a;
+		vec3 left = root;
+		float mt = ts[1];
+		vec3 mid = f(mt);
+
+		for (size_t i = 1; i < numSamples - 1; i++) {
+			vec3 right = f(ts[i + 1]);
+			float rt = ts[i + 1];
+
+			// (t - lt) / (mt - lt) * leftL = (1 - (t - mt) / (rt - mt)) * rightL
+			// (t - lt) lr = (rt - t) rr
+			float lr = length(left - mid) / (mt - lt);
+			float rr = length(right - mid) / (rt - mt);
+
+			float episilon = (rt - lt) * 1e-2f;
+			float nt = glm::clamp((lt * lr + rt * rr) / (lr + rr), lt + episilon, rt - episilon);
+			ts[i] = mt = glm::mix(mt, nt, learningRate);
+			mid = f(mt);
+
+			left = mid;
+			mid = right;
+			lt = mt;
+			mt = rt;
+		}
+	}
+
+	return ts;
+}
+
 Eigen::VectorXf Kitten::lbfgsMin(int numVars, std::function<float(Eigen::VectorXf)> f,
 	std::function<Eigen::VectorXf(Eigen::VectorXf)> g,
 	Eigen::VectorXf& guess, const float tol, const int m) {
