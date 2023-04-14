@@ -411,9 +411,9 @@ namespace Kitten {
 				ivec3 tri;
 				int v, m;
 				iss >> v >> tri.x >> tri.y >> tri.z >> m;
-				mesh->indices.push_back(tri.x - 1);
-				mesh->indices.push_back(tri.y - 1);
-				mesh->indices.push_back(tri.z - 1);
+				mesh->indices.push_back(tri.x);
+				mesh->indices.push_back(tri.y);
+				mesh->indices.push_back(tri.z);
 				// printf("f %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1);
 			}
 
@@ -444,10 +444,10 @@ namespace Kitten {
 				ivec4 tri;
 				int v;
 				iss >> v >> tri.x >> tri.y >> tri.z >> tri.w;
-				mesh->tetIndices.push_back(tri.x - 1);
-				mesh->tetIndices.push_back(tri.y - 1);
-				mesh->tetIndices.push_back(tri.z - 1);
-				mesh->tetIndices.push_back(tri.w - 1);
+				mesh->tetIndices.push_back(tri.x);
+				mesh->tetIndices.push_back(tri.y);
+				mesh->tetIndices.push_back(tri.z);
+				mesh->tetIndices.push_back(tri.w);
 				// printf("e %d %d %d %d\n", tri.x - 1, tri.y - 1, tri.z - 1, tri.w - 1);
 			}
 
