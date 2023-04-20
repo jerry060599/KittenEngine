@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-
+// Jerry Hsu 2023
 // KittenEngine Quick Start Skeleton Code
 
 #include "KittenEngine/includes/KittenEngine.h"
