@@ -465,6 +465,31 @@ namespace Kitten {
 			v.y, -v.x, 0
 			);
 	}
+
+	KITTEN_FUNC_DECL inline ivec3 getCell(vec3 pos, float h) {
+		return glm::ceil(pos / h);
+	}
+
+	KITTEN_FUNC_DECL inline int cantorHashCombine(int a, int b) {
+		return ((a + b) * (a + b + 1)) / 2 + b;
+	}
+
+	KITTEN_FUNC_DECL inline int boostHashCombine(int lhs, int rhs) {
+		lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+		return lhs;
+	}
+
+	/// <summary>
+	/// Somewhat expensive but really REALLY good spatial hash function.
+	/// Incredibly uniform randomness + very low maximum collisions for EVERY xyz index in (-100, 100)
+	/// </summary>
+	/// <param name="cell"></param>
+	/// <returns></returns>
+	KITTEN_FUNC_DECL inline int getCellHash(ivec3 cell) {
+		int hash = cantorHashCombine(boostHashCombine(cell.x, cell.z),
+			cantorHashCombine(boostHashCombine(cell.x, cell.y), boostHashCombine(cell.y, cell.z)));
+		return hash ? hash : 1;
+	}
 }
 
 namespace std {
