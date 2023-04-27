@@ -479,6 +479,13 @@ namespace Kitten {
 		return lhs;
 	}
 
+	KITTEN_FUNC_DECL inline int szudzikHashCombine(int a, int b) {
+		int A = a >= 0 ? 2 * a : -2 * a - 1;
+		int B = b >= 0 ? 2 * b : -2 * b - 1;
+		int C = (A >= B ? A * A + A + B : A + B * B) / 2;
+		return a < 0 && b < 0 || a >= 0 && b >= 0 ? C : -C - 1;
+	}
+
 	/// <summary>
 	/// Somewhat expensive but really REALLY good spatial hash function.
 	/// Incredibly uniform randomness + very low maximum collisions for EVERY xyz index in (-100, 100)
