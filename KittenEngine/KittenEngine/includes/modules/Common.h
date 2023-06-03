@@ -332,8 +332,7 @@ namespace Kitten {
 
 		// Calculates ray tri intersection location and barycentric coordinates. 
 		dmat3 A(tri[1] - tri[0], tri[2] - tri[0], -dir);
-		dmat3 AT = transpose(A);
-		dvec3 r = inverse(AT * A) * (AT * (ori - tri[0]));
+		dvec3 r = inverse(A) * (ori - tri[0]);
 		if (!all(isfinite(r))) return false;
 
 		t = r.z;
