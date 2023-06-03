@@ -2,12 +2,24 @@
 // Jerry Hsu, 2021
 
 #define KITTEN_FUNC_DECL 
-#ifdef __CUDA_ARCH__
-// #pragma nv_diag_suppress 20012
+
+#if __has_include("cuda_runtime.h")
 #pragma nv_diag_suppress esa_on_defaulted_function_ignored
-#include <cuda.h>
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #undef KITTEN_FUNC_DECL
 #define KITTEN_FUNC_DECL __device__ __host__
+
+#define checkCudaErrors(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char* file, int line, bool abort = true) {
+	if (code != cudaSuccess) {
+		fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+		if (abort) exit(code);
+	}
+}
+
 #endif
 
 #include <glm/glm.hpp>
@@ -314,6 +326,55 @@ namespace Kitten {
 		return s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1;
 	}
 
+	// A ray triangle intersection robust to edge/vertex ambiguities. 
+	KITTEN_FUNC_DECL inline bool robustRayTriInt(dvec3& ori, dvec3& dir, dmat3& tri, dvec3& bary, double& t) {
+		constexpr double episilon = 1e-7;
+
+		// Calculates ray tri intersection location and barycentric coordinates. 
+		dmat3 A(tri[1] - tri[0], tri[2] - tri[0], -dir);
+		dmat3 AT = transpose(A);
+		dvec3 r = inverse(AT * A) * (AT * (ori - tri[0]));
+		if (!all(isfinite(r))) return false;
+
+		t = r.z;
+		bary = dvec3(1 - r.x - r.y, r.x, r.y);
+
+		// Determine whether it hits
+		if (bary.x > episilon && bary.y > episilon && bary.z > episilon) return true;
+
+		// Handle edge case
+		bool onEdge = true;
+		dvec3 edge, point;
+		if (bary.x > -episilon && bary.y > -episilon && bary.z > -episilon) {
+			if (abs(bary.x) <= episilon) {
+				edge = tri[2] - tri[1];
+				point = tri[0];
+			}
+			else if (abs(bary.y) <= episilon) {
+				edge = A[1];
+				point = tri[1];
+			}
+			else if (abs(bary.z) <= episilon) {
+				edge = A[0];
+				point = tri[2];
+			}
+			else onEdge = false;
+		}
+		else onEdge = false;
+
+		if (onEdge) {
+			// Orient the edge to always have positive x, then y, then z
+			if (edge.x < 0) edge *= -1;
+			else if (edge.x == 0)
+				if (edge.y < 0) edge *= -1;
+				else if (edge.z < 0)
+					edge *= -1;
+
+			return dot(point - tri * bary, cross(dir, edge)) > 0;
+		}
+		return false;
+	}
+
 	KITTEN_FUNC_DECL inline int wrap(int i, int period) {
 		return (i + period) % period;
 	}
@@ -463,7 +524,7 @@ namespace Kitten {
 			0, v.z, -v.y,
 			-v.z, 0, v.x,
 			v.y, -v.x, 0
-			);
+		);
 	}
 
 	KITTEN_FUNC_DECL inline ivec3 getCell(vec3 pos, float h) {
@@ -496,6 +557,57 @@ namespace Kitten {
 		int hash = cantorHashCombine(boostHashCombine(cell.x, cell.z),
 			cantorHashCombine(boostHashCombine(cell.x, cell.y), boostHashCombine(cell.y, cell.z)));
 		return hash ? hash : 1;
+	}
+
+	// Multiples out U.S.V^T
+	template <typename T>
+	KITTEN_FUNC_DECL inline mat<3, 3, T, defaultp> svdMul(mat<3, 3, T, defaultp> U, vec<3, T, defaultp> S, mat<3, 3, T, defaultp> V) {
+		U[0] *= S[0];
+		U[1] *= S[1];
+		U[2] *= S[2];
+
+		mat<3, 3, T, defaultp> A(
+			U[0][0] * V[0][0] + U[1][0] * V[1][0] + U[2][0] * V[2][0],
+			U[0][1] * V[0][0] + U[1][1] * V[1][0] + U[2][1] * V[2][0],
+			U[0][2] * V[0][0] + U[1][2] * V[1][0] + U[2][2] * V[2][0],
+
+			U[0][0] * V[0][1] + U[1][0] * V[1][1] + U[2][0] * V[2][1],
+			U[0][1] * V[0][1] + U[1][1] * V[1][1] + U[2][1] * V[2][1],
+			U[0][2] * V[0][1] + U[1][2] * V[1][1] + U[2][2] * V[2][1],
+
+			U[0][0] * V[0][2] + U[1][0] * V[1][2] + U[2][0] * V[2][2],
+			U[0][1] * V[0][2] + U[1][1] * V[1][2] + U[2][1] * V[2][2],
+			U[0][2] * V[0][2] + U[1][2] * V[1][2] + U[2][2] * V[2][2]
+		);
+		return A;
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL inline void stridedMat3(T* data, const int stride, mat<3, 3, T, defaultp> val) {
+		for (size_t i = 0; i < 9; i++)
+			data[i * stride] = ((float*)&val)[i];
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL inline void stridedVec3(T* data, const int stride, vec<3, T, defaultp> val) {
+		for (size_t i = 0; i < 3; i++)
+			data[i * stride] = val[i];
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL inline mat<3, 3, T, defaultp> stridedMat3(T* data, const int stride) {
+		mat<3, 3, T, defaultp> val;
+		for (int i = 0; i < 9; i++)
+			((float*)&val)[i] = data[i * stride];
+		return val;
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL inline vec<3, T, defaultp> stridedVec3(T* data, const int stride) {
+		vec<3, T, defaultp> val;
+		for (int i = 0; i < 3; i++)
+			val[i] = data[i * stride];
+		return val;
 	}
 }
 

@@ -57,6 +57,9 @@ namespace Kitten {
 
 		// The center of mass of the mesh. Only works if triangle index ordering is correct.
 		vec3 centerOfMass();
+
+		// Uniformly sample inside/outside tests on every point of a grid. Will only work on closed meshes
+		char* gridIntersections(Bound<> bounds, int samplesPerAxis = 128);
 	};
 
 	class TetMesh : public Mesh {
@@ -71,8 +74,8 @@ namespace Kitten {
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
 	Mesh* genCylMesh(int radialSegments, bool cap = true);
-	void loadMeshFrom(path path);
-	void loadTetgenFrom(path path);
+	Mesh* loadMeshFrom(path path);
+	TetMesh* loadTetgenFrom(path path);
 	Mesh* loadMeshExact(path path);
 	TetMesh* loadTetMeshOBJ(path path);
 }

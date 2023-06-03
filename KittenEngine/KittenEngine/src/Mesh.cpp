@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <unordered_set>
+#include <unordered_map>
 
 namespace Kitten {
 	unsigned int meshImportFlags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
@@ -207,15 +207,59 @@ namespace Kitten {
 		}
 	}
 
-	void loadMeshFrom(std::filesystem::path path) {
-		if (resources.count(path.string())) return;
+	char* Mesh::gridIntersections(Bound<> bounds, int samplesPerAxis) {
+		char* data = new char[samplesPerAxis * samplesPerAxis * samplesPerAxis];
+		std::vector<float> sortedInts;
+		const float invS = 1 / (float)samplesPerAxis;
+		const float ydiff = (bounds.max.y - bounds.min.y) * invS;
+
+		for (size_t ix = 0; ix < samplesPerAxis; ix++)
+			for (size_t iz = 0; iz < samplesPerAxis; iz++) {
+				// Build column
+				sortedInts.clear();
+				vec3 coord = bounds.interp(vec3(ix * invS, 0, iz * invS));
+				coord.y = 0;
+				vec3 dir(0, 1, 0);
+
+				for (size_t i = 0; i < indices.size(); i += 3) {
+					dmat3 tri;
+					tri[0] = vertices[indices[i + 0]].pos;
+					tri[1] = vertices[indices[i + 1]].pos;
+					tri[2] = vertices[indices[i + 2]].pos;
+
+					dvec3 ori = coord;
+					dvec3 dir(0, 1, 0);
+					dvec3 bary;
+					double t;
+					if (robustRayTriInt(ori, dir, tri, bary, t))
+						sortedInts.push_back((float)t);
+				}
+
+				if (sortedInts.size() & 1) 
+					throw std::exception("Mesh not closed!");
+
+				std::sort(sortedInts.begin(), sortedInts.end());
+
+				size_t ii = 0;
+				for (size_t iy = 0; iy < samplesPerAxis; iy++) {
+					float y = iy * ydiff + bounds.min.y;
+					while (ii < sortedInts.size() && sortedInts[ii] < y) ii++;
+					data[Kitten::flatIdx(ivec3(ix, iy, iz), ivec3(samplesPerAxis))] = ii & 1;
+				}
+			}
+
+		return data;
+	}
+
+	Mesh* loadMeshFrom(std::filesystem::path path) {
+		if (resources.count(path.string())) return (Mesh*)resources[path.string()];
 
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path.string(), meshImportFlags);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			cout << "err: assimp error " << import.GetErrorString() << endl;
-			return;
+			return nullptr;
 		}
 
 		vector<aiNode*> processStack;
@@ -260,6 +304,7 @@ namespace Kitten {
 			}
 		}
 
+		Mesh* loadedMesh = nullptr;
 		bool firstMesh = true;
 		while (processStack.size()) {
 			auto node = processStack.back();
@@ -269,6 +314,7 @@ namespace Kitten {
 
 			if (node->mNumMeshes) {
 				Mesh* mesh = new Mesh;
+				loadedMesh = mesh;
 				string nName = path.string() + "\\" + node->mName.C_Str();
 				resources[nName] = mesh;
 				if (firstMesh) {
@@ -343,9 +389,10 @@ namespace Kitten {
 		}
 
 		delete[] mats;
+		return loadedMesh;
 	}
 
-	void loadTetgenFrom(path path) {
+	TetMesh* loadTetgenFrom(path path) {
 		string name = path.string().substr(0, path.string().size() - path.extension().string().size()) + ".tetgen";
 		printf("asset: loading tetgen-mesh %s (.tetgen)\n", path.string().c_str());
 
@@ -455,6 +502,8 @@ namespace Kitten {
 			mesh->initGL();
 			mesh->upload();
 		}
+
+		return mesh;
 	}
 
 	Mesh* genQuadMesh(int rows, int cols) {

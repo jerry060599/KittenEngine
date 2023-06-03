@@ -4,7 +4,6 @@
 using namespace Kitten;
 using namespace glm;
 
-ComputeBuffer::ComputeBuffer() {}
 ComputeBuffer::ComputeBuffer(size_t elementSize, size_t size, GLenum usage)
 	: elementSize(elementSize), size(size), usage(usage) {
 	glGenBuffers(1, &glHandle);

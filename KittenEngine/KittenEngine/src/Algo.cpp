@@ -24,7 +24,7 @@ std::vector<float> Kitten::polylineUniformSample(std::function<vec3(float)> f, f
 			float rr = length(right - mid) / (rt - mt);
 
 			float episilon = (rt - lt) * 1e-2f;
-			float nt = glm::clamp((lt * lr + rt * rr) / (lr + rr), lt + episilon, rt - episilon);
+			float nt = lr + rr != 0 ? glm::clamp((lt * lr + rt * rr) / (lr + rr), lt + episilon, rt - episilon) : 0.5f * (lt + rt);
 			ts[i] = mt = glm::mix(mt, nt, learningRate);
 			mid = f(mt);
 
