@@ -37,6 +37,8 @@ namespace Kitten {
 		Mesh(Mesh& m);
 		~Mesh();
 
+		int hashTriangles();
+
 		void setFromLine(vector<vec3>& points);
 		void polygonize();
 		void transform(mat4);

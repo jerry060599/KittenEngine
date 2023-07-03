@@ -49,4 +49,6 @@ namespace Kitten {
 		void setMat3(const char* name, glm::mat3 v);
 		void setMat4(const char* name, glm::mat4 v);
 	};
+
+	bool compileShader(string path, GLenum type, unsigned int* handle);
 }

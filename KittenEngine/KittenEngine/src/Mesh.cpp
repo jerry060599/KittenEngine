@@ -41,6 +41,16 @@ namespace Kitten {
 		}
 	}
 
+	int Mesh::hashTriangles() {
+		int hash = boostHashCombine(indices.size(), vertices.size());
+		for (int i : indices)
+			hash = boostHashCombine(hash, i);
+		for (auto v : vertices)
+			for (size_t k = 0; k < sizeof(Vertex) / sizeof(int); k++)
+				hash = boostHashCombine(hash, ((int*)&v)[k]);
+		return hash;
+	}
+
 	void Mesh::draw() {
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
@@ -235,7 +245,7 @@ namespace Kitten {
 						sortedInts.push_back((float)t);
 				}
 
-				if (sortedInts.size() & 1) 
+				if (sortedInts.size() & 1)
 					throw std::exception("Mesh not closed!");
 
 				std::sort(sortedInts.begin(), sortedInts.end());

@@ -299,4 +299,152 @@ namespace Kitten {
 		const int itrLim = -1,
 		const int k = 4
 	);
+
+	inline double relError(double a, double b) {
+		double err = abs(a - b);
+		return abs(b) > 1e-7 ? glm::min(abs(err / b), err) : err;
+	}
+
+	// Performs a simple check of the jacobian grad() by comparing it to a numerical approximation
+	template<int N, int M = 1>
+	bool checkJacobian(void (*f)(double*, double*), void (*grad)(double*, double*), double tol = 1e-5, int itr = 1, double h = 1e-3, void (*validate)(double*) = nullptr) {
+		printf("\n\033[1mJacobian test %dx%d\033[0m\n\n", M, N);
+
+		const double invH = 1 / (12 * h);
+		const double secondaryTol = pow2(tol);
+
+		double x[N];
+		double r[M];
+		double numericalRes[N][M];
+		double actualRes[N][M];
+
+		bool good = true;
+		srand(0);
+
+		for (int kk = 0; kk < itr; kk++) {
+			for (size_t i = 0; i < N; i++) {
+				x[i] = (rand() / (float)RAND_MAX) * 2 - 1;
+				for (size_t k = 0; k < M; k++)
+					actualRes[i][k] = 0;
+			}
+
+			if (validate) validate(x);
+			grad(x, (double*)actualRes);
+
+			// Compute the numerical gradient
+			for (size_t i = 0; i < N; i++) {
+				double old = x[i];
+
+				x[i] = old - 2 * h;
+				f(x, r);
+				for (size_t k = 0; k < M; k++) numericalRes[i][k] = r[k];
+
+				x[i] = old - h;
+				f(x, r);
+				for (size_t k = 0; k < M; k++) numericalRes[i][k] -= 8 * r[k];
+
+				x[i] = old + h;
+				f(x, r);
+				for (size_t k = 0; k < M; k++) numericalRes[i][k] += 8 * r[k];
+
+				x[i] = old + 2 * h;
+				f(x, r);
+				for (size_t k = 0; k < M; k++) numericalRes[i][k] -= r[k];
+
+				for (size_t k = 0; k < M; k++) numericalRes[i][k] *= invH;
+				x[i] = old;
+			}
+
+			double maxErr = 0;
+			// Check if the results are the same
+			for (size_t i = 0; i < N; i++) {
+				for (size_t k = 0; k < M; k++) {
+					double err = relError(actualRes[i][k], numericalRes[i][k]);
+					if (err > tol)
+						good = false;
+					maxErr = glm::max(err, maxErr);
+				}
+			}
+
+			if (!good || (itr < 3)) {
+				printf("Test %d/%d h=%.1e tol=%.1e (%.1e):\n", kk + 1, itr, h, tol, secondaryTol);
+
+				f(x, r);
+				printf("val: ");
+				for (size_t i = 0; i < M; i++)
+					printf("%10f ", r[i]);
+				printf("\n");
+
+				printf("x: ");
+				for (size_t i = 0; i < N; i++)
+					printf("%10f ", x[i]);
+				printf("\n\n");
+
+				printf("Given jacobian:\n");
+				for (size_t k = 0; k < M; k++) {
+					printf("%d: ", k);
+					for (int i = 0; i < N; i++) {
+						double err = relError(actualRes[i][k], numericalRes[i][k]);
+						if (err > tol) printf("\033[31m");
+						else if (err > secondaryTol) printf("\033[33m");
+						if (err == maxErr) printf("\033[1m");
+						printf("%10f \033[0m", actualRes[i][k]);
+					}
+					printf("\n");
+				}
+				printf("\n");
+
+				printf("Numerical jacobian (ground truth):\n");
+				for (size_t k = 0; k < M; k++) {
+					printf("%d: ", k);
+					for (int i = 0; i < N; i++) {
+						double err = relError(actualRes[i][k], numericalRes[i][k]);
+						if (err > tol) printf("\033[32m");
+						if (err == maxErr) printf("\033[1m");
+						printf("%10f \033[0m", numericalRes[i][k]);
+					}
+					printf("\n");
+				}
+				printf("\n");
+
+				printf("Relative err:\n");
+				bool flipped = false;
+				for (size_t k = 0; k < M; k++) {
+					printf("%d: ", k);
+					for (int i = 0; i < N; i++) {
+						double err = relError(actualRes[i][k], numericalRes[i][k]);
+						if (err > tol && relError(-actualRes[i][k], numericalRes[i][k]) <= tol)
+							flipped = true;
+						if (err > tol) printf("\033[31m");
+						else if (err > secondaryTol) printf("\033[33m");
+						if (err == maxErr) printf("\033[1m");
+
+						if (err == 0)
+							printf("%10d \033[0m", 0);
+						else
+							printf("%10.2e \033[0m", err);
+					}
+					printf("\n");
+				}
+
+				printf("Max error: ");
+				if (maxErr > tol) printf("\033[1;31m");
+				else if (maxErr > secondaryTol) printf("\033[1;33m");
+				printf("%10.3e \033[0m\n", maxErr);
+
+				if (flipped) printf("\033[1;31mFlipped sign??\033[0m\n");
+				printf("\n");
+			}
+
+			if (!good) break;
+		}
+
+		if (good)
+			printf("\n\033[1;32mAll pass!\033[0m\n");
+		else
+			printf("\n\033[1;31m=====    SOMETHING IS WRONG!!!!!!!!!!!    =====\033[0m\n");
+		printf("End jacobian test.\n");
+
+		return good;
+	}
 }

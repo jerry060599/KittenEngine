@@ -186,6 +186,14 @@ namespace Kitten {
 		return d;
 	}
 
+	template <int s, int c, typename T>
+	KITTEN_FUNC_DECL inline mat<s, c, T, defaultp> mix(mat<s, c, T, defaultp> a, mat<s, c, T, defaultp> b, T t) {
+		mat<s, c, T, defaultp> m;
+		for (int i = 0; i < s; i++)
+			m[i] = mix(a[i], b[i], t);
+		return m;
+	}
+
 	template <int s, typename T>
 	KITTEN_FUNC_DECL inline T norm(mat<s, s, T, defaultp> m) {
 		T d = 0;
@@ -224,8 +232,9 @@ namespace Kitten {
 		return x;
 	}
 
-	KITTEN_FUNC_DECL inline mat3 abT(vec3 a, vec3 b) {
-		return mat3(
+	template<typename T>
+	KITTEN_FUNC_DECL inline mat<3, 3, T, defaultp> abT(vec<3, T, defaultp> a, vec<3, T, defaultp> b) {
+		return mat<3, 3, T, defaultp>(
 			b.x * a.x, b.y * a.x, b.z * a.x,
 			b.x * a.y, b.y * a.y, b.z * a.y,
 			b.x * a.z, b.y * a.z, b.z * a.z
@@ -302,6 +311,12 @@ namespace Kitten {
 
 	KITTEN_FUNC_DECL inline int numBatches(size_t n, int batchSize) {
 		return numBatches((int)n, batchSize);
+	}
+
+	// Returns the closest points between one a line in the form mix(a0, a1, t)
+	KITTEN_FUNC_DECL inline float lineClosestPoints(vec3 a0, vec3 a1, vec3 b) {
+		vec3 d = a1 - a0;
+		return dot(b - a0, d) / dot(d, d);
 	}
 
 	// Returns the closest points between two lines in the form mix(a0, a1, uv.x) and mix(b0, b1, uv.y)
@@ -483,6 +498,39 @@ namespace Kitten {
 		for (int i = 1; i < s; i++)
 			sum += a[i];
 		return compSum(sum);
+	}
+
+	// Finds v s.t. p = mix(Av, Bv, v.w)
+	KITTEN_FUNC_DECL inline dvec4 prismaticCoords(dmat3& A, dmat3& B, dvec3 p, double tol = 1e-14, int maxItr = 32) {
+		constexpr double reg = 1e-4;
+
+		dvec3 center(1 / 3., 1 / 3., 0.5);
+		dvec3 uv = center;
+		dmat2x3 MA(A[1] - A[0], A[2] - A[0]);
+		dmat2x3 MB(B[1] - B[0], B[2] - B[0]);
+
+		for (size_t k = 0; k < maxItr; k++) {
+			dvec3 a = MA * uv + A[0];
+			dvec3 b = MB * uv + B[0];
+			dmat2x3 S = Kitten::mix(MA, MB, uv[2]);
+
+			// Get constraint value and constraint jacobian
+			dvec3 c = mix(a, b, uv[2]) - p;
+			double err = length2(c);
+
+			dmat3 jac(S[0], S[1], b - a);
+			dmat3 A = transpose(jac) * jac;
+			A[0][0] += reg;
+			A[1][1] += reg;
+			A[2][2] += reg;
+
+			dvec3 dx = -(inverse(A) * (c * jac));
+			uv += dx;
+
+			if (err < tol) break;
+		}
+
+		return vec4(1 - uv[0] - uv[1], uv[0], uv[1], uv[2]);
 	}
 
 	// Returns the bary-centric coords of the closest point to x on triangle p

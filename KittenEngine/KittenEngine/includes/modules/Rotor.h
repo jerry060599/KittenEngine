@@ -6,8 +6,18 @@ namespace Kitten {
 	template <typename T>
 	struct RotorX {
 		typedef glm::vec<3, T, defaultp> q_type;
-		q_type q;	// The bivector part laid out in the { y^z, z^x, x^y } basis
-		T w;		// The scaler part
+		typedef glm::vec<4, T, defaultp> v_type;
+
+		union {
+			v_type v;
+			struct {
+				q_type q;	// The bivector part laid out in the { y^z, z^x, x^y } basis
+				T w;		// The scaler part
+			};
+			struct {
+				T x, y, z, w;
+			};
+		};
 
 		// Create a quaternion from an angle (in radians) and rotation axis
 		KITTEN_FUNC_DECL static RotorX<T> angleAxis(T rad, q_type axis) {
@@ -58,10 +68,12 @@ namespace Kitten {
 			return RotorX<T>();
 		}
 
-		KITTEN_FUNC_DECL RotorX() : q(q_type(0)), w(1) {}
+		KITTEN_FUNC_DECL RotorX(T x = 0, T y = 0, T z = 0, T w = 0) : v(x, y, z, w) {}
+		KITTEN_FUNC_DECL RotorX(q_type q, T w = 0) : q(q), w(w) {}
+		KITTEN_FUNC_DECL RotorX(v_type v) : v(v) {}
 
-		KITTEN_FUNC_DECL RotorX(q_type q, T w) : q(q), w(w) {}
-		KITTEN_FUNC_DECL RotorX(glm::vec<4, T, defaultp> v) : q(v), w(v.w) {}
+		template<typename U>
+		KITTEN_FUNC_DECL explicit RotorX(const RotorX<U>& other) : v((v_type)other.v) {}
 
 		// Get the multiplicative inverse
 		KITTEN_FUNC_DECL RotorX<T> inverse() const {
@@ -86,7 +98,7 @@ namespace Kitten {
 
 		KITTEN_FUNC_DECL mat<3, 3, T, defaultp> matrix() {
 			mat3 cm = crossMatrix(q);
-			return abT((vec3)q, (vec3)q) + mat<3, 3, T, defaultp>(w * w) + 2 * w * cm + cm * cm;
+			return abT(q, q) + mat<3, 3, T, defaultp>(w * w) + 2 * w * cm + cm * cm;
 		}
 
 		// Get the euler angle in radians
@@ -140,6 +152,15 @@ namespace Kitten {
 				lhs.w * rhs.w - dot(lhs.q, rhs.q));
 		}
 
+		KITTEN_FUNC_DECL RotorX<T>& operator+=(const RotorX<T>& rhs) {
+			v += rhs.v;
+			return *this;
+		}
+
+		KITTEN_FUNC_DECL friend RotorX<T> operator+(RotorX<T> lhs, const RotorX<T>& rhs) {
+			return RotorX<T>(lhs.v + rhs.v);
+		}
+
 		KITTEN_FUNC_DECL friend RotorX<T> operator*(T lhs, const RotorX<T>& rhs) {
 			if (rhs.w == 1) return RotorX<T>();
 			T na = lhs * acos(rhs.w);	// New angle
@@ -150,8 +171,12 @@ namespace Kitten {
 		}
 
 		// Gets the vec4 repersentation laid out in { y^z, z^x, x^y, scaler }
-		KITTEN_FUNC_DECL explicit operator glm::vec<4, T, defaultp>() const {
-			return vec<4, T, defaultp>(q, w);
+		KITTEN_FUNC_DECL explicit operator v_type() const {
+			return v;
+		}
+
+		KITTEN_FUNC_DECL T& operator[](std::size_t idx) {
+			return v[idx];
 		}
 	};
 
@@ -159,6 +184,11 @@ namespace Kitten {
 	template<typename T>
 	KITTEN_FUNC_DECL inline RotorX<T> mix(RotorX<T> a, RotorX<T> b, T t) {
 		return (t * (b * a.inverse())) * a;
+	}
+
+	template<typename T>
+	KITTEN_FUNC_DECL inline T dot(RotorX<T> a, RotorX<T> b) {
+		return glm::dot(a.v, b.v);
 	}
 
 	using Rotor = RotorX<float>;

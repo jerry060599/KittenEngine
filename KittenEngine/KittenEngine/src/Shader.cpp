@@ -1,12 +1,45 @@
 
 #include <stdio.h>
+#include <iostream>
+
 #include "../includes/modules/KittenRendering.h"
 #include "../includes/modules/Shader.h"
+#include "../includes/modules/KittenPreprocessor.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace glm;
 
 namespace Kitten {
+	bool checkCompile(unsigned int obj) {
+		int  success;
+		char infoLog[512];
+		glGetShaderiv(obj, GL_COMPILE_STATUS, &success);
+
+		if (!success) {
+			glGetShaderInfoLog(obj, 512, NULL, infoLog);
+			std::cout << "err: shader compilation failed.\n" << infoLog << std::endl;
+			return false;
+		}
+
+		return true;
+	}
+
+	bool compileShader(string path, GLenum type, unsigned int* handle) {
+		string src = Kitten::loadTextWithIncludes(path);
+		unsigned int s = glCreateShader(type);
+		const char* cstr = src.c_str();
+		glShaderSource(s, 1, &cstr, NULL);
+		glCompileShader(s);
+		*handle = s;
+
+		if (!checkCompile(s)) {
+			Kitten::printWithLineNumber(src);
+			return false;
+		}
+		return true;
+	}
+
 	Shader::~Shader() {
 		for (auto h : unlinkedHandles)
 			glDeleteShader(h);
@@ -29,6 +62,22 @@ namespace Kitten {
 
 	bool Shader::link() {
 		tryLinked = true;
+
+		// We're going to provide standard vert/frag shaders if either is missing
+		if (!(type & (int)ShaderType::FRAG)) {
+			unsigned int handle;
+			compileShader("KittenEngine\\shaders\\blingForward.frag", GL_FRAGMENT_SHADER, &handle);
+			unlinkedHandles.push_back(handle);
+			type |= (int)ShaderType::FRAG;
+		}
+
+		if (!(type & (int)ShaderType::VERT)) {
+			unsigned int handle;
+			compileShader("KittenEngine\\shaders\\blingForward.vert", GL_VERTEX_SHADER, &handle);
+			unlinkedHandles.push_back(handle);
+			type |= (int)ShaderType::VERT;
+		}
+
 		unsigned int shaderProgram;
 		shaderProgram = glCreateProgram();
 		for (auto h : unlinkedHandles)

@@ -18,35 +18,6 @@
 namespace Kitten {
 	map<string, void*> resources;
 
-	bool checkCompile(unsigned int obj) {
-		int  success;
-		char infoLog[512];
-		glGetShaderiv(obj, GL_COMPILE_STATUS, &success);
-
-		if (!success) {
-			glGetShaderInfoLog(obj, 512, NULL, infoLog);
-			std::cout << "err: shader compilation failed.\n" << infoLog << std::endl;
-			return false;
-		}
-
-		return true;
-	}
-
-	bool compileShader(string path, GLenum type, unsigned int* handle) {
-		string src = Kitten::loadTextWithIncludes(path);
-		unsigned int s = glCreateShader(type);
-		const char* cstr = src.c_str();
-		glShaderSource(s, 1, &cstr, NULL);
-		glCompileShader(s);
-		*handle = s;
-
-		if (!checkCompile(s)) {
-			Kitten::printWithLineNumber(src);
-			return false;
-		}
-		return true;
-	}
-
 	void loadDirectory(path root) {
 		if (root.is_relative())
 			for (auto& p : recursive_directory_iterator(root)) {
