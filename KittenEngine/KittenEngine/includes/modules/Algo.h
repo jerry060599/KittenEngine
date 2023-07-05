@@ -382,7 +382,7 @@ namespace Kitten {
 
 				printf("Given jacobian:\n");
 				for (size_t k = 0; k < M; k++) {
-					printf("%d: ", k);
+					printf("%2d: ", k);
 					for (int i = 0; i < N; i++) {
 						double err = relError(actualRes[i][k], numericalRes[i][k]);
 						if (err > tol) printf("\033[31m");
@@ -396,7 +396,7 @@ namespace Kitten {
 
 				printf("Numerical jacobian (ground truth):\n");
 				for (size_t k = 0; k < M; k++) {
-					printf("%d: ", k);
+					printf("%2d: ", k);
 					for (int i = 0; i < N; i++) {
 						double err = relError(actualRes[i][k], numericalRes[i][k]);
 						if (err > tol) printf("\033[32m");
@@ -410,7 +410,7 @@ namespace Kitten {
 				printf("Relative err:\n");
 				bool flipped = false;
 				for (size_t k = 0; k < M; k++) {
-					printf("%d: ", k);
+					printf("%2d: ", k);
 					for (int i = 0; i < N; i++) {
 						double err = relError(actualRes[i][k], numericalRes[i][k]);
 						if (err > tol && relError(-actualRes[i][k], numericalRes[i][k]) <= tol)
