@@ -348,7 +348,7 @@ namespace Kitten {
 		// Calculates ray tri intersection location and barycentric coordinates. 
 		dmat3 A(tri[1] - tri[0], tri[2] - tri[0], -dir);
 		dvec3 r = inverse(A) * (ori - tri[0]);
-		if (!all(isfinite(r))) return false;
+		if (!glm::all(isfinite(r))) return false;
 
 		t = r.z;
 		bary = dvec3(1 - r.x - r.y, r.x, r.y);
@@ -414,8 +414,9 @@ namespace Kitten {
 		printf(format, x);
 	}
 
-	KITTEN_FUNC_DECL inline void printDiv() {
-		printf("\n----div----\n");
+	KITTEN_FUNC_DECL inline void printDiv(const char* label = nullptr) {
+		if (!label) label = "div";
+		printf("\n----%s----\n", label);
 	}
 
 	KITTEN_FUNC_DECL inline void print(float x, const char* format = "%f\n") {
@@ -736,5 +737,15 @@ namespace std {
 				h = v[i] ^ (h + 0x9e3779b9llu + (v[i] << 6) + (v[i] >> 2));
 			return h;
 		}
+	};
+
+	template<typename Derived, typename Base>
+	inline Derived* as(Base* ptr) {
+		return dynamic_cast<Derived*>(ptr);
+	};
+
+	template<typename Derived, typename Base>
+	inline bool is(Base* ptr) {
+		return as<Derived>(ptr) != nullptr;
 	};
 };

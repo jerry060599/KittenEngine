@@ -41,6 +41,10 @@ namespace Kitten {
 			min -= vec<dim, Real, defaultp>(padding); max += vec<dim, Real, defaultp>(padding);
 		}
 
+		inline void pad(vec<dim, Real, defaultp> padding) {
+			min -= padding; max += padding;
+		}
+
 		inline Real volume() {
 			vec<dim, Real, defaultp> diff = max - min;
 			Real v = diff.x;

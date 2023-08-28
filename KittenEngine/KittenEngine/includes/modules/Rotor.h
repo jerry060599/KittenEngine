@@ -5,8 +5,8 @@
 namespace Kitten {
 	template <typename T>
 	struct RotorX {
-		typedef glm::vec<3, T, defaultp> q_type;
-		typedef glm::vec<4, T, defaultp> v_type;
+		typedef glm::vec<3, T, glm::defaultp> q_type;
+		typedef glm::vec<4, T, glm::defaultp> v_type;
 
 		union {
 			v_type v;
@@ -68,9 +68,10 @@ namespace Kitten {
 			return RotorX<T>();
 		}
 
-		KITTEN_FUNC_DECL RotorX(T x = 0, T y = 0, T z = 0, T w = 0) : v(x, y, z, w) {}
+		KITTEN_FUNC_DECL RotorX(T x, T y = 0, T z = 0, T w = 0) : v(x, y, z, w) {}
 		KITTEN_FUNC_DECL RotorX(q_type q, T w = 0) : q(q), w(w) {}
 		KITTEN_FUNC_DECL RotorX(v_type v) : v(v) {}
+		KITTEN_FUNC_DECL RotorX() : v(0, 0, 0, 1) {}
 
 		template<typename U>
 		KITTEN_FUNC_DECL explicit RotorX(const RotorX<U>& other) : v((v_type)other.v) {}
@@ -112,7 +113,7 @@ namespace Kitten {
 
 		// Get the euler angle in degrees
 		KITTEN_FUNC_DECL q_type eulerDeg() {
-			return euler() * 57.29577951308232f;
+			return euler() * (T)57.29577951308232;
 		}
 
 		// Returns both the axis and rotation angle in radians
@@ -189,6 +190,40 @@ namespace Kitten {
 	template<typename T>
 	KITTEN_FUNC_DECL inline T dot(RotorX<T> a, RotorX<T> b) {
 		return glm::dot(a.v, b.v);
+	}
+
+	template<typename T>
+	KITTEN_FUNC_DECL inline RotorX<T> normalize(RotorX<T> a) {
+		return RotorX<T>(glm::normalize(a.v));
+	}
+
+	// Projects x onto the constraint q*e = d
+	template<typename T>
+	KITTEN_FUNC_DECL inline RotorX<T> projectRotor(RotorX<T> x, vec<3, T, glm::defaultp> e, vec<3, T, glm::defaultp> d) {
+		auto q = RotorX<T>::fromTo(e, d);
+		auto qp = q.inverse() * x;
+		qp.y = qp.z = 0;
+		return q * normalize(qp);
+	}
+
+	template <typename T>
+	KITTEN_FUNC_DECL void print(RotorX<T> v, const char* format = "%.4f") {
+		printf("{");
+		for (int i = 0; i < 4; i++) {
+			printf(format, v[i]);
+			if (i != 3) printf(", ");
+		}
+		if (abs(length2(v.v) - 1) < 1e-3) {
+			printf("}, euler: {");
+			auto a = v.eulerDeg();
+			for (int i = 0; i < 3; i++) {
+				printf(format, a[i]);
+				if (i != 2) printf(", ");
+			}
+			printf("} deg\n");
+		}
+		else
+			printf("}\n");
 	}
 
 	using Rotor = RotorX<float>;

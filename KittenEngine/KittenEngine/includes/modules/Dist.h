@@ -1,5 +1,7 @@
 #pragma once
 #include <math.h>
+#include <glm/glm.hpp>
+
 // Jerry Hsu 2022
 
 namespace Kitten {
@@ -47,4 +49,59 @@ namespace Kitten {
 			return Dist(0);
 		}
 	};
+
+	// A light weight running fit of a small degree polynomial up to a cubic
+	template <int N = 4, typename T = float>
+	struct PolyFit {
+		typedef glm::vec<N, T, glm::defaultp> v_type;
+		typedef glm::mat<N, N, T, glm::defaultp> m_type;
+
+		m_type AtA;
+		v_type Atb;
+
+		PolyFit() {
+			AtA = m_type(0);
+			Atb = v_type(0);
+		}
+
+		// Accumulate a new data point
+		void accu(T x, T y) {
+			v_type row;
+			row[0] = 1;
+			for (int i = 1; i < N; i++)
+				row[i] = row[i - 1] * x;
+
+			AtA += glm::outerProduct(row, row);
+			Atb += row * y;
+		}
+
+		// Returns the coefficients of the polynomial in increasing order of degree
+		v_type coeff() {
+			return inverse(AtA) * Atb;
+		}
+	};
+
+	// Evaluates the integral of the squared difference between two polynomials from start to end
+	template <int N = 4, typename T = float>
+	T polyDistance(glm::vec<N, T, glm::defaultp> a, glm::vec<N, T, glm::defaultp> b, T start, T end) {
+		// Recompute all the powers
+		T s = start, e = end;
+		T diff[8];
+		for (int i = 0; i < 8; i++) {
+			diff[i] = e - s;
+			s *= start;
+			e *= end;
+		}
+
+		// Grab all the terms
+		auto c = a - b;
+		auto m = glm::outerProduct(c, c);
+
+		T res = 0;
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++) {
+
+				res += m[i][j] / (i + j + 1)
+			}
+	}
 }

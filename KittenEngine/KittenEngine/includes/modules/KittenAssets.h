@@ -49,6 +49,11 @@ namespace Kitten {
 	void loadMesh(path path);
 	void loadTetgenMesh(path path);
 
+	// Grabs a file path for a cache file for a specific string key and hash
+	// If cache does not exist, keep the last numCache files and delete the oldest one if too many
+	// Both key and hash are used to prevent collisions. Key should be cache name, hash should be hash of inputs
+	std::filesystem::path getCache(std::string key, size_t hash, int numCache = 8);
+
 	template<typename T>
 	inline T* get(const char* name) {
 		auto itr = resources.find(name);
