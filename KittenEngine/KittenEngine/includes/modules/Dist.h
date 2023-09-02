@@ -80,28 +80,4 @@ namespace Kitten {
 			return inverse(AtA) * Atb;
 		}
 	};
-
-	// Evaluates the integral of the squared difference between two polynomials from start to end
-	template <int N = 4, typename T = float>
-	T polyDistance(glm::vec<N, T, glm::defaultp> a, glm::vec<N, T, glm::defaultp> b, T start, T end) {
-		// Recompute all the powers
-		T s = start, e = end;
-		T diff[8];
-		for (int i = 0; i < 8; i++) {
-			diff[i] = e - s;
-			s *= start;
-			e *= end;
-		}
-
-		// Grab all the terms
-		auto c = a - b;
-		auto m = glm::outerProduct(c, c);
-
-		T res = 0;
-		for (int i = 0; i < N; i++)
-			for (int j = 0; j < N; j++) {
-
-				res += m[i][j] / (i + j + 1)
-			}
-	}
 }
