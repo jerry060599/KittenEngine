@@ -97,6 +97,10 @@ namespace Kitten {
 	void renderInstancedShadows(Mesh* mesh, int count, Shader* base = nullptr);
 	void renderEnv(Texture* cubemap);
 
+	// A helper/adapter that spaces out fixed updates in between dynamic updates
+	void fixedUpdateAdapter(std::function<void(double)> dynamicUpdate, std::function<void(double)> fixedUpdate,
+		double dt, double fixedDT, double& timeSinceFixed);
+
 	// Sync all operations on the GPU and block until they are done
 	inline void gpuFinish() {
 		if (glFinish) glFinish();

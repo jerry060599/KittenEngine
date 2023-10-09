@@ -413,4 +413,23 @@ namespace Kitten {
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
+
+	void fixedUpdateAdapter(std::function<void(double)> dynamicUpdate, std::function<void(double)> fixedUpdate,
+		double dt, double fixedDT, double& timeSinceFixed) {
+		double timeLeft = dt;
+
+		while (true) {
+			float timeTillNextFixed = std::max(fixedDT - timeSinceFixed, 0.);
+			if (timeLeft > timeTillNextFixed) {
+				dynamicUpdate(timeTillNextFixed);
+				timeLeft -= timeTillNextFixed;
+				timeSinceFixed = 0;
+				fixedUpdate(fixedDT);
+			}
+			else break;
+		}
+
+		dynamicUpdate(timeLeft);
+		timeSinceFixed += timeLeft;
+	}
 }
