@@ -21,7 +21,7 @@ namespace Kitten {
 	Material defMaterial{ vec4(1), vec4(1), vec4(1), vec4(1) };
 
 	vector<UBOLight> lights;
-	UBOLight ambientLight = { vec4(0.04f, 0.04f, 0.08f, 1.f), vec3(0), 0, 0, 0, 0, 0, vec3(0), (int)KittenLight::AMBIENT };
+	UBOLight ambientLight = { vec4(0.f, 0.f, 0.f, 1.f), vec3(0), 0, 0, 0, 0, 0, vec3(0), (int)KittenLight::AMBIENT };
 
 	UniformBuffer<UBOCommon>* uboCommon;
 	UniformBuffer<UBOModel>* uboModel;
