@@ -1,24 +1,30 @@
 #include <exception>
 #include "../includes/modules/Timer.h"
+#include "../includes/modules/KittenRendering.h"
 
 namespace Kitten {
 	Timer::Timer() {
 		reset();
 	}
 
-	void Timer::start(const char* tag) {
+	void Timer::start(const char* tag, bool gpuSync) {
 		entry zero{};
 		auto itr = entries.insert(std::make_pair(tag, zero));
 		if (itr.first->second.inFence) throw new std::exception("Tag already started");
 		itr.first->second.inFence = true;
+		itr.first->second.gpuSync = gpuSync;
+
+		if (gpuSync) gpuFinish();
 		itr.first->second.lastPoint = high_resolution_clock::now();
 	}
 
 	double Timer::end(const char* tag) {
-		auto time = high_resolution_clock::now();
 		entry& e = entries[tag];
-
 		if (!e.inFence) throw new std::exception("Tag not started");
+
+		if (e.gpuSync) gpuFinish();
+		auto time = high_resolution_clock::now();
+
 		double delta = duration_cast<duration<double>>(time - e.lastPoint).count();
 		e.dist.accu(delta);
 		e.inFence = false;

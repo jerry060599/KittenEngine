@@ -63,6 +63,8 @@ void initScene() {
 	light.type = (int)Kit::KittenLight::SPOT;
 	Kit::lights.push_back(light);
 
+	Kit::ambientLight.col = vec4(0.f, 0.f, 0.1f, 1);
+
 	camera.angle = vec2(30, 30);
 }
 

@@ -96,4 +96,12 @@ namespace Kitten {
 	void renderShadows(Mesh* mesh, Shader* base = nullptr);
 	void renderInstancedShadows(Mesh* mesh, int count, Shader* base = nullptr);
 	void renderEnv(Texture* cubemap);
+
+	// Sync all operations on the GPU and block until they are done
+	inline void gpuFinish() {
+		if (glFinish) glFinish();
+#if __has_include("cuda_runtime.h")
+		cudaDeviceSynchronize();
+#endif
+	}
 };

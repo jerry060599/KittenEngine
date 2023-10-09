@@ -1,4 +1,5 @@
 #include "../includes/modules/StopWatch.h"
+#include "../includes/modules/KittenRendering.h"
 
 namespace Kitten {
 	StopWatch::StopWatch() {
@@ -10,6 +11,8 @@ namespace Kitten {
 	}
 
 	double StopWatch::time(const char* tag) {
+		if (gpuSync) gpuFinish();
+
 		auto time = high_resolution_clock::now();
 		double delta = duration_cast<duration<double>>(time - lastPoint).count();
 		lastPoint = time;
@@ -25,6 +28,8 @@ namespace Kitten {
 		deltaTimes.clear();
 		times.clear();
 		tags.clear();
+
+		if (gpuSync) gpuFinish();
 		lastPoint = high_resolution_clock::now();
 	}
 

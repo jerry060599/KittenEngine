@@ -19,6 +19,7 @@ namespace Kitten {
 			Dist dist;
 			steady_clock::time_point lastPoint;
 			bool inFence = false;
+			bool gpuSync = true;
 		};
 
 	private:
@@ -28,7 +29,7 @@ namespace Kitten {
 	public:
 		Timer();
 		void printTimes();
-		void start(const char* tag = nullptr);
+		void start(const char* tag = nullptr, bool gpuSync = true);
 		double end(const char* tag = nullptr);
 		void reset();
 	};

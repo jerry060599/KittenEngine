@@ -13,6 +13,8 @@ namespace Kitten {
 	/// </summary>
 	class StopWatch {
 	public:
+		bool gpuSync = true;
+
 		steady_clock::time_point lastPoint;
 		std::vector<double> deltaTimes;
 		std::vector<double> times;
