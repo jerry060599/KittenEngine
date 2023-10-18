@@ -73,8 +73,15 @@ namespace Kitten {
 		KITTEN_FUNC_DECL RotorX(v_type v) : v(v) {}
 		KITTEN_FUNC_DECL RotorX() : v(0, 0, 0, 1) {}
 
+		KITTEN_FUNC_DECL RotorX(const RotorX<T>& other) : v(other.v) {}
+
 		template<typename U>
 		KITTEN_FUNC_DECL explicit RotorX(const RotorX<U>& other) : v((v_type)other.v) {}
+
+		KITTEN_FUNC_DECL RotorX<T>& operator=(const RotorX<T>& rhs) {
+			v = rhs.v;
+			return *this;
+		}
 
 		// Get the multiplicative inverse
 		KITTEN_FUNC_DECL RotorX<T> inverse() const {
