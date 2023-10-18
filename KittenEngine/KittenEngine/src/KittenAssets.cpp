@@ -212,8 +212,13 @@ namespace Kitten {
 
 		// Check if we have a matching hash
 		for (auto& p : paths)
-			if (p.filename().string() == target)
+			if (p.filename().string() == target) {
+				// Touch file
+				auto now = std::filesystem::file_time_type::clock::now();
+				std::filesystem::last_write_time(p, now);
+
 				return p;
+			}
 
 		// Cache not found, delete the oldest one if we have too many
 		if (paths.size() && paths.size() >= numCache) {
