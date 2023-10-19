@@ -265,7 +265,7 @@ namespace Kitten {
 		if (resources.count(path.string())) return (Mesh*)resources[path.string()];
 
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path.string(), meshImportFlags);
+		const aiScene * scene = import.ReadFile(path.string(), meshImportFlags);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			cout << "err: assimp error " << import.GetErrorString() << endl;
@@ -546,31 +546,40 @@ namespace Kitten {
 		return mesh;
 	}
 
-	Mesh* genCylMesh(int radialSegments, bool cap) {
+	Mesh* genCylMesh(int radialSegments, int heightSegments, bool cap) {
 		Mesh* mesh = new Mesh;
 
-		mesh->vertices.resize(2 * radialSegments);
-		mesh->indices.resize(6 * radialSegments + 6 * cap * (radialSegments - 2));
+		float h = 1 / (float)heightSegments;
+		int numWallQuads = radialSegments * heightSegments;
+		mesh->vertices.resize(2 * numWallQuads);
+		mesh->indices.resize(6 * numWallQuads + 6 * cap * (radialSegments - 2));
 		for (size_t i = 0; i < radialSegments; i++) {
 			float angle = (2 * pi<float>() * i) / radialSegments;
 			vec3 n = vec3(cos(angle), 0, sin(angle));
-			mesh->vertices[2 * i + 0] = { n };
-			mesh->vertices[2 * i + 1] = { n + vec3(0, 1, 0) };
+			for (size_t j = 0; j <= heightSegments; j++) {
+				n.y = j * h;
+				mesh->vertices[i + j * radialSegments] = { n };
+			}
 
-			mesh->indices[6 * i + 0] = (int)(2 * i);
-			mesh->indices[6 * i + 1] = (int)(2 * i + 1);
-			mesh->indices[6 * i + 2] = wrap((int)(2 * i + 3), (int)mesh->vertices.size());
-			mesh->indices[6 * i + 3] = wrap((int)(2 * i + 2), (int)mesh->vertices.size());
-			mesh->indices[6 * i + 4] = (int)(2 * i);
-			mesh->indices[6 * i + 5] = wrap((int)(2 * i + 3), (int)mesh->vertices.size());
+			for (size_t j = 0; j < heightSegments; j++) {
+				int ind = i + j * radialSegments;
+				int nind = ((i + 1) % radialSegments) + j * radialSegments;
+				mesh->indices[6 * ind + 0] = ind + radialSegments;
+				mesh->indices[6 * ind + 1] = nind;
+				mesh->indices[6 * ind + 2] = ind;
 
-			if (cap && i > 1) {
-				mesh->indices[6 * (i + radialSegments) - 12] = 0;
-				mesh->indices[6 * (i + radialSegments) - 11] = (int)(2 * i - 2);
-				mesh->indices[6 * (i + radialSegments) - 10] = (int)(2 * i);
-				mesh->indices[6 * (i + radialSegments) - 9] = (int)(2 * i - 1);
-				mesh->indices[6 * (i + radialSegments) - 8] = 1;
-				mesh->indices[6 * (i + radialSegments) - 7] = (int)(2 * i + 1);
+				mesh->indices[6 * ind + 3] = nind + radialSegments;
+				mesh->indices[6 * ind + 4] = nind;
+				mesh->indices[6 * ind + 5] = ind + radialSegments;
+			}
+
+			if (cap && i > 0 && i < radialSegments - 1) {
+				mesh->indices[6 * (i - 1 + numWallQuads) + 0] = 0;
+				mesh->indices[6 * (i - 1 + numWallQuads) + 1] = i;
+				mesh->indices[6 * (i - 1 + numWallQuads) + 2] = i + 1;
+				mesh->indices[6 * (i - 1 + numWallQuads) + 3] = i + numWallQuads;
+				mesh->indices[6 * (i - 1 + numWallQuads) + 4] = 0 + numWallQuads;
+				mesh->indices[6 * (i - 1 + numWallQuads) + 5] = i + 1 + numWallQuads;
 			}
 		}
 
@@ -740,7 +749,7 @@ namespace Kitten {
 				if (get<0>(t) > get<1>(t)) swap(get<0>(t), get<1>(t));
 			}
 			return t;
-		};
+			};
 
 		for (size_t i = 0; i < tetIndices.size(); i += 4) {
 			tri tris[4]{

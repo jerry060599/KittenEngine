@@ -75,7 +75,7 @@ namespace Kitten {
 	};
 
 	Mesh* genQuadMesh(int rows = 1, int cols = 1);
-	Mesh* genCylMesh(int radialSegments, bool cap = true);
+	Mesh* genCylMesh(int radialSegments, int heightSegments = 1, bool cap = true);
 	Mesh* loadMeshFrom(path path);
 	TetMesh* loadTetgenFrom(path path);
 	Mesh* loadMeshExact(path path);

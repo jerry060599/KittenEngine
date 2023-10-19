@@ -28,6 +28,9 @@ vec3 camWPos() {
 	return vec3(viewMatInv[3]);
 }
 
-vec3 getViewDir(vec3 worldPos){
-	return normalize(camWPos() - worldPos);
+vec3 getViewDir(vec3 worldPos) {
+	if (projMat[3][3] > 0.5) // Check if its orthographic or not
+		return vpMatInv[2].xyz;
+	else
+		return normalize(camWPos() - worldPos);
 }
