@@ -188,13 +188,24 @@ namespace Kitten {
 	GEN_BOOL_SPEC(GL_BLEND);
 	GEN_BOOL_SPEC(GL_CULL_FACE);
 	GEN_BOOL_SPEC(GL_DEPTH_TEST);
-	GEN_BOOL_SPEC(GL_DEPTH_WRITEMASK);
 	GEN_BOOL_SPEC(GL_DITHER);
 	GEN_BOOL_SPEC(GL_LINE_SMOOTH);
 	GEN_BOOL_SPEC(GL_PROGRAM_POINT_SIZE);
 	GEN_BOOL_SPEC(GL_POLYGON_SMOOTH);
 	GEN_BOOL_SPEC(GL_SCISSOR_TEST);
 	GEN_BOOL_SPEC(GL_STENCIL_TEST);
+
+	// For some reason GL_DEPTH_WRITEMASK is special
+	template <>
+	class glTempVar<GL_DEPTH_WRITEMASK> {
+	public:
+		const GLboolean oldVal;
+		glTempVar(bool val) : oldVal(0) {
+			glGetBooleanv(GL_DEPTH_WRITEMASK, (GLboolean*)&oldVal);
+			glDepthMask(val);
+		}
+		~glTempVar() { glDepthMask(oldVal); }
+	};
 
 	GEN_INT_SPEC(GL_ACTIVE_TEXTURE, glActiveTexture);
 	GEN_INT_SPEC(GL_COLOR_LOGIC_OP, glLogicOp);

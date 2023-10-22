@@ -43,8 +43,10 @@ namespace Kitten {
 		// Minimum camera distance allowed.
 		float minDistance = 0.1f;
 
-	private:
+		// The last mouse position recorded from 0 to 1
 		vec2 lastMousePos = vec2(0);
+
+	private:
 		bvec2 buttonDown = bvec2(false);
 
 	public:
@@ -106,8 +108,10 @@ namespace Kitten {
 		// Minimum camera distance allowed.
 		float minDistance = 0.1f;
 
-	private:
+		// The last mouse position recorded from 0 to 1
 		vec2 lastMousePos = vec2(0);
+
+	private:
 		bool buttonDown = false;
 
 	public:

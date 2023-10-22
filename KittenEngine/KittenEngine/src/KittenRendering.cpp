@@ -119,6 +119,8 @@ namespace Kitten {
 		glEnable(GL_BLEND);
 
 		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_TRUE);
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 		const float patchLvl[]{ 16, 16, 16, 16 };
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
@@ -278,19 +280,28 @@ namespace Kitten {
 		glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
 	}
 
+	inline bool canSkipBase() {
+		return lights.size() == 1 && trace(vec3(ambientLight.col)) * ambientLight.col.w <= 0;
+	}
+
 	void renderForward(Mesh* mesh, Shader* base, Shader* light) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
 		uboLight->upload(ambientLight);
 
+		bool skipBase = canSkipBase() && light;
+
 		glTempVar<GL_BLEND_ALPHA> blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		if (!base) base = defUnlitShader;
-		base->use();
 		glBindVertexArray(mesh->VAO);
-		glDrawElements(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+		if (!skipBase) {
+			if (!base) base = defUnlitShader;
+			base->use();
+			glDrawElements(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+		}
 
 		if (light) {
-			glTempVar<GL_BLEND_ALPHA> lblend(GL_ONE, GL_ONE);
+			glTempVar<GL_BLEND_ALPHA> blend(GL_ONE, skipBase ? GL_ZERO : GL_ONE);
+			glTempVar<GL_DEPTH_WRITEMASK> zwrite(skipBase);
 
 			light->use();
 			for (size_t i = 0; i < lights.size(); i++) {
@@ -315,14 +326,20 @@ namespace Kitten {
 		startRenderMaterial(mesh->defMaterial);
 		uboLight->upload(ambientLight);
 
+		bool skipBase = canSkipBase() && light;
+
 		glTempVar<GL_BLEND_ALPHA> blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		if (!base) base = defUnlitShader;
-		base->use();
 		glBindVertexArray(mesh->VAO);
-		glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
+
+		if (!skipBase) {
+			if (!base) base = defUnlitShader;
+			base->use();
+			glDrawElementsInstanced(base->drawMode(), (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, count);
+		}
 
 		if (light) {
-			glTempVar<GL_BLEND_ALPHA> lblend(GL_ONE, GL_ONE);
+			glTempVar<GL_BLEND_ALPHA> blend(GL_ONE, skipBase ? GL_ZERO : GL_ONE);
+			glTempVar<GL_DEPTH_WRITEMASK> zwrite(skipBase);
 
 			light->use();
 			for (size_t i = 0; i < lights.size(); i++) {
@@ -350,6 +367,7 @@ namespace Kitten {
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
 		glTempVar<GL_CULL_FACE> cull(false);
+		glTempVar<GL_COLOR_WRITEMASK> colwrite(bvec4(false));
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
@@ -381,6 +399,7 @@ namespace Kitten {
 		mat4 oldProj = projMat;
 		viewMat = mat4(1);
 		glTempVar<GL_CULL_FACE> cull(false);
+		glTempVar<GL_COLOR_WRITEMASK> colwrite(bvec4(false));
 
 		if (base == nullptr) base = defUnlitShader;
 		base->use();
