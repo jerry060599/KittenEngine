@@ -55,7 +55,7 @@ namespace Kitten {
 		}
 
 		KITTEN_FUNC_DECL static RotorX<T> fromTo(q_type from, q_type to) {
-			q_type h = (from + to) / 2.f;
+			q_type h = (from + to) * 0.5f;
 			T l = length2(h);
 			if (l > 0) h *= inversesqrt(l);
 			else h = orthoBasisX((vec3)from)[1];
