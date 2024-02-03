@@ -124,3 +124,25 @@ mat3 rotorMatrix(vec4 r) {
 	mat3 cm = crossMatrix(r.xyz);
 	return abT(r.xyz, r.xyz) + mat3(r.w * r.w) + 2 * r.w * cm + cm * cm;
 }
+
+// Cubic Catmull-Rom Spline
+vec3 cmrSpline(vec3 p0, vec3 p1, vec3 p2, vec3 p3, float t) {
+	vec3 a0 = mix(p0, p1, t + 1);
+	vec3 a1 = mix(p1, p2, t + 0);
+	vec3 a2 = mix(p2, p3, t - 1);
+
+	vec3 b0 = mix(a0, a1, (t + 1) * 0.5f);
+	vec3 b1 = mix(a1, a2, (t + 0) * 0.5f);
+
+	return mix(b0, b1, t);
+}
+
+// Tangent of the Cubic Catmull-Rom Spline
+vec3 cmrSplineTangent(vec3 p0, vec3 p1, vec3 p2, vec3 p3, float t) {
+	return 0.5f * (
+		(-(t - 1) * (3 * t - 1)) * p0 +
+		(t * (9 * t - 10)) * p1 +
+		-(t - 1) * (9 * t + 1) * p2 +
+		t * (3 * t - 2) * p3
+		);
+}
