@@ -1,6 +1,9 @@
 #pragma once
 // Jerry Hsu 2022
 
+#include <iostream>
+#include <fstream>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -83,6 +86,19 @@ namespace Kitten {
 		void processMouseScroll(double xoffset, double yoffset) {
 			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, (float)(yoffset + xoffset)));
 		}
+
+		void loadSettings(const char* fileName) {
+			if (FILE* file = fopen(fileName, "rb")) {
+				fread(this, sizeof(BasicCameraControl), 1, file);
+				fclose(file);
+			}
+		}
+
+		void saveSettings(const char* fileName) {
+			FILE* file = fopen(fileName, "wb");
+			fwrite(this, sizeof(BasicCameraControl), 1, file);
+			fclose(file);
+		}
 	};
 
 	/// <summary>
@@ -137,6 +153,19 @@ namespace Kitten {
 
 		void processMouseScroll(double xoffset, double yoffset) {
 			distance = glm::max(minDistance, distance * powf(1 + zoomSpeed, -(float)(yoffset + xoffset)));
+		}
+
+		void loadSettings(const char* fileName) {
+			if (FILE* file = fopen(fileName, "rb")) {
+				fread(this, sizeof(BasicCameraControl2D), 1, file);
+				fclose(file);
+			}
+		}
+
+		void saveSettings(const char* fileName) {
+			FILE* file = fopen(fileName, "wb");
+			fwrite(this, sizeof(BasicCameraControl2D), 1, file);
+			fclose(file);
 		}
 	};
 }

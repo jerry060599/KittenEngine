@@ -10,7 +10,7 @@ namespace Kitten {
 	void Timer::start(const char* tag, bool gpuSync) {
 		entry zero{};
 		auto itr = entries.insert(std::make_pair(tag, zero));
-		if (itr.first->second.inFence) throw new std::exception("Tag already started");
+		if (itr.first->second.inFence) throw new std::runtime_error("Tag already started");
 		itr.first->second.inFence = true;
 		itr.first->second.gpuSync = gpuSync;
 
@@ -20,7 +20,7 @@ namespace Kitten {
 
 	double Timer::end(const char* tag) {
 		entry& e = entries[tag];
-		if (!e.inFence) throw new std::exception("Tag not started");
+		if (!e.inFence) throw new std::runtime_error("Tag not started");
 
 		if (e.gpuSync) gpuFinish();
 		auto time = high_resolution_clock::now();

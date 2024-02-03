@@ -127,7 +127,7 @@ namespace Kitten {
 	}
 
 	void Shader::setBuffer(const char* name, ComputeBuffer* buffer) {
-		throw new exception("TODO here.");
+		throw new runtime_error("TODO here.");
 		/*
 		glUseProgram(glHandle);
 		int binding = glGetProgramResourceIndex(glHandle, GL_SHADER_STORAGE_BLOCK, name);

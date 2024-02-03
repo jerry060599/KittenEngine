@@ -109,6 +109,33 @@ namespace Kitten {
 			return abT(q, q) + mat<3, 3, T, defaultp>(w * w) + 2 * w * cm + cm * cm;
 		}
 
+		KITTEN_FUNC_DECL static RotorX<T> fromMatrix(mat<3, 3, T, defaultp> m) {
+			RotorX<T> q;
+			T t;
+			if (m[2][2] < 0) {
+				if (m[0][0] > m[1][1]) {
+					t = 1 + m[0][0] - m[1][1] - m[2][2];
+					q = RotorX<T>(t, m[1][0] + m[0][1], m[0][2] + m[2][0], m[2][1] - m[1][2]);
+				}
+				else {
+					t = 1 - m[0][0] + m[1][1] - m[2][2];
+					q = RotorX<T>(m[1][0] + m[0][1], t, m[2][1] + m[1][2], m[0][2] - m[2][0]);
+				}
+			}
+			else {
+				if (m[0][0] < -m[1][1]) {
+					t = 1 - m[0][0] - m[1][1] + m[2][2];
+					q = RotorX<T>(m[0][2] + m[2][0], m[2][1] + m[1][2], t, m[1][0] - m[0][1]);
+				}
+				else {
+					t = 1 + m[0][0] + m[1][1] + m[2][2];
+					q = RotorX<T>(m[2][1] - m[1][2], m[0][2] - m[2][0], m[1][0] - m[0][1], t);
+				}
+			}
+
+			return RotorX<T>(((0.5f / glm::sqrt(t)) * q.v)).inverse();
+		}
+
 		// Get the euler angle in radians
 		KITTEN_FUNC_DECL q_type euler() {
 			return q_type(

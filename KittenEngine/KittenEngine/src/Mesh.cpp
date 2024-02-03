@@ -246,7 +246,7 @@ namespace Kitten {
 				}
 
 				if (sortedInts.size() & 1)
-					throw std::exception("Mesh not closed!");
+					throw std::runtime_error("Mesh not closed!");
 
 				std::sort(sortedInts.begin(), sortedInts.end());
 

@@ -657,6 +657,33 @@ namespace Kitten {
 			val[i] = data[i * stride];
 		return val;
 	}
+
+	template <int s, typename T>
+	// Performs uniform catmull rom spline interpolation with t from 0 to 1 in between p1 and p2
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> cmrSpline(
+		vec<s, T, defaultp> p0, vec<s, T, defaultp> p1, vec<s, T, defaultp> p2, vec<s, T, defaultp> p3, T t) {
+
+		vec<s, T, defaultp> a0 = glm::mix(p0, p1, t + 1);
+		vec<s, T, defaultp> a1 = glm::mix(p1, p2, t + 0);
+		vec<s, T, defaultp> a2 = glm::mix(p2, p3, t - 1);
+
+		vec<s, T, defaultp> b0 = glm::mix(a0, a1, (t + 1) * 0.5f);
+		vec<s, T, defaultp> b1 = glm::mix(a1, a2, (t + 0) * 0.5f);
+
+		return glm::mix(b0, b1, t);
+	}
+
+	// Tangent of the cmrSpline() function
+	template <int s, typename T>
+	KITTEN_FUNC_DECL inline vec<s, T, defaultp> cmrSplineTangent(
+		vec<s, T, defaultp> p0, vec<s, T, defaultp> p1, vec<s, T, defaultp> p2, vec<s, T, defaultp> p3, T t) {
+		return 0.5f * (
+			(-(t - 1) * (3 * t - 1)) * p0 +
+			(t * (9 * t - 10)) * p1 +
+			-(t - 1) * (9 * t + 1) * p2 +
+			t * (3 * t - 2) * p3
+			);
+	}
 }
 
 namespace std {

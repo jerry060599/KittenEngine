@@ -101,6 +101,13 @@ namespace Kitten {
 	void fixedUpdateAdapter(std::function<void(double)> dynamicUpdate, std::function<void(double)> fixedUpdate,
 		double dt, double fixedDT, double& timeSinceFixed);
 
+	inline void ndcToWorldRay(vec2 ndc, vec3& ori, vec3& dir) {
+		mat4 invView = glm::inverse(viewMat);
+		ori = invView[3];
+		dir = glm::inverse(projMat) * vec4(ndc, -1, 1);
+		dir = glm::normalize(mat3(invView) * dir);
+	}
+
 	// Sync all operations on the GPU and block until they are done
 	inline void gpuFinish() {
 		if (glFinish) glFinish();
