@@ -602,8 +602,7 @@ namespace Kitten {
 	/// <param name="cell"></param>
 	/// <returns></returns>
 	KITTEN_FUNC_DECL inline int getCellHash(ivec3 cell) {
-		int hash = cantorHashCombine(boostHashCombine(cell.x, cell.z),
-			cantorHashCombine(boostHashCombine(cell.x, cell.y), boostHashCombine(cell.y, cell.z)));
+		int hash = cantorHashCombine(boostHashCombine(cell.x, cell.y), boostHashCombine(cell.y - cell.x, cell.z));
 		return hash ? hash : 1;
 	}
 
