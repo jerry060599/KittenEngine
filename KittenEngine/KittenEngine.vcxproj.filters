@@ -197,6 +197,9 @@
     <ClInclude Include="KittenEngine\includes\modules\UniformBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\SymMat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="KittenEngine\shaders\blingBase.frag" />

@@ -207,6 +207,7 @@
     <ClInclude Include="KittenEngine\includes\modules\Shader.h" />
     <ClInclude Include="KittenEngine\includes\modules\SpatialHashmap.h" />
     <ClInclude Include="KittenEngine\includes\modules\StopWatch.h" />
+    <ClInclude Include="KittenEngine\includes\modules\SymMat.h" />
     <ClInclude Include="KittenEngine\includes\modules\Texture.h" />
     <ClInclude Include="KittenEngine\includes\modules\Timer.h" />
     <ClInclude Include="KittenEngine\includes\modules\UniformBuffer.h" />
