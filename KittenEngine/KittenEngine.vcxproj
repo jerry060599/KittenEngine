@@ -165,6 +165,7 @@
     <CudaCompile>
       <CodeGeneration>compute_86,sm_86</CodeGeneration>
       <AdditionalOptions>--std c++17 -Wno-deprecated-declarations -Xcudafe "--diag_suppress=esa_on_defaulted_function_ignored" --extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalCompilerOptions>-openmp</AdditionalCompilerOptions>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
