@@ -122,14 +122,6 @@ namespace Kitten {
 	}
 
 	template <int s, typename T>
-	KITTEN_FUNC_DECL inline vec<s, T, defaultp> min(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
-		vec<s, T, defaultp> r;
-		for (int i = 0; i < s; i++)
-			r[i] = glm::min(a[i], b[i]);
-		return r;
-	}
-
-	template <int s, typename T>
 	KITTEN_FUNC_DECL inline T max(vec<s, T, defaultp> v) {
 		T n = v[0];
 		for (int i = 1; i < s; i++)
@@ -148,14 +140,6 @@ namespace Kitten {
 	template <int s, typename T>
 	KITTEN_FUNC_DECL inline vec<s, T, defaultp> max(T num, vec<s, T, defaultp> v) {
 		return max(v, num);
-	}
-
-	template <int s, typename T>
-	KITTEN_FUNC_DECL inline vec<s, T, defaultp> max(vec<s, T, defaultp> a, vec<s, T, defaultp> b) {
-		vec<s, T, defaultp> r;
-		for (int i = 0; i < s; i++)
-			r[i] = glm::max(a[i], b[i]);
-		return r;
 	}
 
 	template <int s, typename T>
