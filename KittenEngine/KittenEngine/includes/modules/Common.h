@@ -610,6 +610,21 @@ namespace Kitten {
 		return hash ? hash : 1;
 	}
 
+	KITTEN_FUNC_DECL inline uint32_t mortonExpandBits(uint32_t v) {
+		v = (v * 0x00010001u) & 0xFF0000FFu;
+		v = (v * 0x00000101u) & 0x0F00F00Fu;
+		v = (v * 0x00000011u) & 0xC30C30C3u;
+		v = (v * 0x00000005u) & 0x49249249u;
+		return v;
+	}
+
+	KITTEN_FUNC_DECL inline uint32_t getMorton(ivec3 cell) {
+		const uint32_t xx = mortonExpandBits(cell.x);
+		const uint32_t yy = mortonExpandBits(cell.y);
+		const uint32_t zz = mortonExpandBits(cell.z);
+		return xx * 4 + yy * 2 + zz;
+	}
+
 	// Multiples out U.S.V^T
 	template <typename T>
 	KITTEN_FUNC_DECL inline mat<3, 3, T, defaultp> svdMul(mat<3, 3, T, defaultp> U, vec<3, T, defaultp> S, mat<3, 3, T, defaultp> V) {
