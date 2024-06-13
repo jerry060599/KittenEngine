@@ -24,6 +24,9 @@ void renderScene() {
 	Kit::renderShadows(mesh);
 	Kit::renderForward(Kit::defMesh, Kit::defBaseShader, Kit::defForwardShader);
 	Kit::renderForward(mesh, Kit::defBaseShader, Kit::defForwardShader);
+
+	Kit::get<Kit::Font>("resources\\fonts\\Quicksand_Regular.ttf")->
+		render("Hello world!!", 8, vec4(1, 1, 1, 1), Kit::Bound<2>(vec2(0, 0), vec2(0.35, 1)));
 }
 
 void renderGui() {

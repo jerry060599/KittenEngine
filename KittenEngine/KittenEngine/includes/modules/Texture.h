@@ -15,8 +15,8 @@ namespace Kitten {
 		unsigned int glHandle;
 		int width;
 		int height;
-		GLenum deviceFormat;
-		GLenum hostFormat;
+		GLenum deviceFormat;	// Format in GPU memory
+		GLenum hostFormat;		// Internal data format
 		GLenum hostDataType;
 
 		ivec4 borders = ivec4(0);
@@ -24,7 +24,7 @@ namespace Kitten {
 		unsigned char* rawData = nullptr;
 
 		Texture();
-		Texture(int width, int height, GLenum deviceFormat = GL_RGBA8);
+		Texture(int width, int height, GLenum deviceFormat = GL_RGBA, GLenum hostFormat = GL_RGBA8, GLenum hostDataType = GL_UNSIGNED_BYTE);
 		Texture(Texture* xpos, Texture* xneg, Texture* ypos, Texture* yneg, Texture* zpos, Texture* zneg);
 		~Texture();
 

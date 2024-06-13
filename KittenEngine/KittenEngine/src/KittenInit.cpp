@@ -97,6 +97,7 @@ namespace Kitten {
 		imGuiCallbacks.scrollCallback = glfwSetScrollCallback(window, scrollCallback);
 
 		initRender();
+		initFreetype();
 	}
 
 	void terminate() {

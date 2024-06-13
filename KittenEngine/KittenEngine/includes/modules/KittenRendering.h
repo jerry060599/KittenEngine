@@ -85,6 +85,7 @@ namespace Kitten {
 	void startRender();
 	void startFrame();
 	void endFrame();
+	void uploadAmbientLight();
 	void startRenderMesh(mat4 transform);
 	void startRenderMaterial(Material* mat);
 	void render(Mesh* mesh, Shader* base = nullptr);

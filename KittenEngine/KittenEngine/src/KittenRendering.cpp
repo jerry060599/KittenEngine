@@ -142,8 +142,8 @@ namespace Kitten {
 			img->glHandle = handle;
 			img->width = 1;
 			img->height = 1;
-			img->deviceFormat = GL_RGBA8;
-			img->hostFormat = GL_RGBA;
+			img->deviceFormat = GL_RGBA;
+			img->hostFormat = GL_RGBA8;
 			img->hostDataType = GL_UNSIGNED_BYTE;
 			img->ratio = 1;
 			img->borders = ivec4(0);
@@ -243,10 +243,14 @@ namespace Kitten {
 		renderForward(mesh, base);
 	}
 
+	void uploadAmbientLight() {
+		uboLight->upload(ambientLight);
+	}
+
 	void renderAdditive(Mesh* mesh, Shader* base) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
-		uboLight->upload(ambientLight);
+		uploadAmbientLight();
 
 		glTempVar<GL_BLEND_ALPHA> blend(GL_ONE, GL_ONE);
 		if (!base) base = defUnlitShader;
@@ -258,8 +262,7 @@ namespace Kitten {
 	void renderLine(Mesh* mesh, Shader* base) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
-
-		uboLight->upload(ambientLight);
+		uploadAmbientLight();
 
 		glTempVar<GL_BLEND_ALPHA> blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
@@ -271,7 +274,7 @@ namespace Kitten {
 	void renderInstanced(Mesh* mesh, int count, Shader* base) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
-		uboLight->upload(ambientLight);
+		uploadAmbientLight();
 
 		glTempVar<GL_BLEND_ALPHA> blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if (!base) base = defUnlitShader;
@@ -287,7 +290,7 @@ namespace Kitten {
 	void renderForward(Mesh* mesh, Shader* base, Shader* light) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
-		uboLight->upload(ambientLight);
+		uploadAmbientLight();
 
 		bool skipBase = canSkipBase() && light;
 
@@ -324,7 +327,7 @@ namespace Kitten {
 	void renderInstancedForward(Mesh* mesh, int count, Shader* base, Shader* light) {
 		startRenderMesh(mesh->defTransform);
 		startRenderMaterial(mesh->defMaterial);
-		uboLight->upload(ambientLight);
+		uploadAmbientLight();
 
 		bool skipBase = canSkipBase() && light;
 

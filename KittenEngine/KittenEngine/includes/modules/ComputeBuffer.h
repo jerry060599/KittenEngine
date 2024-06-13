@@ -26,7 +26,9 @@ namespace Kitten {
 		void bind(int loc);
 		void resize(size_t newSize);
 		void upload(void* src);
+		void upload(void* src, size_t count);
 		void download(void* dst);
+		void download(void* dst, size_t count);
 	};
 
 #ifdef __CUDA_RUNTIME_H__

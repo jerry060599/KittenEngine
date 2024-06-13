@@ -78,6 +78,9 @@
     <ClCompile Include="KittenEngine\opt\svd\svd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KittenEngine\src\Font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KittenEngine\includes\modules\Bound.h">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KittenEngine\includes\modules\SymMat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KittenEngine\includes\modules\Font.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

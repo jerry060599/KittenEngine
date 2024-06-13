@@ -178,6 +178,7 @@
     <ClCompile Include="KittenEngine\opt\toms178.cpp" />
     <ClCompile Include="KittenEngine\src\Algo.cpp" />
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
+    <ClCompile Include="KittenEngine\src\Font.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />
     <ClCompile Include="KittenEngine\src\KittenInit.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="KittenEngine\includes\modules\Common.h" />
     <ClInclude Include="KittenEngine\includes\modules\ComputeBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\Dist.h" />
+    <ClInclude Include="KittenEngine\includes\modules\Font.h" />
     <ClInclude Include="KittenEngine\includes\modules\FrameBuffer.h" />
     <ClInclude Include="KittenEngine\includes\modules\glTempVar.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenAssets.h" />

@@ -6,8 +6,8 @@
 
 namespace Kitten {
 	Texture::Texture() {}
-	Texture::Texture(int width, int height, GLenum deviceFormat)
-		:width(width), height(height), deviceFormat(deviceFormat), ratio(float(width) / height) {
+	Texture::Texture(int width, int height, GLenum deviceFormat, GLenum hostFormat, GLenum hostDataType)
+		:width(width), height(height), deviceFormat(deviceFormat), ratio(float(width) / height), hostFormat(hostFormat), hostDataType(hostDataType) {
 		glGenTextures(1, &glHandle);
 		glBindTexture(GL_TEXTURE_2D, glHandle);
 
@@ -16,7 +16,7 @@ namespace Kitten {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, deviceFormat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, hostFormat, width, height, 0, deviceFormat, hostDataType, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 

@@ -40,6 +40,8 @@ namespace Kitten {
 			loadMesh(path);
 		else if (ext == ".node" || ext == ".face" || ext == ".ele")
 			loadTetgenMesh(path);
+		else if (ext == ".ttf")
+			loadFont(path);
 		else if (ext == ".glsl" || ext == ".include" || ext == ".mtl") {
 		}
 		else if (ext == ".csv" || ext == ".txt" || ext == ".cfg" || ext == ".json") {
@@ -98,7 +100,7 @@ namespace Kitten {
 			img->glHandle = handle;
 			img->width = width;
 			img->deviceFormat = GL_RGBA;
-			img->hostFormat = GL_RGBA;
+			img->hostFormat = GL_RGBA8;
 			img->hostDataType = GL_UNSIGNED_BYTE;
 			img->height = height;
 			img->ratio = float(width) / height;
