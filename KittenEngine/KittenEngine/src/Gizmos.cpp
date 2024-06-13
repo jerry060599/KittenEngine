@@ -29,6 +29,7 @@ namespace Kitten {
 		g.model[0] *= thickness;
 		g.model[3] = vec4(a - 0.5f * (vec3)g.model[0], 1);
 		g.color = color;
+		g.model = projMat * viewMat * g.model;
 		gizmoRenderQueue.push_back(g);
 	}
 
@@ -39,6 +40,7 @@ namespace Kitten {
 		g.model = (mat4)(basis * mat3(size));
 		g.model[3] = vec4(a - 0.5f * (vec3)g.model[0] - 0.5f * (vec3)g.model[1], 1);
 		g.color = color;
+		g.model = projMat * viewMat * g.model;
 		gizmoRenderQueue.push_back(g);
 	}
 
@@ -50,7 +52,7 @@ namespace Kitten {
 		float aspect = getAspect();
 		a.x *= aspect;
 		g.model[3] = vec4(vec3(a, 0) - 0.5f * (vec3)g.model[1], 1);
-		g.model = inverse(projMat * viewMat) * glm::ortho(-aspect, aspect, -1.f, 1.f) * g.model;
+		g.model = glm::ortho(-aspect, aspect, -1.f, 1.f) * g.model;
 		g.color = color;
 		gizmoRenderQueue.push_back(g);
 	}
@@ -61,7 +63,7 @@ namespace Kitten {
 		float aspect = getAspect();
 		a.x *= aspect;
 		g.model[3] = vec4(vec3(a, 0) - 0.5f * (vec3)g.model[0] - 0.5f * (vec3)g.model[1], 1);
-		g.model = inverse(projMat * viewMat) * glm::ortho(-aspect, aspect, -1.f, 1.f) * g.model;
+		g.model = glm::ortho(-aspect, aspect, -1.f, 1.f) * g.model;
 		g.color = color;
 		gizmoRenderQueue.push_back(g);
 	}

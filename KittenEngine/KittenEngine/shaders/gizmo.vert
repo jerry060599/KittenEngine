@@ -16,5 +16,5 @@ out vec4 col;
 void main() {
     GizmoData d = data[gl_InstanceID];
     col = d.color;
-    gl_Position = vpMat * (d.model * vec4(vPos, 1));
+    gl_Position = d.model * vec4(vPos, 1);
 }
