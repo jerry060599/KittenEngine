@@ -212,6 +212,7 @@ namespace Kitten {
 	}
 
 	void endFrame() {
+		renderGizmos();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		checkErr("frame_end");

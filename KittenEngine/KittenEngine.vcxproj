@@ -180,6 +180,7 @@
     <ClCompile Include="KittenEngine\src\ComputeBuffer.cpp" />
     <ClCompile Include="KittenEngine\src\Font.cpp" />
     <ClCompile Include="KittenEngine\src\FrameBuffer.cpp" />
+    <ClCompile Include="KittenEngine\src\Gizmos.cpp" />
     <ClCompile Include="KittenEngine\src\KittenAssets.cpp" />
     <ClCompile Include="KittenEngine\src\KittenInit.cpp" />
     <ClCompile Include="KittenEngine\src\KittenPreprocessor.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="KittenEngine\includes\modules\Dist.h" />
     <ClInclude Include="KittenEngine\includes\modules\Font.h" />
     <ClInclude Include="KittenEngine\includes\modules\FrameBuffer.h" />
+    <ClInclude Include="KittenEngine\includes\modules\Gizmos.h" />
     <ClInclude Include="KittenEngine\includes\modules\glTempVar.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenAssets.h" />
     <ClInclude Include="KittenEngine\includes\modules\KittenInit.h" />

@@ -3,5 +3,5 @@
 #include "kittenCommonVert.glsl"
 
 void main() {
-    gl_Position = vpMat * modelMat * vec4(vPos, 1);
+    gl_Position = vpMat * (modelMat * vec4(vPos, 1));
 }

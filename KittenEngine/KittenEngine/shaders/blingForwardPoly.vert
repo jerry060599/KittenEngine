@@ -8,6 +8,6 @@ out vec2 v_uv;
 
 void main() {
 	v_uv = vUv;
-    gl_Position = vpMat * modelMat * vec4(vPos, 1);
+    gl_Position = vpMat * (modelMat * vec4(vPos, 1));
     v_wPos = vec3(modelMat * vec4(vPos, 1));
 }

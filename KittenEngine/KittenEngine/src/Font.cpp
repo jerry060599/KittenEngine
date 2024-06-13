@@ -42,9 +42,12 @@ namespace Kitten {
 		glTempVar<GL_DEPTH_TEST> dtest(false);
 		glTempVar<GL_CULL_FACE> cull(false);
 		auto oldM = modelMat;
-		modelMat = inverse(projMat * viewMat) * glm::ortho(0.f, Kitten::getAspect(), 0.f, 1.f);	// Hacky way to get screenspace
+		float aspect = Kitten::getAspect();
+		b.min.x *= aspect;
+		b.max.x *= aspect;
+		modelMat = glm::ortho(-aspect, aspect, -1.f, 1.f) * modelMat;	// Hacky way to get screenspace
 		auto ret = renderInternal(buff, fontSize, color,
-			Kitten::get<Shader>("KittenEngine\\shaders\\text.glsl"), b, horWrap, vertWrap, horJust, vertJust);
+			Kitten::get<Shader>("KittenEngine\\shaders\\textScreenspace.glsl"), b, horWrap, vertWrap, horJust, vertJust);
 		modelMat = oldM;
 		return ret;
 	}

@@ -24,7 +24,7 @@ void main() {
     pos.xy *= data.y * uvo.w;
     pos.xy += data.zw;
 
-    gl_Position = vpMat * (modelMat * vec4(pos, 1));
+    gl_Position = modelMat * vec4(pos, 1);
     wPos = vec3(modelMat * vec4(pos, 1));
 
     uv = vec2(vUv.x * uvo.z, vUv.y * uvo.w);

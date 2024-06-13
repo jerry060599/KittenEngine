@@ -1,5 +1,6 @@
 #include "../includes/modules/KittenInit.h"
 #include "../includes/modules/KittenRendering.h"
+#include "../includes/modules/Gizmos.h"
 
 #include <iostream>
 #include <imgui_impl_glfw.h>
@@ -98,6 +99,7 @@ namespace Kitten {
 
 		initRender();
 		initFreetype();
+		initGizmos();
 	}
 
 	void terminate() {
