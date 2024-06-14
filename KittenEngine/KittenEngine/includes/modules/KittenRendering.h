@@ -7,6 +7,7 @@
 
 #include "KittenAssets.h"
 #include "Gizmos.h"
+#include "Font.h"
 #include "Rotor.h"
 #include "glTempVar.h"
 
@@ -59,6 +60,8 @@ namespace Kitten {
 	extern Material defMaterial;
 	extern UBOLight ambientLight;
 	extern mat4 projMat;
+	extern mat4 invProjMat;
+	extern mat4 invViewMat;
 	extern mat4 viewMat;
 	extern mat4 modelMat;
 	extern vector<UBOLight> lights;
@@ -69,6 +72,7 @@ namespace Kitten {
 	extern Texture* defTexture;
 	extern Texture* defCubemap;
 	extern Mesh* defMesh, * defMeshPoly;
+	extern Font* defFont;
 	extern Shader* defBaseShader;
 	extern Shader* defForwardShader;
 	extern Shader* defUnlitShader;
@@ -104,10 +108,9 @@ namespace Kitten {
 		double dt, double fixedDT, double& timeSinceFixed);
 
 	inline void ndcToWorldRay(vec2 ndc, vec3& ori, vec3& dir) {
-		mat4 invView = glm::inverse(viewMat);
-		ori = invView[3];
-		dir = glm::inverse(projMat) * vec4(ndc, -1, 1);
-		dir = glm::normalize(mat3(invView) * dir);
+		ori = invViewMat[3];
+		dir = invProjMat * vec4(ndc, -1, 1);
+		dir = glm::normalize(mat3(invViewMat) * dir);
 	}
 
 	// Sync all operations on the GPU and block until they are done

@@ -18,6 +18,7 @@ namespace Kitten {
 	void mouseButtonCallback(GLFWwindow* w, int button, int action, int mode) {
 		if (imGuiCallbacks.mouseButtonCallback)
 			imGuiCallbacks.mouseButtonCallback(w, button, action, mode);
+		gizmoMouseButtonCallback(button, action, mode);
 		if (ImGui::GetIO().WantCaptureMouse) return;
 		if (glfwCallbacks.mouseButtonCallback)
 			glfwCallbacks.mouseButtonCallback(w, button, action, mode);
@@ -26,6 +27,7 @@ namespace Kitten {
 	void cursorPosCallback(GLFWwindow* w, double xp, double yp) {
 		if (imGuiCallbacks.cursorPosCallback)
 			imGuiCallbacks.cursorPosCallback(w, xp, yp);
+		gizmoCursorPosCallback(xp, yp);
 		if (ImGui::GetIO().WantCaptureMouse) return;
 		if (glfwCallbacks.cursorPosCallback)
 			glfwCallbacks.cursorPosCallback(w, xp, yp);
@@ -97,8 +99,8 @@ namespace Kitten {
 		imGuiCallbacks.keyCallback = glfwSetKeyCallback(window, keyCallback);
 		imGuiCallbacks.scrollCallback = glfwSetScrollCallback(window, scrollCallback);
 
-		initRender();
 		initFreetype();
+		initRender();
 		initGizmos();
 	}
 

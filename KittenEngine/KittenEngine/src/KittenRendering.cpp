@@ -15,7 +15,9 @@ using namespace glm;
 
 namespace Kitten {
 	mat4 projMat;
+	mat4 invProjMat;
 	mat4 viewMat;
+	mat4 invViewMat;
 	mat4 modelMat(1);
 
 	Material defMaterial{ vec4(1), vec4(1), vec4(1), vec4(1) };
@@ -34,6 +36,7 @@ namespace Kitten {
 	Texture* defTexture;
 	Texture* defCubemap;
 	Mesh* defMesh, * defMeshPoly;
+	Font* defFont;
 
 	Shader* defBaseShader;
 	Shader* defForwardShader;
@@ -109,6 +112,9 @@ namespace Kitten {
 		defEnvShader = get<Kitten::Shader>("KittenEngine\\shaders\\env.glsl");
 		defBlitShader = get<Kitten::Shader>("KittenEngine\\shaders\\blit.glsl");
 
+		loadDirectory("KittenEngine\\fonts");
+		defFont = get<Kitten::Font>("KittenEngine\\fonts\\Quicksand_Regular.ttf");
+
 		uboCommon = new UniformBuffer<UBOCommon>;
 		uboModel = new UniformBuffer<UBOModel>;
 		uboMat = new UniformBuffer<UBOMat>;
@@ -174,9 +180,9 @@ namespace Kitten {
 		UBOCommon dat;
 
 		dat.projMat = projMat;
-		dat.projMatInv = inverse(projMat);
+		invProjMat = dat.projMatInv = inverse(projMat);
 		dat.viewMat = viewMat;
-		dat.viewMatInv = inverse(viewMat);
+		invViewMat = dat.viewMatInv = inverse(viewMat);
 
 		dat.viewMat_n = normalTransform(dat.viewMat);
 		dat.vpMat = dat.projMat * dat.viewMat;
