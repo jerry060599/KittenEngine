@@ -58,7 +58,7 @@ namespace Kitten {
 
 		mat4 model = mat4(size * basis);
 		std::swap(model[axis], model[2]);
-		model[3] = vec4(*ptr, 1);
+		model[3] = vec4(*ptr + 0.5f * (vec3)model[0] + 0.5f * (vec3)model[1], 1);
 		queueGizmoSquare(model, color);
 
 		addGizmoSquareCallback(model, ptr, {
