@@ -2,6 +2,44 @@
 
 using namespace Eigen;
 
+std::vector<glm::vec3> Kitten::bluenoiseSample(vector<glm::vec3>& samples, int N) {
+	using namespace glm;
+	using namespace std;
+	vector<vec3> newSamples;
+	newSamples.reserve(N);
+	newSamples.push_back(samples.back());
+	samples.pop_back();
+
+	vector<float> closestDist(samples.size(), std::numeric_limits<float>::infinity());
+
+	for (int i = 1; i < N; i++) {
+		float maxDist = 0;
+		int furthestIdx = -1;
+
+		vec3 lastPicked = newSamples.back();
+		for (int j = 0; j < samples.size(); j++) {
+			vec3 p = samples[j];
+
+			float nd = length2(p - lastPicked);
+			float minDist = closestDist[j];
+			if (nd < minDist)
+				closestDist[j] = minDist = nd;
+
+			if (minDist > maxDist) {
+				maxDist = minDist;
+				furthestIdx = j;
+			}
+		}
+
+		newSamples.push_back(samples[furthestIdx]);
+		std::swap(samples[furthestIdx], samples.back());
+		samples.pop_back();
+		std::swap(closestDist[furthestIdx], closestDist.back());
+		closestDist.pop_back();
+	}
+	return newSamples;
+}
+
 std::vector<float> Kitten::polylineUniformSample(std::function<vec3(float)> f, float a, float b, const int numSamples, const int numItr, const float learningRate) {
 	std::vector<float> ts(numSamples);
 	for (size_t i = 0; i < numSamples; i++)

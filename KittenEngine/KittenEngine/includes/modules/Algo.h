@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 #include <Eigen/Eigen>
 #include <Eigen/Sparse>
@@ -10,6 +11,11 @@
 #include "Common.h"
 
 namespace Kitten {
+	// Brute force blue noise sampling
+	// Last sample is guaranteed to be included
+	std::vector<vec3> bluenoiseSample(std::vector<vec3>& samples, int N);
+
+	// Uniformly sample a curve as a function from a to b
 	std::vector<float> polylineUniformSample(std::function<vec3(float)> f, float a, float b, const int numSamples, const int numItr = 64, const float learningRate = 1.f);
 
 	/// <summary>
