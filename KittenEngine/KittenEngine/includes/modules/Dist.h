@@ -10,6 +10,7 @@ namespace Kitten {
 	/// </summary>
 	struct Dist {
 	public:
+		double min, max;
 		double X = 0;
 		double XX = 0;
 		int num = 0;
@@ -17,12 +18,16 @@ namespace Kitten {
 		Dist(int n = 0) {
 			X = XX = 0;
 			num = n;
+			min = INFINITY;
+			max = -INFINITY;
 		}
 
 		void accu(double x) {
 			++num;
 			X += x;
 			XX += x * x;
+			min = fmin(min, x);
+			max = fmax(max, x);
 		}
 
 		void accu(Dist other) {

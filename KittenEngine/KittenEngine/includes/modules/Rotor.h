@@ -15,7 +15,7 @@ namespace Kitten {
 				T w;		// The scaler part
 			};
 			struct {
-				T x, y, z, w;
+				T x, y, z, s;
 			};
 		};
 
