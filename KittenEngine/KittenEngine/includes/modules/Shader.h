@@ -24,7 +24,7 @@ namespace Kitten {
 		~Shader();
 
 		unsigned int glHandle = 0;
-		int type;
+		int type = 0;
 		bool tryLinked = false;
 		vector<unsigned int> unlinkedHandles;
 
