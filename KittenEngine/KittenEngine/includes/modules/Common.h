@@ -328,6 +328,7 @@ namespace Kitten {
 		uv.y /= a * c - b * b;
 
 		// Reproject points onto lines in case of clamping
+		if (!glm::isfinite(uv.y)) uv.y = 0.5f;
 		uv.y = glm::clamp(uv.y, 0.f, 1.f);
 		uv.x = glm::clamp(dot(mix(b0, b1, uv.y) - a0, A[0]) / a, 0.f, 1.f);
 		uv.y = glm::clamp(dot(mix(a0, a1, uv.x) - b0, A[1]) / c, 0.f, 1.f);
