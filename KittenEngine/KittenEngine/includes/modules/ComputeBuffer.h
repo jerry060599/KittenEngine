@@ -29,6 +29,41 @@ namespace Kitten {
 		void upload(void* src, size_t count);
 		void download(void* dst);
 		void download(void* dst, size_t count);
+
+#ifdef __CUDA_RUNTIME_H__
+		// These are provided as an alternative to CudaComputerBuffer for compatibility reasons
+		void cudaWriteGL(void* ptr, size_t dataSize) {
+			cudaGraphicsResource* cudaRes;
+			void* cudaPtr;
+			cudaGraphicsGLRegisterBuffer(&cudaRes, glHandle, cudaGraphicsRegisterFlagsNone);
+			cudaGraphicsMapResources(1, &cudaRes);
+
+			size_t tmp;
+			cudaGraphicsResourceGetMappedPointer(&cudaPtr, &tmp, cudaRes);
+			cudaMemcpy(cudaPtr, ptr, dataSize, cudaMemcpyDeviceToDevice);
+
+			cudaGraphicsUnmapResources(1, &cudaRes, 0);
+			cudaGraphicsUnregisterResource(cudaRes);
+		}
+
+		void cudaWriteGL(void* ptr) { cudaWriteGL(ptr, elementSize * size); }
+
+		void cudaReadGL(void* ptr, size_t dataSize) {
+			cudaGraphicsResource* cudaRes;
+			void* cudaPtr;
+			cudaGraphicsGLRegisterBuffer(&cudaRes, glHandle, cudaGraphicsRegisterFlagsNone);
+			cudaGraphicsMapResources(1, &cudaRes);
+
+			size_t tmp;
+			cudaGraphicsResourceGetMappedPointer(&cudaPtr, &tmp, cudaRes);
+			cudaMemcpy(ptr, cudaPtr, dataSize, cudaMemcpyDeviceToDevice);
+
+			cudaGraphicsUnmapResources(1, &cudaRes, 0);
+			cudaGraphicsUnregisterResource(cudaRes);
+		}
+
+		void cudaReadGL(void* ptr) { cudaReadGL(ptr, elementSize * size); }
+#endif
 	};
 
 #ifdef __CUDA_RUNTIME_H__
