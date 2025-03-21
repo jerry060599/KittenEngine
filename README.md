@@ -1,7 +1,9 @@
 # Kitten Engine
 **[Jerry Hsu](jerryhsu.io), 2025**
 
-A collection of OpenGL, CUDA, mathematics, and algorithm utilities built up over the years for use as a project template in my physically based animations research. 
+A collection of OpenGL, CUDA, mathematics, and algorithm utilities built up over the years by yours truely.
+Built for use as a project template in my physically based animations research. 
+Released standalone here for open sourcing research projects which rely on this.
 
 ## Build
 Configured for Windows and Visual Studios. 
@@ -37,6 +39,8 @@ This library handles:
 * Gizmos for rendering formated text, lines, arrows, translation widget ... etc 
 * Integration with Dear ImGui and CUDA
 * Many small utilities for debugging, timing, mathematics, statistics ... etc
+
+See main.cpp for a bare-bones demo.
 
 ## License
 Unless otherwise stated in the file header, the contents of this repository are provided under the following license. Files that specify a different copyright are governed by the terms indicated therein.
