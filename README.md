@@ -7,7 +7,7 @@ Released standalone here for open sourcing research projects which rely on this.
 
 ## Build
 Configured for Windows and Visual Studios. 
-The main library is compiled through **llvm** for performance and the app is compiled through **msvc** to simplify linking.
+The main library is compiled through **clang** for performance and the app is compiled through **msvc** to simplify linking.
 
 **Dependencies using vcpkg**: assimp, eigen3, stb headers, glad, glfw, imgui[opengl3-glad-binding], glm, jsoncpp
 
