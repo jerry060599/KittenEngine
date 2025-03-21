@@ -1,5 +1,5 @@
 # Kitten Engine
-**[Jerry Hsu](jerryhsu.io), 2025**
+**[Jerry Hsu](https://jerryhsu.io), 2025**
 
 A collection of OpenGL, CUDA, mathematics, and algorithm utilities built up over the years by yours truely.
 Built for use as a project template in my physically based animations research. 
