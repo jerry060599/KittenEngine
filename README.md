@@ -26,6 +26,10 @@ vcpkg.exe install jsoncpp:x64-windows
 vcpkg.exe install imgui[core,glfw-binding,opengl3-binding]:x64-windows
 ```
 
+**DO NOT INSTALL GLM DIRECTLY FROM THE CURRENT WORKING BRANCH.**
+Only install versions taged as stable releases or through vcpkg. 
+When in doubt, use glm version ```1.0.1#3```. 
+
 ## Usage
 This project was built as a bare-bones template for use in my personal research. 
 Fork it. Change it. Do whatever you want with it. 
